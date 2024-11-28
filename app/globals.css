@@ -3,40 +3,10 @@
 @tailwind utilities;
 
 :root {
-  
+  --backHeader: #171717;
+  --foreHeader: #ededed;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --backHeader: #171717;
-    --foreHeader: #ededed;
-
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
 /* 
   Geist Mono - font 
   Montserrat -font 
@@ -46,46 +16,27 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-#navbar{
-  background-color: var(--backHeader);
-  color: var(--foreHeader);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
+#navbar {
+  @apply bg-[var(--backHeader)] text-[var(--foreHeader)] flex justify-between items-center flex-row;
 }
 
-#header{
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  background-color: var(--backHeader);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  font-family: 'Cascadia Code', sans-serif;
+#header {
+  @apply px-5 py-3 bg-[var(--backHeader)] shadow-sm font-mono;
 }
 
-#navbar-text{
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
+#navbar-text {
+  @apply flex gap-6 items-center;
 }
 
 #logo {
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-#logo:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  @apply rounded-3xl w-12 h-12 
+  transition-all duration-300 ease-in-out
+  hover:rounded-lg hover:scale-110;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 95%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -104,6 +55,7 @@ body {
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
+    --ring-small: 222.2 84% 4.9%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -114,7 +66,7 @@ body {
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 210 30% 12%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
@@ -130,7 +82,8 @@ body {
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 212.7 26.8% 23.9%;
+    --ring-small: 212.7 36.8% 63.9%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -149,23 +102,80 @@ body {
 }
 
 .blueContainer {
-  background-color: #062e4cd8;
-  color: #ffffff;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  margin-left: 5rem;
-  margin-right: 5rem;
-  h1{
-    font-size: 2rem;
-  }
+  @apply ring-1 ring-ring bg-gradient-to-r
+   from-gray-100 via-gray-200 to-gray-300 px-8 py-24 text-xl 
+   rounded-lg bg-opacity-90 text-gray-800 flex flex-col items-center 
+   justify-center text-center mx-24 mt-12 shadow-lg
+   transition-all duration-300;
 }
 
-.textBox{
-  padding: 1rem;
-  margin: 1rem;
-  border-radius: 0.5rem;
-  background-color: var(--card);
-  color: var(--card-foreground);
+.dark .blueContainer {
+  @apply bg-gradient-to-r from-blue-700 via-blue-800 to-blue-950 text-gray-200;
+}
+
+.blueContainer h1 {
+  @apply text-4xl font-bold mb-4;
+}
+
+.textBox {
+  @apply p-8 bg-blue-300 rounded-lg;
+}
+
+.dark .textBox {
+  @apply bg-black;
+}
+
+.textBox h1 {
+  @apply text-4xl font-semibold;
+}
+
+button {
+  @apply bg-gradient-to-tr from-blue-600 to-blue-400 
+  rounded-3xl;
+}
+.dark button {
+  /* @apply bg-gradient-to-r from-blue-900 to-blue-800; */
+  @apply bg-gradient-to-r from-gray-700 to-gray-500;
+}
+
+.search-form {
+  @apply mt-10 flex items-center justify-center
+  transition-all duration-300 ease-in-out;
+}
+
+.search-input {
+  @apply w-full max-w-md px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.dark .search-input {
+  @apply border-gray-700 bg-gray-800 text-gray-200 focus:ring-blue-400;
+}
+
+.search-btn {
+  @apply px-3 py-3 ml-2 bg-blue-500 text-white rounded-3xl 
+  shadow-sm hover:rounded-lg hover:scale-105
+  transition-all duration-300 ease-in-out
+  active:ring-2 active:ring-blue-500 active:ring-offset-2 active:ring-offset-blue-500;
+}
+
+.dark .search-btn {
+  @apply active:ring-offset-gray-700 active:ring-gray-700;
+}
+
+.btn-pure {
+  @apply bg-none;
+}
+
+.dark .btn-pure {
+  @apply bg-none;
+}
+
+.section-container {
+  @apply px-6 py-10 max-w-7xl mx-auto;
+}
+
+.startup-card {
+  @apply bg-card border-[5px] border-ring p-6 px-5 rounded-[22px] 
+  shadow-lg hover:border-card transition-all duration-500;
+  /* hover:shadow-xl hover:bg-card; */
 }
