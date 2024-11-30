@@ -179,3 +179,7 @@ button {
   shadow-lg hover:border-card transition-all duration-500;
   /* hover:shadow-xl hover:bg-card; */
 }
+
+.startup-card h1 {
+  @apply text-2xl font-semibold line-clamp-1;
+}

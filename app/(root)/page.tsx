@@ -1,12 +1,29 @@
 import SearchForm from "@/components/SearchForm";
 import StartupCard from "@/components/StartupCard";
+import { client } from "@/sanity/lib/client";
+
+import { STARTUPS_QUERY } from "@/lib/queries";
+
+type StartupCardType = {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  createAt: string;
+  author: { _id: string; name: string; image: string; bio: string };
+  views: number;
+  description: string;
+  category: string;
+  image: string;
+};
 
 async function Home({
   searchParams
 }: {
   searchParams: Promise<{ query?: string }>;
 }) {
-  const posts = [
+  const posts = await client.fetch(STARTUPS_QUERY);
+
+  const postsTemp = [
     {
       _createdAt: new Date(),
       views: -1,
