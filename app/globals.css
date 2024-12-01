@@ -103,7 +103,7 @@ body {
 
 .blueContainer {
   @apply ring-1 ring-ring bg-gradient-to-r
-   from-gray-100 via-gray-200 to-gray-300 px-8 py-24 text-xl 
+   from-gray-100 via-gray-200 to-gray-300  text-xl 
    rounded-lg bg-opacity-90 text-gray-800 flex flex-col items-center 
    justify-center text-center mx-24 mt-12 shadow-lg
    transition-all duration-300;

@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
         hostname: "placehold.co"
       }
     ]
+  },
+  experimental: {
+    ppr: "incremental"
+  },
+  devIndicators: {
+    appIsrStatus: true,
+    buildActivity: true,
+    buildActivityPosition: "bottom-right"
   }
 };
 

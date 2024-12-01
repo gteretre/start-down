@@ -3,6 +3,7 @@ import StartupCard from "@/components/StartupCard";
 import { client } from "@/sanity/lib/client";
 
 import { STARTUPS_QUERY } from "@/lib/queries";
+import { sanityFetch, SanityLive } from "@/sanity/lib/live";
 
 type StartupCardType = {
   _id: string;
@@ -21,7 +22,9 @@ async function Home({
 }: {
   searchParams: Promise<{ query?: string }>;
 }) {
-  const posts = await client.fetch(STARTUPS_QUERY);
+  const query = (await searchParams).query;
+  const params = { search: query || null };
+  const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
 
   const postsTemp = [
     {
@@ -45,10 +48,10 @@ async function Home({
       title: "This is a title"
     }
   ];
-  const { query } = await searchParams;
+  //posts.push(...postsTemp);
   return (
     <>
-      <section className="blueContainer">
+      <section className="blueContainer px-8 pb-12 pt-24">
         <div className="textBox">
           <h1>Bring Light to Your Misery</h1>
         </div>
@@ -62,7 +65,7 @@ async function Home({
         <p className="text-30-semibold text-center">
           {query ? `Search results for ${query}` : "Popular Startups"}
         </p>
-        <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
           {posts?.length > 0 ? (
             posts.map((post: StartupCardType) => (
               <StartupCard key={post?._id} post={post} />
@@ -72,6 +75,7 @@ async function Home({
           )}
         </ul>
       </section>
+      <SanityLive />
     </>
   );
 }

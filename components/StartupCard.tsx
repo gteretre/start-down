@@ -7,59 +7,75 @@ function StartupCard({ post }: any) {
   return (
     <li className="startup-card group">
       <div>
-        <div className="flex gap-3 mt-5 items-center">
-          <p className="date">{formatDate(post._createdAt || new Date())}</p>
+        <div className="flex justify-between">
+          <p>{formatDate(post._createdAt || new Date())}</p>
+          <div className="flex gap-1">
+            <EyeIcon className="size-6 text-primary" />
+            <span className="text-16-medium">{post.views || "0"}</span>
+          </div>
 
           <Link href={`/user/${post.author._id}`}>
             <Image
-              src={post.author.image ? post.author.image : "/logo.png"}
+              //problem with sanity, getting 404
+              //src={post.author.image ? post.author.image : "/logo.png"}
+              src="/logo.png"
               alt="profile picture"
               width={48}
               height={48}
               className="rounded-3xl hover:rounded-lg
               transition-all duration-300 ease-in-out
               ring-2 ring-ring-small min-w-12 min-h-12 
-              max-w-48 max-h-48 m-5"
+              max-w-48 max-h-48"
             ></Image>
           </Link>
         </div>
 
-        <div className="flex gap-1.5 ml-5">
-          <EyeIcon className="size-6 text-primary" />
-          <span className="text-16-medium">{post.views || "0"}</span>
-        </div>
-
-        <div className="flex-between mt-5 gap-5">
+        <div className="flex-between gap-2">
           <div className="flex-1">
-            <Link href={`/user/${post.author._id}`}>
-              <p className="text-16-medium line-clamp-1">{post.author?.name}</p>
-            </Link>
-            <Link href={`/startup/${post._id}`}>
+            <Link
+              className="flex flex-col items-start"
+              href={`/startup/${post._id}`}
+            >
               <h1>{post.title || "ERROR"}</h1>
             </Link>
+
+            <Link
+              className="flex flex-col items-end"
+              href={`/user/${post.author._id}`}
+            >
+              <p className=" mt-2 text-16-medium line-clamp-1">
+                created by <strong>{post.author?.name}</strong>
+              </p>
+            </Link>
           </div>
-          <Link href={`/startup/${post._id}`}>
-            <p>{post.description}</p>
-            <Image
-              src={post.image ? post.image : "/logo.png"}
-              alt="profile picture"
-              layout="responsive"
-              width={400}
-              height={200}
-              className="rounded-3xl hover:rounded-lg
+          <Link className="flex flex-col" href={`/startup/${post._id}`}>
+            <p className="text-justify mt-3 mb-5 line-clamp-5">
+              {post.description}
+            </p>
+            <div className="flex justify-center">
+              <Image
+                src={
+                  post.image
+                    ? post.image
+                    : `https://placehold.co/600x400?text=${post.title}`
+                }
+                alt="profile picture"
+                width={600}
+                height={400}
+                className="rounded-3xl hover:rounded-lg
               transition-all duration-300 ease-in-out
-              ring-2 ring-ring w-full h-max-[200px]"
-              objectFit="cover"
-            ></Image>
+              ring-2 ring-ring"
+              ></Image>
+            </div>
           </Link>
-          <div className="flex gap-1 mt-5 items-center">
-            <Link href={`/category/${post.category}`}>
-              <p className="text-16-medium">
+          <div className="flex justify-between mt-5">
+            <Link href={`/?query=${post.category}`}>
+              <p className="mt-5 text-16-medium">
                 {post.category || "something went wrong"}
               </p>
             </Link>
             <Link href={`/startup/${post._id}`}>
-              <button className="p-2 m-5 search-btn">Read More</button>
+              <button className="p-2 search-btn">More...</button>
             </Link>
           </div>
         </div>
