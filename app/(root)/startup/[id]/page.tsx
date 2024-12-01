@@ -1,9 +1,9 @@
 import { client } from "@/sanity/lib/client";
 import { notFound } from "next/navigation";
+import { EyeIcon } from "lucide-react";
 
 import { STARTUP_BY_ID } from "@/lib/queries";
-
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -18,13 +18,22 @@ async function Page({ params }: { params: { id: string } }) {
 
   if (!post) return notFound();
   return (
-    <div>
-      <section className="blueContainer">
-        <p className="tag m-4">{formatDate(post?._createdAt || new Date())}</p>
-        <h1 className="textBox !min-h-{230px} !min-h-{460px}">{post?.title}</h1>
-        <p className="m-4">{post?.description}</p>
-      </section>
-    </div>
+    <section className=" blueContainer flex flex-col items-center">
+      <div className="max-w-[1000px] mx-auto">
+        <div className="flex justify-between gap-20 mx-12 my-8 lg:mx-32">
+          <p>{formatDate(post?._createdAt || new Date())}</p>
+          <div className="flex gap-1">
+            <EyeIcon className="size-6 text-primary" />
+            <span className="text-16-medium">
+              {formatNumber(post.views || 1)}
+            </span>
+          </div>
+        </div>
+
+        <h1 className="textBox mx-28 my-4 ">{post?.title}</h1>
+        <p className="m-8 lg:mx-32">{post?.description}</p>
+      </div>
+    </section>
   );
 }
 

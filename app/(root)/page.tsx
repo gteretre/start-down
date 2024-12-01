@@ -48,10 +48,10 @@ async function Home({
       title: "This is a title"
     }
   ];
-  //posts.push(...postsTemp);
+  posts.push(...postsTemp);
   return (
     <>
-      <section className="blueContainer px-8 pb-12 pt-24">
+      <section className="blueContainer items-center px-8 pb-12 pt-16">
         <div className="textBox">
           <h1>Bring Light to Your Misery</h1>
         </div>

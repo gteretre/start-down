@@ -1,4 +1,4 @@
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,7 +11,9 @@ function StartupCard({ post }: any) {
           <p>{formatDate(post._createdAt || new Date())}</p>
           <div className="flex gap-1">
             <EyeIcon className="size-6 text-primary" />
-            <span className="text-16-medium">{post.views || "0"}</span>
+            <span className="text-16-medium">
+              {formatNumber(post.views || 1)}
+            </span>
           </div>
 
           <Link href={`/user/${post.author._id}`}>
@@ -62,8 +64,7 @@ function StartupCard({ post }: any) {
                 alt="profile picture"
                 width={600}
                 height={400}
-                className="rounded-3xl hover:rounded-lg
-              transition-all duration-300 ease-in-out
+                className="rounded-3xl ease-in-out
               ring-2 ring-ring"
               ></Image>
             </div>
