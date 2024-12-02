@@ -5,11 +5,25 @@
 :root {
   --backHeader: #171717;
   --foreHeader: #ededed;
+  --universal: rgb(156 163 175);
+}
+
+@media (max-width: 740px) {
+  :root {
+    --font-size-base: 4px;
+    --font-size-lg: 9px;
+    --font-size-xl: 12px;
+    --font-size-2xl: 15px;
+    --font-size-3xl: 18px;
+    --font-size-4xl: 21px;
+    --padding-base: 5px;
+  }
 }
 
 /* 
   Geist Mono - font 
-  Montserrat -font 
+  Montserrat -font
+  750px - min that makes sense 
   */
 
 body {
@@ -18,12 +32,11 @@ body {
 
 #navbar {
   @apply bg-[var(--backHeader)] text-[var(--foreHeader)] 
-  flex justify-between items-center flex-row
-  w-full
+  flex justify-between items-center flex-row;
 }
 
 #header {
-  @apply px-5 py-3 bg-[var(--backHeader)] shadow-sm font-mono;
+  @apply container px-5 py-3 bg-[var(--backHeader)] shadow-sm font-mono;
 }
 
 #navbar-text {
@@ -108,8 +121,7 @@ body {
    from-gray-100 via-gray-200 to-gray-300  text-xl 
    rounded-lg bg-opacity-90 text-gray-800 flex flex-col
    justify-center text-center mx-24 mt-12 shadow-lg
-   transition-all duration-300
-   min-w-[540px];
+   transition-all duration-300;
 }
 
 .dark .blueContainer {
@@ -184,4 +196,8 @@ button {
 
 .startup-card h1 {
   @apply text-2xl font-semibold line-clamp-1;
+}
+
+.category {
+  @apply mt-5 text-gray-400;
 }

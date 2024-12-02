@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 function StartupCard({ post }: any) {
+  console.log(post.category);
   return (
     <li className="startup-card group">
       <div>
@@ -71,7 +72,7 @@ function StartupCard({ post }: any) {
           </Link>
           <div className="flex justify-between mt-5">
             <Link href={`/?query=${post.category}`}>
-              <p className="mt-5 text-16-medium">
+              <p className="category">
                 {post.category || "something went wrong"}
               </p>
             </Link>
