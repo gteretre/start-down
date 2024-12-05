@@ -1,6 +1,6 @@
 import SearchForm from "@/components/SearchForm";
 import StartupCard from "@/components/StartupCard";
-import { client } from "@/sanity/lib/client";
+import { Squirrel } from "lucide-react";
 
 import { STARTUPS_QUERY } from "@/lib/queries";
 import { sanityFetch, SanityLive } from "@/sanity/lib/live";
@@ -48,7 +48,7 @@ async function Home({
       title: "This is a title"
     }
   ];
-  posts.push(...postsTemp);
+  //posts.push(...postsTemp);
   return (
     <>
       <section className="blueContainer items-center px-8 pb-12 pt-16">
@@ -71,7 +71,10 @@ async function Home({
               <StartupCard key={post?._id} post={post} />
             ))
           ) : (
-            <p className="no-results">No posts found</p>
+            <p className="no-results">
+              <Squirrel />
+              No posts found
+            </p>
           )}
         </ul>
       </section>

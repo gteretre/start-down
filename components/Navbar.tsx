@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { auth, signOut, signIn } from "@/auth";
+import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 
 import UIMode from "@/components/UIMode";
 
@@ -19,7 +20,10 @@ const Navbar = async () => {
           {session && session.user ? (
             <>
               <Link href="/startup/create">
-                <span>Create</span>
+                <span>
+                  <Pencil />
+                  Create
+                </span>
               </Link>
               <form
                 action={async () => {
@@ -29,11 +33,17 @@ const Navbar = async () => {
               >
                 <button className="btn-pure" type="submit">
                   {" "}
-                  <span>Logout</span>
+                  <span>
+                    <Unplug />
+                    Logout
+                  </span>
                 </button>
               </form>
               <Link href="/user/${session?.id}">
-                <span>{session?.user?.name}</span>
+                <span>
+                  <User />
+                  {session?.user?.name}
+                </span>
               </Link>
             </>
           ) : (
@@ -45,7 +55,10 @@ const Navbar = async () => {
                 }}
               >
                 <button className="btn-pure" type="submit">
-                  <span>GitHub</span>
+                  <span>
+                    <Github />
+                    GitHub
+                  </span>
                 </button>
               </form>
               <form
@@ -55,7 +68,10 @@ const Navbar = async () => {
                 }}
               >
                 <button className="btn-pure" type="submit">
-                  <span>Google</span>
+                  <span>
+                    <Chrome />
+                    Google
+                  </span>
                 </button>
               </form>
             </>

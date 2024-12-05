@@ -34,9 +34,10 @@ body {
   @apply bg-[var(--backHeader)] text-[var(--foreHeader)] 
   flex justify-between items-center flex-row;
 }
-
+/* maybe use container class */
 #header {
-  @apply container px-5 py-3 bg-[var(--backHeader)] shadow-sm font-mono;
+  @apply px-5 py-3 bg-[var(--backHeader)] shadow-sm 
+  font-mono;
 }
 
 #navbar-text {
@@ -199,5 +200,30 @@ button {
 }
 
 .category {
-  @apply mt-5 text-gray-400;
+  @apply text-gray-400;
+}
+
+.author {
+  @apply mt-6 max-w-4xl mx-auto px-12 
+  flex justify-between w-full text-sm;
+}
+
+.avatar {
+  @apply rounded-3xl hover:rounded-lg
+              transition-all duration-300 ease-in-out
+              ring-2 min-w-12 min-h-12 
+              max-w-48 max-h-48;
+}
+
+/* !TODO */
+.divider {
+  @apply border-dotted bg-zinc-400 max-w-4xl my-10 mx-auto;
+}
+
+.view_skeleton {
+  @apply bg-zinc-400 h-10 w-24 rounded-lg fixed bottom-3 right-3;
+}
+
+.view-container {
+  @apply bg-red-400 rounded-lg flex justify-end items-center px-5 py-1.5 mt-5 bottom-3 right-3;
 }

@@ -3,11 +3,15 @@ import { notFound } from "next/navigation";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-// import markdownit from "markdown-it";
-// const md = markdownit({ html: true });
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import markdownit from "markdown-it";
+const md = markdownit({ html: true });
 
 import { STARTUP_BY_ID } from "@/lib/queries";
-import { formatDate, formatNumber } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import ShareButton from "@/components/ui/ShareButton";
+import View from "@/components/View";
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -21,28 +25,58 @@ async function Page({ params }: { params: { id: string } }) {
   }
 
   if (!post) return notFound();
-  // const parsedContent = md.render(post?.pitch || "");
+  const parsedContent = md.render(post?.pitch || "");
   return (
     <>
-      <section className=" blueContainer flex flex-col items-center">
+      <section className=" blueContainer flex flex-col">
         <div className="max-w-[1000px] mx-auto">
           <div className="flex justify-between gap-20 mx-12 my-8 lg:mx-32">
             <p>{formatDate(post?._createdAt || new Date())}</p>
             <div className="flex gap-1">
               <EyeIcon className="size-6 text-primary" />
               <span className="text-16-medium">
-                {formatNumber(post.views || 1)}
+                <Suspense fallback={<Skeleton />}>
+                  <View id={id} />
+                </Suspense>
               </span>
             </div>
           </div>
 
           <h1 className="textBox mx-28 my-4 ">{post?.title}</h1>
-          <p className="m-8 lg:mx-32">{post?.description}</p>
+          <p className="mx-8 mt-8 lg:mx-32 text-start justify-start">
+            {post?.description}
+          </p>
         </div>
+        <div className="author mx-12">
+          <Link
+            className="flex justify-between gap-2"
+            href={`/user/${post.author?.id}`}
+          >
+            <Image
+              src="/logo.png"
+              alt={post.author?.name + "s avatar"}
+              width={48}
+              height={48}
+              className="avatar"
+            />
+            <div className="flex flex-col items-start pt-1">
+              <p className="text-24-medium">
+                <strong>{post.author?.name}</strong>
+              </p>
+              <p className="text-16-medium">@{post.author?.username}</p>
+            </div>
+          </Link>
+          <ShareButton
+            title={post?.title || "Default Title"}
+            text={post?.description || "Default Text"}
+            url={"/startup/" + post?._id}
+          />
+        </div>
+        <p className="category text-end text-sm mx-12">{post.category}</p>
       </section>
 
       <section>
-        <div className="mx-32 my-12">
+        <div className="mx-32 my-12 flex justify-center flex-col items-center">
           <Image
             src={
               post.image
@@ -52,29 +86,19 @@ async function Page({ params }: { params: { id: string } }) {
             width={600}
             height={400}
             alt={post?.title}
-            className="w-full h-auto rounded-xl"
+            className="rounded-xl mb-8"
           />
-          <div className="space-y-5 mt-10 max-w-4xl mx-auto">
-            <Link
-              className="flex justify-between gap-5"
-              href={`/user/${post.author?.id}`}
-            >
-              <Image
-                src="/logo.png"
-                alt={post.author?.name + "s avatar"}
-                width={48}
-                height={48}
-              />
-              <div className="flex flex-col items-start">
-                <p className="text-24-medium">{post.author?.name}</p>
-                <p className="text-16-medium">@{post.author?.username}</p>
-              </div>
-            </Link>
-            <p className="category">{post.category}</p>
-          </div>
-          <h3 className="text-30-bold mt-10">Details</h3>
+          {parsedContent ? (
+            <div
+              className="textBox prose"
+              dangerouslySetInnerHTML={{ __html: parsedContent }}
+            />
+          ) : (
+            <p>No details available</p>
+          )}
         </div>
       </section>
+      <section></section>
     </>
   );
 }
