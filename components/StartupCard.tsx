@@ -3,11 +3,12 @@ import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import View from "./View";
+import Tooltip from "./Tooltip";
 
 function StartupCard({ post }: any) {
   console.log(post.category);
   return (
-    <li className="startup-card group">
+    <li className="startup-card">
       <div>
         <div className="flex justify-between">
           <p>{formatDate(post._createdAt || new Date())}</p>

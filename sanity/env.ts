@@ -22,3 +22,5 @@ export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
 
 //   return v;
 // }
+
+export const token = process.env.SANITY_WRITE_TOKEN;

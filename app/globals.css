@@ -227,3 +227,20 @@ button {
 .view-container {
   @apply bg-red-400 rounded-lg flex justify-end items-center px-5 py-1.5 mt-5 bottom-3 right-3;
 }
+
+@layer components {
+  .sidebar-icon {
+    @apply relative flex items-center justify-center 
+    w-12 h-12 text-2xl rounded-3xl text-center mt-2
+    hover:rounded-xl cursor-pointer
+    transition-all duration-300 ease-linear;
+  }
+
+  .tooltip {
+    @apply absolute w-auto p-2 m-2 min-w-max
+    rounded-md  text-primary
+    text-xs font-semibold transition-all duration-100 
+    ease-linear scale-0 origin-left bg-secondary ring-1 ring-ring
+    -translate-x-1/2;
+  }
+}

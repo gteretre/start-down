@@ -11,7 +11,8 @@ const md = markdownit({ html: true });
 import { STARTUP_BY_ID } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
 import ShareButton from "@/components/ui/ShareButton";
-import View from "@/components/View";
+import { View, ViewUpdate } from "@/components/View";
+import Tooltip from "@/components/Tooltip";
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -26,16 +27,33 @@ async function Page({ params }: { params: { id: string } }) {
 
   if (!post) return notFound();
   const parsedContent = md.render(post?.pitch || "");
+  ViewUpdate({ id });
   return (
     <>
       <section className=" blueContainer flex flex-col">
         <div className="max-w-[1000px] mx-auto">
           <div className="flex justify-between gap-20 mx-12 my-8 lg:mx-32">
-            <p>{formatDate(post?._createdAt || new Date())}</p>
+            <Tooltip
+              text={
+                Math.floor(
+                  (new Date().getTime() -
+                    new Date(post?._createdAt || new Date()).getTime()) /
+                    (1000 * 60 * 60 * 24)
+                ) === 0
+                  ? "Created Today"
+                  : `Created ${Math.floor(
+                      (new Date().getTime() -
+                        new Date(post?._createdAt || new Date()).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )} days ago`
+              }
+            >
+              <p>{formatDate(post?._createdAt || new Date())}</p>
+            </Tooltip>
             <div className="flex gap-1">
               <EyeIcon className="size-6 text-primary" />
               <span className="text-16-medium">
-                <Suspense fallback={<Skeleton />}>
+                <Suspense fallback={<Skeleton className="view_skeleton" />}>
                   <View id={id} />
                 </Suspense>
               </span>
@@ -48,24 +66,26 @@ async function Page({ params }: { params: { id: string } }) {
           </p>
         </div>
         <div className="author mx-12">
-          <Link
-            className="flex justify-between gap-2"
-            href={`/user/${post.author?.id}`}
-          >
-            <Image
-              src="/logo.png"
-              alt={post.author?.name + "s avatar"}
-              width={48}
-              height={48}
-              className="avatar"
-            />
-            <div className="flex flex-col items-start pt-1">
-              <p className="text-24-medium">
-                <strong>{post.author?.name}</strong>
-              </p>
-              <p className="text-16-medium">@{post.author?.username}</p>
-            </div>
-          </Link>
+          <Tooltip text={post.author?.bio}>
+            <Link
+              className="flex justify-between gap-2"
+              href={`/user/${post.author?.id}`}
+            >
+              <Image
+                src="/logo.png"
+                alt={post.author?.name + "s avatar"}
+                width={48}
+                height={48}
+                className="avatar"
+              />
+              <div className="flex flex-col items-start pt-1">
+                <p className="text-24-medium">
+                  <strong>{post.author?.name}</strong>
+                </p>
+                <p className="text-16-medium">@{post.author?.username}</p>
+              </div>
+            </Link>
+          </Tooltip>
           <ShareButton
             title={post?.title || "Default Title"}
             text={post?.description || "Default Text"}

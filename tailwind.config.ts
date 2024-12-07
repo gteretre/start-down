@@ -55,7 +55,8 @@ export default {
       },
       boxShadow: {
         header: "0 1px 2px rgba(0, 0, 0, 0.05)",
-        logoHover: "0 4px 8px rgba(0, 0, 0, 0.2)"
+        logoHover: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        neon: "0 0 5px theme('colors.purple.200'), 0 0 20px theme('colors.purple.700')"
       },
       borderRadius: {
         logo: "50%",

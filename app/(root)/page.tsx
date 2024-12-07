@@ -26,29 +26,6 @@ async function Home({
   const params = { search: query || null };
   const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
 
-  const postsTemp = [
-    {
-      _createdAt: new Date(),
-      views: -1,
-      author: { _id: 1, name: "The Founding Father" },
-      _id: 1,
-      description: "This is a description",
-      image: "https://placehold.co/600x400?text=Startup+1",
-      category: "This is a category",
-      title: "This is a title"
-    },
-    {
-      _createdAt: new Date(),
-      views: -1,
-      author: { _id: 1, name: "The Founding Father" },
-      _id: 2,
-      description: "This is a description",
-      image: "https://placehold.co/600x400?text=Startup+2",
-      category: "This is a category",
-      title: "This is a title"
-    }
-  ];
-  //posts.push(...postsTemp);
   return (
     <>
       <section className="blueContainer items-center px-8 pb-12 pt-16">
@@ -65,15 +42,14 @@ async function Home({
         <p className="text-30-semibold text-center">
           {query ? `Search results for ${query}` : "Popular Startups"}
         </p>
-        <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+        <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:grid-cols-3 gap-4">
           {posts?.length > 0 ? (
             posts.map((post: StartupCardType) => (
               <StartupCard key={post?._id} post={post} />
             ))
           ) : (
-            <p className="no-results">
-              <Squirrel />
-              No posts found
+            <p className="m-auto">
+              <Squirrel /> No posts found
             </p>
           )}
         </ul>
