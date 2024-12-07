@@ -1,7 +1,11 @@
 import NextAuth from "next-auth";
+import { writeClient } from "@/sanity/lib/write-client";
+
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { AUTHOR_BY_ID_QUERY } from "@/lib/queries";
+import { client } from "@/sanity/lib/client";
 //import bcrypt from "bcrypt";
 
 const options = {
@@ -22,23 +26,6 @@ const options = {
         }
       }
     })
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   credentials: {
-    //     email: { label: "Email", type: "email" },
-    //     password: { label: "Password", type: "password" }
-    //   },
-    //   async authorize(credentials) {
-    //     if (!credentials) return null;
-    //     const { email, password } = credentials;
-    //     const user = await getUserByEmail(email);
-    //     if (user && bcrypt.compareSync(password, user.passwordHash)) {
-    //       return { id: user.id, name: user.name, email: user.email };
-    //     } else {
-    //       throw new Error("Invalid credentials");
-    //     }
-    //   }
-    // })
   ],
   session: {
     strategy: "jwt",
@@ -50,17 +37,41 @@ const options = {
     verificationOptions: {
       algorithms: ["HS256"] // Algorithms to use for verifying the JWT
     }
+  },
+  callbacks: {
+    async signIn(user, account, profile) {
+      const existingUser = await client.fetch(AUTHOR_BY_ID_QUERY, {
+        id: profile?.id
+      });
+      if (!existingUser) {
+        await writeClient.create({
+          _type: "author",
+          _id: profile?.id,
+          name: user?.name,
+          username: profile?.login,
+          email: user?.email,
+          image: user?.image,
+          bio: profile?.bio || ""
+        });
+      }
+    },
+    async redirect(url: string, baseUrl: string) {
+      return baseUrl;
+    },
+    async jwt(token, account, profile) {
+      if (account && profile) {
+        const user = await client.fetch(AUTHOR_BY_ID_QUERY, {
+          id: profile?.id
+        });
+        token.id = user._id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      Object.assign(session, { id: token.id });
+      return session;
+    }
   }
-  // callbacks: {
-  // ! only for google
-  //   async signIn({ account, profile }) {
-  //     if (account.provider === "google") {
-  //       console.log("Google profile", profile);
-  //       return profile.email_verified && profile.email.endsWith("@example.com");
-  //     }
-  //     return true; // !Do different verification for other providers that don't have `email_verified`
-  //   }
-  // }
 };
 
 const { handlers, signIn, signOut, auth } = NextAuth(options);

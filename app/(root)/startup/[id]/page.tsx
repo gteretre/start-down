@@ -9,7 +9,7 @@ import markdownit from "markdown-it";
 const md = markdownit({ html: true });
 
 import { STARTUP_BY_ID } from "@/lib/queries";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateAgo } from "@/lib/utils";
 import ShareButton from "@/components/ui/ShareButton";
 import { View, ViewUpdate } from "@/components/View";
 import Tooltip from "@/components/Tooltip";
@@ -34,21 +34,9 @@ async function Page({ params }: { params: { id: string } }) {
         <div className="max-w-[1000px] mx-auto">
           <div className="flex justify-between gap-20 mx-12 my-8 lg:mx-32">
             <Tooltip
-              text={
-                Math.floor(
-                  (new Date().getTime() -
-                    new Date(post?._createdAt || new Date()).getTime()) /
-                    (1000 * 60 * 60 * 24)
-                ) === 0
-                  ? "Created Today"
-                  : `Created ${Math.floor(
-                      (new Date().getTime() -
-                        new Date(post?._createdAt || new Date()).getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )} days ago`
-              }
+              text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
             >
-              <p>{formatDate(post?._createdAt || new Date())}</p>
+              <p>{formatDate(post?.createdAt || new Date())}</p>
             </Tooltip>
             <div className="flex gap-1">
               <EyeIcon className="size-6 text-primary" />

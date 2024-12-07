@@ -24,6 +24,12 @@ export const startup = defineType({
       }
     }),
     defineField({
+      name: "createdAt",
+      title: "Created At",
+      type: "datetime",
+      validation: (Rule) => Rule.required()
+    }),
+    defineField({
       name: "author",
       title: "Author",
       type: "reference",

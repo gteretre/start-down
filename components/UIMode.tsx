@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, CircleArrowRight, CircleArrowLeft } from "lucide-react";
 
 function UIMode() {
   const [mode, setMode] = useState("light");
@@ -12,12 +12,33 @@ function UIMode() {
   };
 
   return (
-    <button className="search-btn" onClick={toggleMode}>
-      {mode === "light" ? (
-        <Sun className="size-5" />
-      ) : (
-        <Moon className="size-5" />
-      )}
+    <button
+      className="group btn-pure ring-1 p-1 ring-foreHeader flex items-center 
+      justify-between"
+      onClick={toggleMode}
+    >
+      <div
+        className={`group-hover:opacity-0 transition-opacity duration-700 ${
+          mode === "light" ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {mode === "light" ? (
+          <Sun className="size-4" />
+        ) : (
+          <Moon className="size-4" />
+        )}
+      </div>
+      <div
+        className={`transform transition-transform duration-200 ${
+          mode === "light" ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {mode === "light" ? (
+          <CircleArrowLeft className="size-4" />
+        ) : (
+          <CircleArrowRight className="size-4" />
+        )}
+      </div>
     </button>
   );
 }

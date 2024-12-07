@@ -95,7 +95,7 @@ const Navbar = async () => {
               </form>
             </>
           )}
-          <Tooltip text="Dark Mode">
+          <Tooltip text="Toogle Dark Mode">
             <UIMode />
           </Tooltip>
         </div>

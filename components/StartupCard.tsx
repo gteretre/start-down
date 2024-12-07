@@ -19,17 +19,19 @@ function StartupCard({ post }: any) {
             </span>
           </div>
 
-          <Link href={`/user/${post.author._id}`}>
-            <Image
-              //problem with sanity, getting 404
-              //src={post.author.image ? post.author.image : "/logo.png"}
-              src="/logo.png"
-              alt="profile picture"
-              width={48}
-              height={48}
-              className="avatar"
-            ></Image>
-          </Link>
+          <Tooltip text={`${post.author?.name || "Someone"}'s Profile`}>
+            <Link href={`/user/${post.author._id}`}>
+              <Image
+                //problem with sanity, getting 404
+                //src={post.author.image ? post.author.image : "/logo.png"}
+                src="/logo.png"
+                alt="profile picture"
+                width={48}
+                height={48}
+                className="avatar"
+              ></Image>
+            </Link>
+          </Tooltip>
         </div>
 
         <div className="flex-between gap-2">

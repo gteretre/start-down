@@ -16,7 +16,7 @@ function SearchForm({ query }: { query?: string }) {
       />
       <div className="flex gap-2">{query && <SearchFormReset />}</div>
       <Tooltip text="Search">
-        <button type="submit" className="search-btn">
+        <button type="submit" className="search-btn mr-5">
           <Search className="size-5" />
         </button>
       </Tooltip>

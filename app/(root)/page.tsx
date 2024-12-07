@@ -4,6 +4,7 @@ import { Squirrel } from "lucide-react";
 
 import { STARTUPS_QUERY } from "@/lib/queries";
 import { sanityFetch, SanityLive } from "@/sanity/lib/live";
+import { auth } from "@/auth";
 
 type StartupCardType = {
   _id: string;
@@ -24,6 +25,9 @@ async function Home({
 }) {
   const query = (await searchParams).query;
   const params = { search: query || null };
+  const session = await auth();
+  console.log(session?.id);
+
   const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
 
   return (
