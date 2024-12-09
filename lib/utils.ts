@@ -16,7 +16,7 @@ export function formatDate(date: string) {
 export function formatDateAgo(date: string) {
   const diff = new Date().getTime() - new Date(date).getTime();
   const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
   if (days === 0) {
     if (hours === 0) return "Just now";

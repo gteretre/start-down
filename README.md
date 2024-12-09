@@ -1,5 +1,15 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## ABC
+
+This project use nextjs canary version - if something is broken run:
+
+```bash
+npm update --force
+#and
+npm  next@canary
+```
+
 ## Getting Started
 
 First, run the development server:

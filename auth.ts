@@ -4,7 +4,7 @@ import { writeClient } from "@/sanity/lib/write-client";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { AUTHOR_BY_ID_QUERY } from "@/lib/queries";
+import { AUTHOR_BY_ID_QUERY, AUTHOR_BY_EMAIL_QUERY } from "@/lib/queries";
 import { client } from "@/sanity/lib/client";
 //import bcrypt from "bcrypt";
 
@@ -39,35 +39,72 @@ const options = {
     }
   },
   callbacks: {
-    async signIn(user, account, profile) {
-      const existingUser = await client.fetch(AUTHOR_BY_ID_QUERY, {
-        id: profile?.id
-      });
-      if (!existingUser) {
-        await writeClient.create({
-          _type: "author",
-          _id: profile?.id,
-          name: user?.name,
-          username: profile?.login,
-          email: user?.email,
-          image: user?.image,
-          bio: profile?.bio || ""
-        });
+    async signIn({
+      user,
+      account,
+      profile
+    }: {
+      user: any;
+      account: any;
+      profile: any;
+    }) {
+      try {
+        if (!profile || !user) {
+          console.error("Profile is undefined");
+          return false; // Return false to indicate sign-in failure
+        }
+        let existingUser = await client
+          .withConfig({ useCdn: false })
+          .fetch(AUTHOR_BY_ID_QUERY, {
+            id: profile.id || user.id
+          });
+        if (!existingUser) {
+          existingUser = await client
+            .withConfig({ useCdn: false })
+            .fetch(AUTHOR_BY_EMAIL_QUERY, {
+              email: user.email
+            });
+        }
+        console.warn("\n\n\nUSER: ", existingUser, "\n\n\n");
+        if (!existingUser) {
+          await writeClient.create({
+            _type: "author",
+            _id: profile.id,
+            id: user.id,
+            name: user?.name,
+            username: profile?.login,
+            email: user?.email,
+            //image: user?.image,
+            bio: profile?.bio || ""
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error("Error during sign-in:", error);
+        return false;
       }
     },
-    async redirect(url: string, baseUrl: string) {
-      return baseUrl;
-    },
-    async jwt(token, account, profile) {
-      if (account && profile) {
-        const user = await client.fetch(AUTHOR_BY_ID_QUERY, {
-          id: profile?.id
-        });
-        token.id = user._id;
+    async jwt(token: any, account: any, profile: any) {
+      try {
+        if (account && profile) {
+          const user = await client
+            .withConfig({ useCdn: false })
+            .fetch(AUTHOR_BY_ID_QUERY, {
+              id: profile?.id
+            });
+          token.id = user._id;
+        }
+      } catch (error) {
+        console.error(
+          "Error during JWT token generation:",
+          error,
+          "\nToken:",
+          token
+        );
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       Object.assign(session, { id: token.id });
       return session;
     }

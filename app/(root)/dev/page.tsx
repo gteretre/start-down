@@ -1,6 +1,17 @@
+"use client";
+import clearAuthor from "@/sanity/deletionTool";
 function Page() {
   return (
     <>
+      <div className="blueContainer">
+        <div className="textBox">Dev Tools</div>
+        <div className="search-form m-10">
+          <input className="search-input"></input>
+          <button className="search-btn" onClick={clearAuthor}>
+            clear author
+          </button>
+        </div>
+      </div>
       <div className="flex justify-center m-20">
         <div
           className="peer bg-blue-200 group h-40 w-40 place-items-center hover:bg-blue-300 grid

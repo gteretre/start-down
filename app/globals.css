@@ -154,6 +154,22 @@ body {
   @apply text-4xl font-semibold;
 }
 
+.articleBox {
+  @apply py-8 px-20 bg-gray-50 rounded-lg ring-1 ring-ring;
+}
+
+.dark .articleBox {
+  @apply bg-black;
+}
+
+.articleBox h1 {
+  @apply text-4xl font-bold mb-10;
+}
+
+.articleBox p {
+  @apply text-xl mb-5 text-justify;
+}
+
 button {
   @apply bg-gradient-to-tr from-blue-600 to-blue-400 
   rounded-3xl;
@@ -257,4 +273,19 @@ button {
     ease-linear scale-0 origin-left bg-secondary ring-1 ring-ring
     -translate-x-1/2;
   }
+}
+
+.marked-text{
+  @apply text-gray-600;
+}
+.dark .marked-text{
+  @apply text-blue-200;
+}
+
+.form-input {
+  @apply w-full ring-2 ring-ring max-w-md px-5 py-3 bg-secondary rounded-3xl;
+}
+
+.form-label{
+  @apply w-full max-w-md px-5 py-3 textBox;
 }

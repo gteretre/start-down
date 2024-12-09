@@ -96,14 +96,16 @@ async function Page({ params }: { params: { id: string } }) {
             alt={post?.title}
             className="rounded-xl mb-8"
           />
-          {parsedContent ? (
-            <div
-              className="textBox prose"
-              dangerouslySetInnerHTML={{ __html: parsedContent }}
-            />
-          ) : (
-            <p>No details available</p>
-          )}
+          <div className="articleBox">
+            {parsedContent ? (
+              <div
+                className=" max-w-[600px] justify-center "
+                dangerouslySetInnerHTML={{ __html: parsedContent }}
+              />
+            ) : (
+              <p>No details available</p>
+            )}
+          </div>
         </div>
       </section>
       <section></section>

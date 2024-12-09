@@ -14,17 +14,22 @@ const Navbar = async () => {
   return (
     <header id="header">
       <nav id="navbar">
-        <Tooltip text="Home">
-          <Link href="/">
-            <Image
-              id="logo"
-              src="/logo.png"
-              alt="logo"
-              width={50}
-              height={50}
-            />
-          </Link>
-        </Tooltip>
+        <div id="navbar-text">
+          <Tooltip text="Home">
+            <Link href="/">
+              <Image
+                id="logo"
+                src="/logo.png"
+                alt="logo"
+                width={50}
+                height={50}
+              />
+            </Link>
+          </Tooltip>
+          <Tooltip text="Toogle Dark Mode">
+            <UIMode />
+          </Tooltip>
+        </div>
 
         <Tooltip text="Dev Only">
           {" "}
@@ -95,9 +100,6 @@ const Navbar = async () => {
               </form>
             </>
           )}
-          <Tooltip text="Toogle Dark Mode">
-            <UIMode />
-          </Tooltip>
         </div>
       </nav>
     </header>

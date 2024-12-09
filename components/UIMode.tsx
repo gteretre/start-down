@@ -13,13 +13,13 @@ function UIMode() {
 
   return (
     <button
-      className="group btn-pure ring-1 p-1 ring-foreHeader flex items-center 
+      className="group btn-pure ring-1 py-1 px-2 ring-foreHeader flex items-center 
       justify-between"
       onClick={toggleMode}
     >
       <div
         className={`group-hover:opacity-0 transition-opacity duration-700 ${
-          mode === "light" ? "translate-x-0" : "translate-x-full"
+          mode === "light" ? "translate-x-0" : "translate-x-6"
         }`}
       >
         {mode === "light" ? (
@@ -30,13 +30,13 @@ function UIMode() {
       </div>
       <div
         className={`transform transition-transform duration-200 ${
-          mode === "light" ? "translate-x-0" : "-translate-x-full"
+          mode === "light" ? "translate-x-0" : "-translate-x-full "
         }`}
       >
         {mode === "light" ? (
-          <CircleArrowLeft className="size-4" />
+          <CircleArrowLeft className="size-4 ml-2" />
         ) : (
-          <CircleArrowRight className="size-4" />
+          <CircleArrowRight className="size-4 ml-2" />
         )}
       </div>
     </button>

@@ -13,8 +13,7 @@ const nextConfig: NextConfig = {
     ]
   },
   experimental: {
-    ppr: "incremental",
-    after: true
+    ppr: "incremental"
   },
   devIndicators: {
     appIsrStatus: true,
