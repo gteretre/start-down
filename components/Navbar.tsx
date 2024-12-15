@@ -1,11 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 
 import { auth, signOut, signIn } from "@/auth";
-import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 import Tooltip from "./Tooltip";
-
 import UIMode from "@/components/UIMode";
 
 const Navbar = async () => {
@@ -60,7 +59,7 @@ const Navbar = async () => {
                   </button>
                 </Tooltip>
               </form>
-              <Tooltip text={session?.user?.name || "Profile"}>
+              <Tooltip text={`${session.user.name}'s Profile` || "Profile"}>
                 <Link href="/user/${session?.id}">
                   <span>
                     <User />

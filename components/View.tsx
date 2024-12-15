@@ -1,4 +1,4 @@
-import { unstable_after as after } from "next/server";
+import { after } from "next/server";
 import { client } from "@/sanity/lib/client";
 
 import Ping from "@/components/Ping";

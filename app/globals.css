@@ -2,10 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --backHeader: #171717;
-  --foreHeader: #ededed;
-  --universal: rgb(156 163 175);
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
+
+@layer base {
+  :root {
+    --backHeader: #171717;
+    --backBanner: #323030;
+    --foreHeader: #ededed;
+    --universal: rgb(156 163 175);
+  }
 }
 
 @media (max-width: 740px) {
@@ -275,10 +280,10 @@ button {
   }
 }
 
-.marked-text{
+.marked-text {
   @apply text-gray-600;
 }
-.dark .marked-text{
+.dark .marked-text {
   @apply text-blue-200;
 }
 
@@ -286,6 +291,41 @@ button {
   @apply w-full ring-2 ring-ring max-w-md px-5 py-3 bg-secondary rounded-3xl;
 }
 
-.form-label{
-  @apply w-full max-w-md px-5 py-3 textBox;
+.form-input:active {
+  @apply ring-4;
+}
+
+.form-label {
+  @apply font-montserrat block w-full max-w-md px-5 py-1 font-bold text-[1.1rem];
+}
+
+.banner {
+  @apply bg-[var(--backBanner)] text-foreHeader flex justify-between 
+  flex-row py-4 px-10 transition-all duration-300 ease-in-out;
+}
+
+.typewriter {
+  @apply flex flex-col justify-center items-center;
+}
+
+.typewriter p {
+  @apply font-mono mx-auto overflow-hidden whitespace-nowrap border-r border-current;
+  animation:
+    typing 3s steps(22) forwards,
+    blink 1s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
 }

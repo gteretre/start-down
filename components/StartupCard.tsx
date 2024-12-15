@@ -6,12 +6,11 @@ import View from "./View";
 import Tooltip from "./Tooltip";
 
 function StartupCard({ post }: any) {
-  console.log(post.category);
   return (
     <li className="startup-card">
       <div>
         <div className="flex justify-between">
-          <p>{formatDate(post._createdAt || new Date())}</p>
+          <p>{formatDate(post?.createdAt || new Date())}</p>
           <div className="flex gap-1">
             <EyeIcon className="size-6 text-primary" />
             <span className="text-16-medium">
@@ -20,7 +19,7 @@ function StartupCard({ post }: any) {
           </div>
 
           <Tooltip text={`${post.author?.name || "Someone"}'s Profile`}>
-            <Link href={`/user/${post.author._id}`}>
+            <Link href={`/user/${post.author?._id}`}>
               <Image
                 //problem with sanity, getting 404
                 //src={post.author.image ? post.author.image : "/logo.png"}
@@ -45,7 +44,7 @@ function StartupCard({ post }: any) {
 
             <Link
               className="flex flex-col items-end"
-              href={`/user/${post.author._id}`}
+              href={`/user/${post.author?._id}`}
             >
               <p className=" mt-2 text-16-medium line-clamp-1">
                 created by <strong>{post.author?.name}</strong>
