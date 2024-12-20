@@ -27,17 +27,18 @@ const options = {
       }
     })
   ],
-  session: {
-    strategy: "jwt",
-    maxAge: 1 * 24 * 60 * 60 // 1 day
-  },
-  jwt: {
-    maxAge: 1 * 24 * 60 * 60, // Token expiration time in seconds (1 day)
-    encryption: true, // Enable encryption for the JWT
-    verificationOptions: {
-      algorithms: ["HS256"] // Algorithms to use for verifying the JWT
-    }
-  },
+  // session: {
+  //   strategy: "jwt",
+  //   maxAge: 24 * 3600, // 1 day
+  //   updateAge: 3600 // 1 hour
+  // },
+  // jwt: {
+  //   maxAge: 1 * 24 * 60 * 60, // Token expiration time in seconds (1 day)
+  //   encryption: true, // Enable encryption for the JWT
+  //   verificationOptions: {
+  //     algorithms: ["HS256"] // Algorithms to use for verifying the JWT
+  //   }
+  // },
   callbacks: {
     async signIn({
       user,
@@ -51,7 +52,7 @@ const options = {
       try {
         if (!profile || !user) {
           console.error("Profile is undefined");
-          return false; // Return false to indicate sign-in failure
+          return false;
         }
         let existingUser = await client
           .withConfig({ useCdn: false })
@@ -65,7 +66,6 @@ const options = {
               email: user.email
             });
         }
-        console.warn("\n\n\nUSER: ", existingUser, "\n\n\n");
         if (!existingUser) {
           await writeClient.create({
             _type: "author",
@@ -92,20 +92,23 @@ const options = {
             .fetch(AUTHOR_BY_ID_QUERY, {
               id: profile?.id
             });
-          token.id = user._id;
+          // token.id = user._id;
+          token.user = {
+            id: user._id,
+            email: user.email,
+            name: user.name
+          };
         }
       } catch (error) {
-        console.error(
-          "Error during JWT token generation:",
-          error,
-          "\nToken:",
-          token
-        );
+        console.error("Error during JWT token generation:", error);
       }
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
-      Object.assign(session, { id: token.id });
+      //! WTF token is inside diffrent token object
+      // cannot find the issue cause
+      session.user = token.token.user;
+      session.id = token.token.id;
       return session;
     }
   }

@@ -13,6 +13,7 @@ import { formatDate, formatDateAgo } from "@/lib/utils";
 import ShareButton from "@/components/ui/ShareButton";
 import { View, ViewUpdate } from "@/components/View";
 import Tooltip from "@/components/Tooltip";
+// import { SanityLive } from "@/lib/live";
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -28,63 +29,68 @@ async function Page({ params }: { params: { id: string } }) {
   if (!post) return notFound();
   const parsedContent = md.render(post?.pitch || "");
   ViewUpdate({ id });
+  // lg:mx-28 my-4 mx-2
   return (
     <>
-      <section className=" blueContainer flex flex-col">
-        <div className="max-w-[1000px] mx-auto">
-          <div className="flex justify-between gap-20 mx-12 my-8 lg:mx-32">
-            <Tooltip
-              text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
-            >
-              <p>{formatDate(post?.createdAt || new Date())}</p>
-            </Tooltip>
-            <div className="flex gap-1">
-              <EyeIcon className="size-6 text-primary" />
-              <span className="text-16-medium">
-                <Suspense fallback={<Skeleton className="view_skeleton" />}>
-                  <View id={id} />
-                </Suspense>
-              </span>
-            </div>
-          </div>
-
-          <h1 className="textBox mx-28 my-4 ">{post?.title}</h1>
-          <p className="mx-8 mt-8 lg:mx-32 text-start justify-start">
-            {post?.description}
-          </p>
-        </div>
-        <div className="author mx-12">
-          <Tooltip text={post.author?.bio}>
-            <Link
-              className="flex justify-between gap-2"
-              href={`/user/${post.author?.id}`}
-            >
-              <Image
-                src="/logo.png"
-                alt={post.author?.name + "s avatar"}
-                width={48}
-                height={48}
-                className="avatar"
-              />
-              <div className="flex flex-col items-start pt-1">
-                <p className="text-24-medium">
-                  <strong>{post.author?.name}</strong>
+      <section className=" blueContainer flex flex-col px-8 py-4 ">
+        <div className="max-w-[800px] justify-center m-auto">
+          <div>
+            <div className="flex justify-between gap-20 mx-6 md:mx-12 my-8">
+              <Tooltip
+                text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
+              >
+                <p className="text-start">
+                  {formatDate(post?.createdAt || new Date())}
                 </p>
-                <p className="text-16-medium">@{post.author?.username}</p>
+              </Tooltip>
+              <div className="flex">
+                <EyeIcon className="size-6 text-primary" />
+                <span className="text-16-medium">
+                  <Suspense fallback={<Skeleton className="view_skeleton" />}>
+                    <View id={id} />
+                  </Suspense>
+                </span>
               </div>
-            </Link>
-          </Tooltip>
-          <ShareButton
-            title={post?.title || "Default Title"}
-            text={post?.description || "Default Text"}
-            url={"/startup/" + post?._id}
-          />
+            </div>
+
+            <h1 className="textBox">{post?.title}</h1>
+            <p className="mx-8 mt-8 lg:mx-32 text-start justify-start">
+              {post?.description}
+            </p>
+          </div>
+          <div className="author mx-12">
+            <Tooltip text={post.author?.bio}>
+              <Link
+                className="flex justify-between gap-2"
+                href={`/user/${post.author?.id}`}
+              >
+                <Image
+                  src="/logo.png"
+                  alt={post.author?.name + "s avatar"}
+                  width={48}
+                  height={48}
+                  className="avatar"
+                />
+                <div className="flex flex-col items-start pt-1">
+                  <p className="text-24-medium">
+                    <strong>{post.author?.name}</strong>
+                  </p>
+                  <p className="text-16-medium">@{post.author?.username}</p>
+                </div>
+              </Link>
+            </Tooltip>
+            <ShareButton
+              title={post?.title || "Default Title"}
+              text={post?.description || "Default Text"}
+              url={"/startup/" + post?._id}
+            />
+          </div>
+          <p className="category text-end text-sm mx-12">{post.category}</p>
         </div>
-        <p className="category text-end text-sm mx-12">{post.category}</p>
       </section>
 
       <section>
-        <div className="mx-32 my-12 flex justify-center flex-col items-center">
+        <div className="mx-6 md:mx-20 lg:mx-32 my-6 md:my-12 flex justify-center flex-col items-center">
           <Image
             src={
               post.image

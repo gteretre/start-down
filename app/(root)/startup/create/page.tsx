@@ -15,7 +15,7 @@ const Page = async () => {
             Idea
           </h1>
         </div>
-        <div className="mt-10 typewriter">
+        <div className="mt-10">
           {session ? (
             <>
               <p>Share Your Idea With Thousands of Users Around the World!</p>

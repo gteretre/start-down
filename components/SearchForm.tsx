@@ -7,12 +7,13 @@ import Tooltip from "./Tooltip";
 
 function SearchForm({ query }: { query?: string }) {
   return (
-    <Form action="/" scroll={false} className="search-form">
+    <Form action="/" scroll={false} className="search-form" autoComplete="off">
       <input
         name="query"
         defaultValue={query}
         className="search-input"
         placeholder="Search Startups"
+        autoComplete="off"
       />
       <div className="flex gap-2">{query && <SearchFormReset />}</div>
       <Tooltip text="Search">

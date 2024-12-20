@@ -7,6 +7,8 @@ import { writeClient } from "@/sanity/lib/write-client";
 import { STARTUP_VIEWS_QUERY } from "@/lib/queries";
 import Tooltip from "./Tooltip";
 
+import { SanityLive } from "@/lib/live";
+
 const View = async ({ id }: { id: string }) => {
   const { views } = await client
     .withConfig({ useCdn: false })
@@ -20,23 +22,31 @@ const View = async ({ id }: { id: string }) => {
           <Ping />
         </div>
       </div>
+      <SanityLive />
     </Tooltip>
   );
 };
 
 const ViewUpdate = async ({ id }: { id: string }) => {
-  const { views } = await client
-    .withConfig({ useCdn: false })
-    .fetch(STARTUP_VIEWS_QUERY, { id });
+  if (typeof window !== "undefined" && id) {
+    try {
+      const hasViewed = sessionStorage.getItem(`viewed_${id}`);
+      if (!hasViewed) {
+        const { views } = await client
+          .withConfig({ useCdn: false })
+          .fetch(STARTUP_VIEWS_QUERY, { id });
 
-  after(
-    async () =>
-      await writeClient
-        .patch(id)
-        .set({ views: views + 1 })
-        .commit()
-  );
+        await writeClient
+          .patch(id)
+          .set({ views: views + 1 })
+          .commit();
 
+        sessionStorage.setItem(`viewed_${id}`, "true");
+      }
+    } catch (error) {
+      console.error("Error updating view count:", error);
+    }
+  }
   return;
 };
 

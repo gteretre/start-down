@@ -43,6 +43,18 @@ export const STARTUP_VIEWS_QUERY = defineQuery(
 );
 
 export const AUTHOR_BY_ID_QUERY = defineQuery(
+  `*[_type == "author" && id == $id][0]{
+    _id,
+    id,
+    name,
+    username,
+    bio,
+    email,
+    image,
+    }`
+);
+
+export const AUTHOR_BY_DATA_ID_QUERY = defineQuery(
   `*[_type == "author" && _id == $id][0]{
     _id,
     id,
@@ -56,6 +68,18 @@ export const AUTHOR_BY_ID_QUERY = defineQuery(
 
 export const AUTHOR_BY_EMAIL_QUERY = defineQuery(
   `*[_type == "author" && email == $email][0]{
+    _id,
+    id,
+    name,
+    username,
+    bio,
+    email,
+    image,
+    }`
+);
+
+export const AUTHOR_BY_USERNAME_QUERY = defineQuery(
+  `*[_type == "author" && username == $username][0]{
     _id,
     id,
     name,

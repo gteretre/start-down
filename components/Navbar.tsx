@@ -1,14 +1,24 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 
 import { auth, signOut, signIn } from "@/auth";
 import Tooltip from "./Tooltip";
 import UIMode from "@/components/UIMode";
+import { client } from "@/sanity/lib/client";
+import { AUTHOR_BY_ID_QUERY } from "@/lib/queries";
+// const UIMode = dynamic(() => import("@/components/UIMode"), { ssr: false });
 
 const Navbar = async () => {
   const session = await auth();
+  let user = null;
+  if (session && session.user) {
+    const id = session.user.id;
+    user = await client.fetch(AUTHOR_BY_ID_QUERY, { id });
+  }
+  console.log(session);
 
   return (
     <header id="header">
@@ -59,8 +69,8 @@ const Navbar = async () => {
                   </button>
                 </Tooltip>
               </form>
-              <Tooltip text={`${session.user.name}'s Profile` || "Profile"}>
-                <Link href="/user/${session?.id}">
+              <Tooltip text={`${user?.username}'s Profile` || "Profile"}>
+                <Link href={`/user/${user?.username}`}>
                   <span>
                     <User />
                   </span>

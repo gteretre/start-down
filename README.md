@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+### TODO
+
+!!!UIMode icon change is causing hydration error (assure its only client stuff)
+
 ## ABC
 
 This project use nextjs canary version - if something is broken run:

@@ -52,22 +52,23 @@ function StartupCard({ post }: any) {
             </Link>
           </div>
           <Link className="flex flex-col" href={`/startup/${post._id}`}>
-            <p className="text-justify mt-3 mb-5 line-clamp-5">
+            <p className="text-justify mt-3 mb-5 line-clamp-3 min-h-[4.5em]">
               {post.description}
             </p>
             <div className="flex justify-center">
-              <Image
-                src={
-                  post.image
-                    ? post.image
-                    : `https://placehold.co/600x400?text=${post.title}`
-                }
-                alt="profile picture"
-                width={600}
-                height={400}
-                className="rounded-3xl ease-in-out
-              ring-2 ring-ring"
-              ></Image>
+              <div className="relative w-full h-0 pb-[66.67%] overflow-hidden">
+                <Image
+                  src={
+                    post.image
+                      ? post.image
+                      : `https://placehold.co/600x400?text=${post.title}`
+                  }
+                  alt="profile picture"
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-3xl ease-in-out"
+                />
+              </div>
             </div>
           </Link>
           <div className="flex justify-between mt-5">

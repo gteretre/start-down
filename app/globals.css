@@ -13,18 +13,6 @@
   }
 }
 
-@media (max-width: 740px) {
-  :root {
-    --font-size-base: 4px;
-    --font-size-lg: 9px;
-    --font-size-xl: 12px;
-    --font-size-2xl: 15px;
-    --font-size-3xl: 18px;
-    --font-size-4xl: 21px;
-    --padding-base: 5px;
-  }
-}
-
 /* 
   Geist Mono - font 
   Montserrat -font
@@ -135,7 +123,7 @@ body {
   @apply ring-1 ring-ring bg-gradient-to-r
    from-gray-100 via-gray-200 to-gray-300  text-xl 
    rounded-lg bg-opacity-90 text-gray-800 flex flex-col
-   justify-center text-center mx-24 mt-12 shadow-lg
+   justify-center text-center mx-6 md:mx-12 lg:mx-24 mt-12 shadow-lg
    transition-all duration-300;
 }
 
@@ -148,7 +136,7 @@ body {
 }
 
 .textBox {
-  @apply py-8 px-20 bg-blue-300 rounded-lg;
+  @apply py-8 px-8 md:px-12 lg:py-8 lg:px-20 bg-blue-300 rounded-lg;
 }
 
 .dark .textBox {
@@ -160,7 +148,7 @@ body {
 }
 
 .articleBox {
-  @apply py-8 px-20 bg-gray-50 rounded-lg ring-1 ring-ring;
+  @apply py-8 px-6 md:px-12 lg:px-20 bg-gray-50 rounded-lg ring-1 ring-ring;
 }
 
 .dark .articleBox {
@@ -177,11 +165,11 @@ body {
 
 button {
   @apply bg-gradient-to-tr from-blue-600 to-blue-400 
-  rounded-3xl;
+  rounded-3xl text-white;
 }
 .dark button {
   /* @apply bg-gradient-to-r from-blue-900 to-blue-800; */
-  @apply bg-gradient-to-r from-gray-700 to-gray-500;
+  @apply bg-gradient-to-r from-gray-700 to-gray-500 text-white;
 }
 
 .search-form {
@@ -211,6 +199,12 @@ button {
 
 .dark .search-btn {
   @apply active:ring-offset-gray-700 active:ring-gray-700;
+}
+
+.submit-btn {
+  @apply py-6 px-16 rounded-3xl hover:rounded-lg hover:scale-105
+  transition-all duration-300 ease-in-out flex text-white
+  text-3xl bg-gradient-to-r from-red-500 via-yellow-500 to-green-500;
 }
 
 .btn-pure {
@@ -328,4 +322,26 @@ button {
   50% {
     border-color: transparent;
   }
+}
+
+.rainbowEffect {
+  @apply bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 
+    animate-rainbow;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-rainbow {
+  background-size: 200% 200%;
+  animation: rainbow 5s linear infinite;
 }

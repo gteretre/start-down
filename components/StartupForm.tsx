@@ -189,10 +189,15 @@ function StartupForm() {
           </p>
         )}
       </div>
-      <Button type="submit" className="search-btn">
-        {isPending ? "Processing Form... " : "Submit My Terrible Idea!"}
-        <PlaneTakeoff />
-      </Button>
+      <div className="flex justify-center">
+        <Button
+          type="submit"
+          className="text-2xl p-6 rounded-xl hover:ring-4 ring-purple-400 hover:rainbowEffect"
+        >
+          {isPending ? "Processing Form... " : "Submit My Terrible Idea!"}
+          <PlaneTakeoff />
+        </Button>
+      </div>
     </form>
   );
 }

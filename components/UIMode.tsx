@@ -3,9 +3,14 @@ import React from "react";
 import { Sun, Moon, CircleArrowRight, CircleArrowLeft } from "lucide-react";
 
 function UIMode() {
-  const [colorMode, setColorMode] = React.useState(() =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-  );
+  const [colorMode, setColorMode] = React.useState("light");
+
+  React.useEffect(() => {
+    const mode = window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+    setColorMode(mode);
+  }, []);
 
   const toggleMode = () => {
     const newMode = colorMode === "light" ? "dark" : "light";
