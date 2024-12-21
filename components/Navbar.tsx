@@ -39,11 +39,13 @@ const Navbar = async () => {
             <UIMode />
           </Tooltip>
         </div>
+        <div className="hidden md:block">
+          <Tooltip text="Dev Only">
+            {" "}
+            Compiled: {new Date().toLocaleTimeString()}
+          </Tooltip>
+        </div>
 
-        <Tooltip text="Dev Only">
-          {" "}
-          Compiled: {new Date().toLocaleTimeString()}
-        </Tooltip>
         <div id="navbar-text">
           {session && session.user ? (
             <>

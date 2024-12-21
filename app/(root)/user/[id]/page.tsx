@@ -7,6 +7,11 @@ import { AUTHOR_BY_USERNAME_QUERY } from "@/lib/queries";
 import { client } from "@/sanity/lib/client";
 import Tooltip from "@/components/Tooltip";
 import { PenBoxIcon } from "lucide-react";
+import UserStartups from "@/components/UserStartups";
+import { Suspense } from "react";
+import { StartupCardSkeleton } from "@/components/StartupCard";
+
+export const experimental_ppr = true;
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const username = (await params).id;
@@ -20,8 +25,8 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   return (
     <>
       <div className="flex flex-col lg:flex-row">
-        <section className="">
-          <div className="blueContainer flex flex-col m-10">
+        <section>
+          <div className="blueContainer flex flex-col my-10 mt-10">
             <div className="max-w-[1000px] mx-auto flex justify-between gap-2 my-4">
               <div className="mx-4">
                 {profileOwner ? (
@@ -70,10 +75,15 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
         </section>
         <section>
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center m-10">
             <p className="text-30-semibold text-center">
               {profileOwner ? "Your Startups" : "All Startups"}
             </p>
+            <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:grid-cols-3 gap-4">
+              <Suspense fallback={<StartupCardSkeleton />}>
+                <UserStartups username={username} />
+              </Suspense>
+            </ul>
           </div>
         </section>
       </div>

@@ -1,25 +1,28 @@
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import View from "./View";
 import Tooltip from "./Tooltip";
+import { Skeleton } from "./ui/skeleton";
 
 function StartupCard({ post }: any) {
   return (
     <li className="startup-card">
       <div>
         <div className="flex justify-between">
-          <p>{formatDate(post?.createdAt || new Date())}</p>
+          <p>{formatDate(post?._createdAt || new Date())}</p>
           <div className="flex gap-1">
             <EyeIcon className="size-6 text-primary" />
             <span className="text-16-medium">
-              <View id={post._id} />
+              <View id={post?._id} />
             </span>
           </div>
 
-          <Tooltip text={`${post.author?.name || "Someone"}'s Profile`}>
-            <Link href={`/user/${post.author?._id}`}>
+          <Tooltip
+            text={`${post?.author ? post.author.name : "Someone"}'s Profile`}
+          >
+            <Link href={`/user/${post?.author?.username}`}>
               <Image
                 //problem with sanity, getting 404
                 //src={post.author.image ? post.author.image : "/logo.png"}
@@ -37,31 +40,31 @@ function StartupCard({ post }: any) {
           <div className="flex-1">
             <Link
               className="flex flex-col items-start"
-              href={`/startup/${post._id}`}
+              href={`/startup/${post?.username}`}
             >
-              <h1>{post.title || "ERROR"}</h1>
+              <h1>{post?.title || "ERROR"}</h1>
             </Link>
 
             <Link
               className="flex flex-col items-end"
-              href={`/user/${post.author?._id}`}
+              href={`/user/${post?.author?.username}`}
             >
               <p className=" mt-2 text-16-medium line-clamp-1">
-                created by <strong>{post.author?.name}</strong>
+                created by <strong>{post?.author?.name}</strong>
               </p>
             </Link>
           </div>
-          <Link className="flex flex-col" href={`/startup/${post._id}`}>
+          <Link className="flex flex-col" href={`/startup/${post?._id}`}>
             <p className="text-justify mt-3 mb-5 line-clamp-3 min-h-[4.5em]">
-              {post.description}
+              {post?.description}
             </p>
             <div className="flex justify-center">
               <div className="relative w-full h-0 pb-[66.67%] overflow-hidden">
                 <Image
                   src={
-                    post.image
+                    post?.image
                       ? post.image
-                      : `https://placehold.co/600x400?text=${post.title}`
+                      : `https://placehold.co/600x400?text=${post?.title}`
                   }
                   alt="profile picture"
                   layout="fill"
@@ -72,12 +75,12 @@ function StartupCard({ post }: any) {
             </div>
           </Link>
           <div className="flex justify-between mt-5">
-            <Link href={`/?query=${post.category}`}>
+            <Link href={`/?query=${post?.category}`}>
               <p className="category">
-                {post.category || "something went wrong"}
+                {post?.category || "something went wrong"}
               </p>
             </Link>
-            <Link href={`/startup/${post._id}`}>
+            <Link href={`/startup/${post?._id}`}>
               <button className="p-2 search-btn">More...</button>
             </Link>
           </div>
@@ -87,4 +90,29 @@ function StartupCard({ post }: any) {
   );
 }
 
+type StartupCardType = {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  createAt: string;
+  author: { _id: string; name: string; image: string; bio: string };
+  views: number;
+  description: string;
+  category: string;
+  image: string;
+};
+
 export default StartupCard;
+export type { StartupCardType };
+
+export const StartupCardSkeleton = () => {
+  return (
+    <>
+      {[0, 1, 2, 3, 4].map((index: number) => (
+        <li key={cn("skeleton", index)}>
+          <Skeleton className="h-4 w-1/2" />
+        </li>
+      ))}
+    </>
+  );
+};

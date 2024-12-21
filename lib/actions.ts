@@ -31,7 +31,7 @@ export const createPitch = async (
       slug: { _type: slug, current: slug },
       author: {
         _type: "reference",
-        _ref: session?.id
+        _ref: session?.user.id
       },
       pitch
     };

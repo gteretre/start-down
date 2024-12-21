@@ -4,18 +4,7 @@ import { sanityFetch, SanityLive } from "@/sanity/lib/live";
 import SearchForm from "@/components/SearchForm";
 import StartupCard from "@/components/StartupCard";
 import { STARTUPS_QUERY } from "@/lib/queries";
-
-type StartupCardType = {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  createAt: string;
-  author: { _id: string; name: string; image: string; bio: string };
-  views: number;
-  description: string;
-  category: string;
-  image: string;
-};
+import { StartupCardType } from "@/components/StartupCard";
 
 async function Home({
   searchParams

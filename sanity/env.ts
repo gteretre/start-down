@@ -13,7 +13,13 @@ export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production";
 //   "Missing environment variable: NEXT_PUBLIC_SANITY_PROJECT_ID"
 // );
 
-export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+export const projectId =
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ||
+  (() => {
+    throw new Error(
+      "Missing environment variable: NEXT_PUBLIC_SANITY_PROJECT_ID"
+    );
+  })();
 
 // function assertValue<T>(v: T | undefined, errorMessage: string): T {
 //   if (v === undefined) {

@@ -13,6 +13,7 @@ import { formatDate, formatDateAgo } from "@/lib/utils";
 import ShareButton from "@/components/ui/ShareButton";
 import { View, ViewUpdate } from "@/components/View";
 import Tooltip from "@/components/Tooltip";
+import FeaturedStartups from "@/components/FeaturedStartups";
 // import { SanityLive } from "@/lib/live";
 
 async function Page({ params }: { params: { id: string } }) {
@@ -28,7 +29,7 @@ async function Page({ params }: { params: { id: string } }) {
 
   if (!post) return notFound();
   const parsedContent = md.render(post?.pitch || "");
-  ViewUpdate({ id });
+  await ViewUpdate({ id });
   // lg:mx-28 my-4 mx-2
   return (
     <>
@@ -37,10 +38,10 @@ async function Page({ params }: { params: { id: string } }) {
           <div>
             <div className="flex justify-between gap-20 mx-6 md:mx-12 my-8">
               <Tooltip
-                text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
+                text={`Created: ${formatDateAgo(post?._createdAt || new Date())}`}
               >
                 <p className="text-start">
-                  {formatDate(post?.createdAt || new Date())}
+                  {formatDate(post?._createdAt || new Date())}
                 </p>
               </Tooltip>
               <div className="flex">
@@ -62,7 +63,7 @@ async function Page({ params }: { params: { id: string } }) {
             <Tooltip text={post.author?.bio}>
               <Link
                 className="flex justify-between gap-2"
-                href={`/user/${post.author?.id}`}
+                href={`/user/${post.author?.username}`}
               >
                 <Image
                   src="/logo.png"
@@ -114,7 +115,21 @@ async function Page({ params }: { params: { id: string } }) {
           </div>
         </div>
       </section>
-      <section></section>
+      <hr />
+
+      <section>
+        <FeaturedStartups />
+      </section>
+      <hr />
+
+      <section>
+        <div className="mx-6 md:mx-10 lg:mx-16 my-6 md:my-12 flex justify-center">
+          <div className="articleBox">
+            <h2 className="text-24-medium">Comments</h2>
+            <p>Comments will be available soon</p>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

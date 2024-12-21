@@ -188,6 +188,11 @@ function StartupForm() {
             {errors.pitch}
           </p>
         )}
+        {state.error && (
+          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
+            {state.error}
+          </p>
+        )}
       </div>
       <div className="flex justify-center">
         <Button
