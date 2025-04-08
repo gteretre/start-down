@@ -16,6 +16,8 @@ import Tooltip from "@/components/Tooltip";
 import FeaturedStartups from "@/components/FeaturedStartups";
 // import { SanityLive } from "@/lib/live";
 
+export const experimental_ppr = true;
+
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
   let post;

@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 // import SideBar from "@/components/SideBar";
 // import { Banner } from "@/components/Banner";
@@ -11,6 +12,7 @@ export default function Layout({
       <Navbar />
       {children}
       <Toaster />
+      <Footer />
     </main>
   );
 }

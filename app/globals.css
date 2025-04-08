@@ -221,7 +221,8 @@ button {
 
 .startup-card {
   @apply bg-card border-[5px] border-ring p-6 px-5 rounded-[22px] 
-  shadow-lg transition-all duration-300 ease-in-out;
+  shadow-lg transition-all duration-300 ease-in-out
+  max-w-[500px] max-h-[650px] min-w-[300px] min-h-[500px];
 }
 
 .startup-card h1 {

@@ -26,7 +26,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     <>
       <div className="flex flex-col lg:flex-row">
         <section>
-          <div className="blueContainer flex flex-col my-10 mt-10">
+          <div className="blueContainer flex flex-col my-10 mt-10 md:min-w-[500px]">
             <div className="max-w-[1000px] mx-auto flex justify-between gap-2 my-4">
               <div className="mx-4">
                 {profileOwner ? (
@@ -47,7 +47,8 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                     alt={user.username + "s avatar"}
                     width={120}
                     height={120}
-                    className="rounded-full ring-4 ring-ring object-cover"
+                    className="rounded-full ring-4 ring-ring object-cover
+                    min-h-[96px] min-w-[96px]"
                   />
                 )}
               </div>
@@ -75,15 +76,13 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
         </section>
         <section>
-          <div className="flex flex-col justify-center m-10">
+          <div className="flex flex-col justify-center mx-4 mt-4">
             <p className="text-30-semibold text-center">
               {profileOwner ? "Your Startups" : "All Startups"}
             </p>
-            <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:grid-cols-3 gap-4">
-              <Suspense fallback={<StartupCardSkeleton />}>
-                <UserStartups username={username} />
-              </Suspense>
-            </ul>
+            <Suspense fallback={<StartupCardSkeleton />}>
+              <UserStartups username={username} />
+            </Suspense>
           </div>
         </section>
       </div>

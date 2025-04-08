@@ -10,7 +10,7 @@ const UserStartups = async ({ username }: { username: string }) => {
   });
 
   return editorPosts?.length > 0 ? (
-    <ul className="my-8 mx-4 grid grid-cols-1 gap-4">
+    <ul className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
       {editorPosts.map((post: StartupCardType, index: number) => (
         <StartupCard key={index} post={post} />
       ))}
