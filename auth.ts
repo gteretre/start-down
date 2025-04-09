@@ -1,11 +1,13 @@
 import NextAuth from "next-auth";
-import { writeClient } from "@/sanity/lib/write-client";
 
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { AUTHOR_BY_ID_QUERY, AUTHOR_BY_EMAIL_QUERY } from "@/lib/queries";
-import { client } from "@/sanity/lib/client";
+import {
+  getAuthorById,
+  getAuthorByEmail,
+  createAuthor
+} from "@/lib/mongodb-service";
 //import bcrypt from "bcrypt";
 
 const options = {
@@ -26,8 +28,7 @@ const options = {
         }
       }
     })
-  ],
-  // session: {
+  ], // session: {
   //   strategy: "jwt",
   //   maxAge: 24 * 3600, // 1 day
   //   updateAge: 3600 // 1 hour
@@ -54,27 +55,23 @@ const options = {
           console.error("Profile is undefined");
           return false;
         }
-        let existingUser = await client
-          .withConfig({ useCdn: false })
-          .fetch(AUTHOR_BY_ID_QUERY, {
-            id: profile.id || user.id
-          });
+
+        // Try to find existing user by ID
+        let existingUser = await getAuthorById(profile.id || user.id);
+
+        // If not found by ID, try by email
         if (!existingUser) {
-          existingUser = await client
-            .withConfig({ useCdn: false })
-            .fetch(AUTHOR_BY_EMAIL_QUERY, {
-              email: user.email
-            });
+          existingUser = await getAuthorByEmail(user.email);
         }
+
+        // If user doesn't exist, create a new one
         if (!existingUser) {
-          await writeClient.create({
-            _type: "author",
-            _id: profile.id,
-            id: user.id,
+          await createAuthor({
+            id: profile.id || user.id,
             name: user?.name,
-            username: profile?.login,
+            username: profile?.login || user.email.split("@")[0], // Fallback username if login not available
             email: user?.email,
-            //image: user?.image,
+            image: user?.image,
             bio: profile?.bio || ""
           });
         }
@@ -87,28 +84,49 @@ const options = {
     async jwt(token: any, account: any, profile: any) {
       try {
         if (account && profile) {
-          const user = await client
-            .withConfig({ useCdn: false })
-            .fetch(AUTHOR_BY_ID_QUERY, {
-              id: profile?.id
-            });
-          // token.id = user._id;
-          token.user = {
-            id: user._id,
-            email: user.email,
-            name: user.name
-          };
+          const user = await getAuthorById(
+            profile?.id || account?.providerAccountId
+          );
+          if (user) {
+            token.user = {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              username: user.username,
+              image: user.image
+            };
+          } else {
+            console.error("User not found for the given token");
+            token.error = "TokenIncorrect";
+          }
         }
       } catch (error) {
         console.error("Error during JWT token generation:", error);
+        token.error = "TokenIncorrect";
       }
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
-      //! WTF token is inside diffrent token object
-      // cannot find the issue cause
-      session.user = token.token.user;
-      session.id = token.token.id;
+      if (token.error === "TokenIncorrect") {
+        if (typeof window !== "undefined") {
+          alert("Token incorrect. Logging out...");
+          await signOut({ redirect: false });
+        }
+        return null;
+      }
+
+      const user = token.user || token.token?.user;
+      if (user) {
+        session.user = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          username: user.username,
+          image: user.image
+        };
+      } else {
+        console.error("User data is missing in the token");
+      }
       return session;
     }
   }

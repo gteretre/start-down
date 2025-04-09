@@ -1,4 +1,3 @@
-import { client } from "@/sanity/lib/client";
 import { notFound } from "next/navigation";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +13,7 @@ import ShareButton from "@/components/ui/ShareButton";
 import { View, ViewUpdate } from "@/components/View";
 import Tooltip from "@/components/Tooltip";
 import FeaturedStartups from "@/components/FeaturedStartups";
+import { mongoFetch } from "@/lib/live";
 // import { SanityLive } from "@/lib/live";
 
 export const experimental_ppr = true;
@@ -23,7 +23,11 @@ async function Page({ params }: { params: { id: string } }) {
   let post;
 
   try {
-    post = await client.fetch(STARTUP_BY_ID, { id });
+    const { data } = await mongoFetch({
+      query: STARTUP_BY_ID,
+      params: { id }
+    });
+    post = data;
   } catch (error) {
     console.error("Failed to fetch post:", error);
     return notFound();
@@ -38,12 +42,13 @@ async function Page({ params }: { params: { id: string } }) {
       <section className=" blueContainer flex flex-col px-8 py-4 ">
         <div className="max-w-[800px] justify-center m-auto">
           <div>
+            {" "}
             <div className="flex justify-between gap-20 mx-6 md:mx-12 my-8">
               <Tooltip
-                text={`Created: ${formatDateAgo(post?._createdAt || new Date())}`}
+                text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
               >
                 <p className="text-start">
-                  {formatDate(post?._createdAt || new Date())}
+                  {formatDate(post?.createdAt || new Date())}
                 </p>
               </Tooltip>
               <div className="flex">
@@ -55,7 +60,6 @@ async function Page({ params }: { params: { id: string } }) {
                 </span>
               </div>
             </div>
-
             <h1 className="textBox">{post?.title}</h1>
             <p className="mx-8 mt-8 lg:mx-32 text-start justify-start">
               {post?.description}
@@ -94,15 +98,16 @@ async function Page({ params }: { params: { id: string } }) {
 
       <section>
         <div className="mx-6 md:mx-20 lg:mx-32 my-6 md:my-12 flex justify-center flex-col items-center">
+          {" "}
           <Image
             src={
-              post.image
+              post.image && post.image.startsWith("http")
                 ? post.image
-                : `https://placehold.co/600x400?text=${post.title}`
+                : `https://placehold.co/600x400?text=${encodeURIComponent(post.title || "Startup")}`
             }
             width={600}
             height={400}
-            alt={post?.title}
+            alt={post?.title || "Startup image"}
             className="rounded-xl mb-8"
           />
           <div className="articleBox">

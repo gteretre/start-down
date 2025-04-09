@@ -1,5 +1,5 @@
 import { Squirrel } from "lucide-react";
-import { sanityFetch, SanityLive } from "@/sanity/lib/live";
+import { mongoFetch } from "@/lib/live";
 
 import SearchForm from "@/components/SearchForm";
 import StartupCard from "@/components/StartupCard";
@@ -13,7 +13,7 @@ async function Home({
 }) {
   const query = (await searchParams).query;
   const params = { search: query || null };
-  const { data: posts } = await sanityFetch({ query: STARTUPS_QUERY, params });
+  const { data: posts } = await mongoFetch({ query: STARTUPS_QUERY, params });
 
   return (
     <>
@@ -43,7 +43,6 @@ async function Home({
           )}
         </ul>
       </section>
-      <SanityLive />
     </>
   );
 }

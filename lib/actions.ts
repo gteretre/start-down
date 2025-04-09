@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { parseServerActionResponse, slugify } from "./utils";
-import { writeClient } from "@/sanity/lib/write-client";
+import { createStartup, getAuthorById } from "./mongodb-service";
 
 export const createPitch = async (
   state: any,
@@ -23,20 +23,26 @@ export const createPitch = async (
   const slug = slugify(title as string);
 
   try {
+    // Get the author from MongoDB
+    const author = await getAuthorById(session.user.id);
+    if (!author) {
+      return parseServerActionResponse({
+        error: "Author not found",
+        status: "ERROR"
+      });
+    }
+
     const startup = {
       title,
       description,
       category,
       image: link,
-      slug: { _type: slug, current: slug },
-      author: {
-        _type: "reference",
-        _ref: session?.user.id
-      },
+      slug: { current: slug },
+      author: author._id, // Use the MongoDB ObjectId reference
       pitch
     };
 
-    const result = await writeClient.create({ _type: "startup", ...startup });
+    const result = await createStartup(startup);
     return parseServerActionResponse({
       ...result,
       error: "",

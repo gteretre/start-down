@@ -1,28 +1,24 @@
 import { after } from "next/server";
-import { client } from "@/sanity/lib/client";
 
 import Ping from "@/components/Ping";
 import { formatNumber } from "@/lib/utils";
-import { writeClient } from "@/sanity/lib/write-client";
 import { STARTUP_VIEWS_QUERY } from "@/lib/queries";
 import Tooltip from "./Tooltip";
-
-import { SanityLive } from "@/lib/live";
+import { mongoFetch } from "@/lib/live";
+import { getStartupViews, updateStartupViews } from "@/lib/mongodb-service";
 
 const View = async ({ id }: { id: string }) => {
-  const { views } = await client
-    .withConfig({ useCdn: false })
-    .fetch(STARTUP_VIEWS_QUERY, { id });
+  // Get views directly from MongoDB service
+  const views = await getStartupViews(id);
 
   return (
     <Tooltip text={`${views} Views`}>
       <div className="flex">
-        {formatNumber(views || 1)}
+        {formatNumber(views || 0)}
         <div className="" style={{ transform: "translate(16px, -1px)" }}>
           <Ping />
         </div>
       </div>
-      <SanityLive />
     </Tooltip>
   );
 };
@@ -32,15 +28,8 @@ const ViewUpdate = async ({ id }: { id: string }) => {
     try {
       const hasViewed = sessionStorage.getItem(`viewed_${id}`);
       if (!hasViewed) {
-        const { views } = await client
-          .withConfig({ useCdn: false })
-          .fetch(STARTUP_VIEWS_QUERY, { id });
-
-        await writeClient
-          .patch(id)
-          .set({ views: views + 1 })
-          .commit();
-
+        // Use MongoDB function to update views
+        await updateStartupViews(id);
         sessionStorage.setItem(`viewed_${id}`, "true");
       }
     } catch (error) {

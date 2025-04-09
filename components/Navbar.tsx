@@ -7,16 +7,15 @@ import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 import { auth, signOut, signIn } from "@/auth";
 import Tooltip from "./Tooltip";
 import UIMode from "@/components/UIMode";
-import { client } from "@/sanity/lib/client";
-import { AUTHOR_BY_ID_QUERY } from "@/lib/queries";
-// const UIMode = dynamic(() => import("@/components/UIMode"), { ssr: false });
+import { getDb } from "@/lib/mongodb";
 
 const Navbar = async () => {
   const session = await auth();
   let user = null;
   if (session && session.user) {
+    const db = await getDb();
     const id = session.user.id;
-    user = await client.fetch(AUTHOR_BY_ID_QUERY, { id });
+    user = await db.collection("authors").findOne({ _id: id });
   }
   console.log(session);
 
@@ -71,7 +70,7 @@ const Navbar = async () => {
                   </button>
                 </Tooltip>
               </form>
-              <Tooltip text={`${user?.username}'s Profile` || "Profile"}>
+              <Tooltip text={`${user?.username || "Profile"}'s Profile`}>
                 <Link href={`/user/${user?.username}`}>
                   <span>
                     <User />

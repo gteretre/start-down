@@ -6,9 +6,9 @@ import View from "./View";
 import Tooltip from "./Tooltip";
 import { Skeleton } from "./ui/skeleton";
 
-function StartupCard({ post }: any) {
+function StartupCard({ post, key }: any) {
   return (
-    <li className="startup-card">
+    <li className="startup-card" key={key}>
       <div>
         <div className="flex justify-between">
           <p>{formatDate(post?._createdAt || new Date())}</p>
@@ -24,9 +24,11 @@ function StartupCard({ post }: any) {
           >
             <Link href={`/user/${post?.author?.username}`}>
               <Image
-                //problem with sanity, getting 404
-                //src={post.author.image ? post.author.image : "/logo.png"}
-                src="/logo.png"
+                src={
+                  post.author?.image?.startsWith("http")
+                    ? post.author.image
+                    : "/logo.png"
+                }
                 alt="profile picture"
                 width={48}
                 height={48}
@@ -40,16 +42,15 @@ function StartupCard({ post }: any) {
           <div className="flex-1">
             <Link
               className="flex flex-col items-start"
-              href={`/startup/${post?.username}`}
+              href={`/startup/${post?._id}`}
             >
               <h1>{post?.title || "ERROR"}</h1>
             </Link>
-
             <Link
               className="flex flex-col items-end"
               href={`/user/${post?.author?.username}`}
             >
-              <p className=" mt-2 text-16-medium line-clamp-1">
+              <p className="mt-2 text-16-medium line-clamp-1">
                 created by <strong>{post?.author?.name}</strong>
               </p>
             </Link>
@@ -62,11 +63,11 @@ function StartupCard({ post }: any) {
               <div className="relative w-full h-0 pb-[66.67%] overflow-hidden">
                 <Image
                   src={
-                    post?.image
+                    post?.image && post.image.startsWith("http")
                       ? post.image
-                      : `https://placehold.co/600x400?text=${post?.title}`
+                      : `https://placehold.co/600x400?text=${encodeURIComponent(post?.title || "Startup")}`
                   }
-                  alt="profile picture"
+                  alt="startup image"
                   layout="fill"
                   objectFit="cover"
                   className="rounded-3xl ease-in-out"
