@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useActionState } from "react";
-import { z } from "zod";
+import { validateForm } from "@/lib/validation";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -9,45 +9,107 @@ import { Button } from "./ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import MDEditor from "@uiw/react-md-editor";
 import { PlaneTakeoff } from "lucide-react";
-import { formSchema } from "@/lib/validation";
 import { createPitch } from "@/lib/actions";
 
 function StartupForm() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [pitch, setPitch] = React.useState("");
+  const [formValues, setFormValues] = React.useState({
+    title: "",
+    description: "",
+    category: "",
+    link: "",
+    pitch: ""
+  });
+  const { pitch } = formValues;
   const { toast } = useToast();
   const router = useRouter();
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePitchChange = (value: string | undefined) => {
+    setFormValues((prev) => ({ ...prev, pitch: value || "" }));
+  };
   const handleFormSubmit = async (prevState: any, formData: FormData) => {
+    // Use values from our state instead of directly from formData
+    const currentValues = {
+      title: formValues.title,
+      description: formValues.description,
+      category: formValues.category,
+      link: formValues.link,
+      pitch: formValues.pitch
+    };
+
+    const fieldErrors = validateForm(currentValues);
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
+      toast({
+        title: "Input Error",
+        description: "Please check Your inputs and try again",
+        variant: "destructive"
+      });
+      return { ...prevState, error: "Validation failed", status: "ERROR" };
+    }
+
     try {
-      const formValues = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        link: formData.get("link") as string,
-        pitch
-      };
-      await formSchema.parseAsync(formValues);
-      const result = await createPitch(prevState, formData, pitch);
-      if (result.status == "SUCCESS") {
+      const validatedFormData = new FormData();
+      validatedFormData.append("title", currentValues.title);
+      validatedFormData.append("description", currentValues.description);
+      validatedFormData.append("category", currentValues.category);
+      validatedFormData.append("link", currentValues.link);
+
+      console.log("Submitting startup data to server action:", {
+        title: currentValues.title,
+        description: currentValues.description.substring(0, 30) + "...",
+        category: currentValues.category,
+        linkLength: currentValues.link.length,
+        pitchLength: currentValues.pitch.length
+      });
+
+      // Pass the validated FormData to the createPitch function
+      const result = await createPitch(
+        prevState,
+        validatedFormData,
+        currentValues.pitch
+      );
+
+      console.log("Result from server action:", result);
+
+      if (result && result.status === "SUCCESS" && result._id) {
         toast({
           title: "Success",
           description: "Congratulations! Your new startup has been created!"
         });
-      }
-      router.push("/startup/${result._id}");
-      return result;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.flatten().fieldErrors;
-        setErrors(fieldErrors as unknown as Record<string, string>);
+
+        // Only reset form on success
+        setFormValues({
+          title: "",
+          description: "",
+          category: "",
+          link: "",
+          pitch: ""
+        });
+
+        // Add a small delay before redirecting to ensure database operation completes
+        setTimeout(() => {
+          router.push(`/startup/${result._id}`);
+        }, 1000);
+      } else {
+        // Handle case where result doesn't have expected structure
         toast({
-          title: "Input Error",
-          description: "Please check Your inputs and try again",
+          title: "Warning",
+          description:
+            "Startup was created but there might be an issue with navigation",
           variant: "destructive"
         });
-        return { ...prevState, error: "Validation failed", status: "ERROR" };
       }
+
+      return result;
+    } catch (error) {
       toast({
         title: "Input Error",
         description: "An unexpected error occured",
@@ -65,12 +127,18 @@ function StartupForm() {
     error: "",
     status: "INITIAL"
   });
+  const [colorMode, setColorMode] = React.useState("light");
 
-  const [colorMode, setColorMode] = React.useState(
-    // document.body.classList.contains("dark") ? "dark" : "light"
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-  );
   React.useEffect(() => {
+    // Set initial color mode based on system preference or body class
+    const isDarkMode = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    setColorMode(
+      document.body.classList.contains("dark") || isDarkMode ? "dark" : "light"
+    );
+
+    // Set up observer for theme changes
     const observer = new MutationObserver(() => {
       const isDark = document.body.classList.contains("dark");
       setColorMode(isDark ? "dark" : "light");
@@ -83,124 +151,147 @@ function StartupForm() {
 
     return () => observer.disconnect();
   }, []);
-
   return (
     <form
       action={formAction}
-      className="articleBox max-w-2xl mx-auto my-10 space-y-8 px-6 "
+      className="articleBox max-w-3xl mx-auto my-12 space-y-10 px-8 shadow-md rounded-xl bg-card p-8"
     >
-      <div>
-        <label htmlFor="title" className="form-label">
-          Name Your Idea
+      <h2 className="text-2xl font-bold text-center mb-6">
+        Create Your Startup Pitch
+      </h2>{" "}
+      <div className="form-section">
+        <label
+          htmlFor="title"
+          className="form-label text-lg font-medium mb-2 block"
+        >
+          Project Name
         </label>
         <input
           type="text"
           id="title"
           name="title"
-          className="form-input"
+          className="form-input w-full transition-all duration-200 focus:ring-2"
           required
-          placeholder="Make the failure original and memorable"
+          placeholder="Enter a memorable name for your startup idea"
+          value={formValues.title}
+          onChange={handleInputChange}
         />
         {errors.title && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
+          <p className="text-red-500 mt-1 text-sm font-medium">
             {errors.title}
           </p>
         )}
       </div>
-      <div>
-        <label htmlFor="description" className="form-label">
-          Put Some Description
+      <div className="form-section">
+        <label
+          htmlFor="description"
+          className="form-label text-lg font-medium mb-2 block"
+        >
+          Executive Summary
         </label>
         <Textarea
           id="description"
           name="description"
-          className="form-input"
+          className="form-input min-h-[120px] transition-all duration-200 focus:ring-2"
           required
-          placeholder="Describe you weirdest thoughts to catch the attention"
+          placeholder="Provide a concise summary of your startup concept (2-3 sentences)"
+          value={formValues.description}
+          onChange={handleInputChange}
         />
-
         {errors.description && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
+          <p className="text-red-500 mt-1 text-sm font-medium">
             {errors.description}
           </p>
         )}
       </div>
-      <div>
-        <label htmlFor="category" className="form-label">
-          Categorize Your Suffering
+      <div className="form-section">
+        <label
+          htmlFor="category"
+          className="form-label text-lg font-medium mb-2 block"
+        >
+          Industry Category
         </label>
         <input
-          type="category"
+          type="text"
           id="category"
           name="category"
-          className="form-input"
+          className="form-input transition-all duration-200 focus:ring-2"
           required
-          placeholder={`Just write "tech" or something...`}
+          placeholder="e.g., Tech, Health, Finance, Education"
+          value={formValues.category}
+          onChange={handleInputChange}
         />
-
         {errors.category && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
+          <p className="text-red-500 mt-1 text-sm font-medium">
             {errors.category}
           </p>
         )}
       </div>
-      <div>
-        <label htmlFor="link" className="form-label">
-          Paint The Vision
+      <div className="form-section">
+        <label
+          htmlFor="link"
+          className="form-label text-lg font-medium mb-2 block"
+        >
+          Image URL
         </label>
         <input
-          type="link"
+          type="url"
           id="link"
           name="link"
-          className="form-input"
-          required
-          placeholder="Insert the valid link to Your photo"
+          className="form-input transition-all duration-200 focus:ring-2"
+          placeholder="(Optional) Enter a URL for your startup's featured image"
+          value={formValues.link}
+          onChange={handleInputChange}
         />
-
         {errors.link && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
-            {errors.link}
-          </p>
+          <p className="text-red-500 mt-1 text-sm font-medium">{errors.link}</p>
         )}
       </div>
-      <div data-color-mode={colorMode}>
-        <label htmlFor="pitch" className="text-xl form-label">
-          Show The World Everything You&apos;ve Got
-        </label>
-        <div className="ring-2 ring-ring rounded-2xl">
+      <div className="form-section" data-color-mode={colorMode}>
+        <label htmlFor="pitch" className="text-lg font-medium mb-3 block">
+          Complete Pitch Details
+        </label>{" "}
+        <div className="ring-1 ring-ring rounded-lg overflow-hidden">
           <MDEditor
             value={pitch}
-            onChange={(value) => setPitch(value as string)}
+            onChange={handlePitchChange}
             height={500}
             id="pitch"
             preview="edit"
-            style={{ borderRadius: 20, overflow: "hidden" }}
+            style={{ borderRadius: 8, overflow: "hidden" }}
             previewOptions={{ disallowedElements: ["style"] }}
             textareaProps={{
               placeholder:
-                "Failure is just another step toward the success!\n\nDescribe Your new idea with as many details as You want."
+                "# Your Startup Pitch\n\n## Problem Statement\n\n## Solution\n\n## Market Opportunity\n\n## Business Model\n\nDescribe your startup concept in detail here..."
             }}
           />
         </div>
-
         {errors.pitch && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
+          <p className="text-red-500 mt-1 text-sm font-medium">
             {errors.pitch}
           </p>
         )}
         {state.error && (
-          <p className="text-red-500 px-5" style={{ fontSize: "0.85rem" }}>
-            {state.error}
-          </p>
+          <p className="text-red-500 mt-2 text-sm font-medium">{state.error}</p>
         )}
-      </div>
-      <div className="flex justify-center">
+      </div>{" "}
+      <div className="flex justify-center mt-8 pt-6 border-t border-muted">
         <Button
           type="submit"
-          className="text-2xl p-6 rounded-xl hover:ring-4 ring-purple-400 hover:rainbowEffect"
+          className="px-10 py-5 text-lg font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30 transform hover:-translate-y-1 flex items-center justify-center gap-3 min-w-[220px]"
+          disabled={isPending}
         >
-          {isPending ? "Processing Form... " : "Submit My Terrible Idea!"}
-          <PlaneTakeoff />
+          {isPending ? (
+            <>
+              <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-1"></div>
+              Processing...
+            </>
+          ) : (
+            <>
+              Submit Pitch
+              <PlaneTakeoff className="w-5 h-5" />
+            </>
+          )}
         </Button>
       </div>
     </form>

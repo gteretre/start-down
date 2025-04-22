@@ -11,13 +11,12 @@ import UserStartups from "@/components/UserStartups";
 import { Suspense } from "react";
 import { StartupCardSkeleton } from "@/components/StartupCard";
 
-export const experimental_ppr = true;
+// export const experimental_ppr = true;
 
-const Page = async ({ params }: { params: { id: string } }) => {
-  const username = params.id;
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id: username } = await params;
   const session = await auth();
 
-  // Fetch user data using mongoFetch instead of Sanity client
   const { data: user } = await mongoFetch({
     query: AUTHOR_BY_USERNAME_QUERY,
     params: { username }

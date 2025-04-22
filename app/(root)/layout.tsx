@@ -8,10 +8,12 @@ export default function Layout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <main className="font-work-sans">
-      <Navbar />
-      {children}
-      <Toaster />
+    <main className="font-work-sans min-h-screen flex flex-col">
+      <div className="flex-1 mx-auto w-full">
+        <Navbar />
+        {children}
+        <Toaster />
+      </div>
       <Footer />
     </main>
   );

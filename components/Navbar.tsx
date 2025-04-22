@@ -1,23 +1,16 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 
-import { auth, signOut, signIn } from "@/auth";
 import Tooltip from "./Tooltip";
 import UIMode from "@/components/UIMode";
-import { getDb } from "@/lib/mongodb";
+
+import { options } from "@/app/api/auth/[...nextauth]/options";
+import { getServerSession } from "next-auth/next";
 
 const Navbar = async () => {
-  const session = await auth();
-  let user = null;
-  if (session && session.user) {
-    const db = await getDb();
-    const id = session.user.id;
-    user = await db.collection("authors").findOne({ _id: id });
-  }
-  console.log(session);
+  const session = await getServerSession(options);
 
   return (
     <header id="header">
@@ -55,7 +48,7 @@ const Navbar = async () => {
                   </span>
                 </Link>
               </Tooltip>
-              <form
+              {/* <form
                 action={async () => {
                   "use server";
                   await signOut({ redirectTo: "/" });
@@ -69,9 +62,12 @@ const Navbar = async () => {
                     </span>
                   </button>
                 </Tooltip>
-              </form>
-              <Tooltip text={`${user?.username || "Profile"}'s Profile`}>
-                <Link href={`/user/${user?.username}`}>
+              </form> */}
+              <Link href="/api/auth/signout" className="nav-link">
+                <Unplug />
+              </Link>
+              <Tooltip text={`${session.user.username}'s Profile`}>
+                <Link href={`/user/${session.user.username}`}>
                   <span>
                     <User />
                   </span>
@@ -79,36 +75,40 @@ const Navbar = async () => {
               </Tooltip>
             </>
           ) : (
-            <>
-              <form
-                action={async () => {
-                  "use server";
-                  await signIn("github");
-                }}
-              >
-                <Tooltip text="Sign In With GitHub">
-                  <button className="btn-pure" type="submit">
-                    <span>
-                      <Github />
-                    </span>
-                  </button>
-                </Tooltip>
-              </form>
-              <form
-                action={async () => {
-                  "use server";
-                  await signIn("google");
-                }}
-              >
-                <Tooltip text="Sign In With Google">
-                  <button className="btn-pure" type="submit">
-                    <span>
-                      <Chrome />
-                    </span>
-                  </button>
-                </Tooltip>
-              </form>
-            </>
+            // <>
+            //   <form
+            //     action={async () => {
+            //       "use server";
+            //       await signIn("github");
+            //     }}
+            //   >
+            //     <Tooltip text="Sign In With GitHub">
+            //       <button className="btn-pure" type="submit">
+            //         <span>
+            //           <Github />
+            //         </span>
+            //       </button>
+            //     </Tooltip>
+            //   </form>
+            //   <form
+            //     action={async () => {
+            //       "use server";
+            //       await signIn("google");
+            //     }}
+            //   >
+            //     <Tooltip text="Sign In With Google">
+            //       <button className="btn-pure" type="submit">
+            //         <span>
+            //           <Chrome />
+            //         </span>
+            //       </button>
+            //     </Tooltip>
+            //   </form>
+              // </>
+              
+          <Link href="/api/auth/signin" className="nav-link">
+            <Github /><Chrome />
+          </Link>
           )}
         </div>
       </nav>

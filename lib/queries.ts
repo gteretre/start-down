@@ -52,13 +52,14 @@ export async function getStartups(search?: string) {
   return startups.map((startup) => ({
     ...startup,
     _id: startup._id.toString(),
-    author: authors.find((author) =>
-      author._id.equals(
-        startup.author instanceof ObjectId
-          ? startup.author
-          : new ObjectId(startup.author)
-      )
-    )
+    author:
+      authors.find((author) =>
+        author._id.equals(
+          startup.author instanceof ObjectId
+            ? startup.author
+            : new ObjectId(startup.author)
+        )
+      ) || null
   }));
 }
 

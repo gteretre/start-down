@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { parseServerActionResponse, slugify } from "./utils";
-import { createStartup, getAuthorById } from "./mongodb-service";
+import { createStartup, getAuthorByUsername } from "./mongodb-service";
 
 export const createPitch = async (
   state: any,
@@ -17,14 +17,24 @@ export const createPitch = async (
     });
   }
 
-  const { title, description, category, link } = Object.fromEntries(
-    Array.from(form).filter(([key]) => key != pitch)
-  );
+  // Extract form data values
+  const formEntries = Array.from(form.entries());
+
+  const formData = Object.fromEntries(formEntries);
+  const { title, description, category, link } = formData;
+
+  if (!title || !description || !category || !pitch) {
+    return parseServerActionResponse({
+      error: "Missing required fields",
+      status: "ERROR"
+    });
+  }
+
   const slug = slugify(title as string);
 
   try {
-    // Get the author from MongoDB
-    const author = await getAuthorById(session.user.id);
+    const author = await getAuthorByUsername(session.user.username);
+
     if (!author) {
       return parseServerActionResponse({
         error: "Author not found",
@@ -43,6 +53,14 @@ export const createPitch = async (
     };
 
     const result = await createStartup(startup);
+
+    if (!result || !result._id) {
+      return parseServerActionResponse({
+        error: "Failed to create startup",
+        status: "ERROR"
+      });
+    }
+
     return parseServerActionResponse({
       ...result,
       error: "",
@@ -50,7 +68,7 @@ export const createPitch = async (
     });
   } catch (error) {
     return parseServerActionResponse({
-      error: JSON.stringify(error),
+      error: typeof error === "object" ? JSON.stringify(error) : String(error),
       status: "ERROR"
     });
   }

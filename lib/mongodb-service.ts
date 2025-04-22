@@ -31,19 +31,52 @@ export interface Startup {
 export async function createStartup(
   startup: Omit<Startup, "_id" | "createdAt">
 ) {
-  const db = await getDb();
-  const result = await db.collection("startups").insertOne({
-    ...startup,
-    createdAt: new Date(),
-    views: 0
-  });
+  try {
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database connection failed");
+    }
 
-  return {
-    _id: result.insertedId.toString(),
-    ...startup,
-    createdAt: new Date(),
-    views: 0
-  };
+    // Validate required fields
+    if (!startup.title || !startup.description || !startup.author) {
+      throw new Error("Missing required fields for startup");
+    }
+
+    // Make sure author field is an ObjectId
+    let authorObjectId;
+    try {
+      authorObjectId =
+        typeof startup.author === "string"
+          ? new ObjectId(startup.author)
+          : startup.author;
+    } catch (error) {
+      throw new Error("Invalid author ID format");
+    }
+
+    // Create the document with proper ObjectId
+    const startupDoc = {
+      ...startup,
+      author: authorObjectId,
+      createdAt: new Date(),
+      views: 0
+    };
+
+    const result = await db.collection("startups").insertOne(startupDoc);
+
+    if (!result || !result.insertedId) {
+      throw new Error("Failed to insert startup into database");
+    }
+
+    // Return the created startup with its new ID
+    return {
+      _id: result.insertedId.toString(),
+      ...startup,
+      createdAt: new Date(),
+      views: 0
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function getStartupById(id: string) {
@@ -87,21 +120,28 @@ export async function getStartups(search?: string) {
     .toArray();
 
   // Get all unique author IDs from startups
-  const authorIds = [...new Set(startups.map((startup) => startup.author))];
+  const authorIds = [
+    ...new Set(startups.map((startup) => startup.author?.toString()))
+  ]
+    .filter(Boolean)
+    .map((id) => new ObjectId(id));
 
   // Fetch all authors in one query
-  const authors = await db
-    .collection("authors")
-    .find({ _id: { $in: authorIds.map((id) => new ObjectId(id.toString())) } })
-    .toArray();
+  const authors = authorIds.length
+    ? await db
+        .collection("authors")
+        .find({ _id: { $in: authorIds } })
+        .toArray()
+    : [];
 
   // Map author data to each startup
   return startups.map((startup) => ({
     ...startup,
     _id: startup._id.toString(),
-    author: authors.find(
-      (author) => author._id.toString() === startup.author.toString()
-    )
+    author:
+      authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
+      ) || null
   }));
 }
 
@@ -146,7 +186,6 @@ export async function getStartupViews(id: string) {
       );
     return startup?.views || 0;
   } catch (error) {
-    console.error("Error fetching startup views:", error);
     return 0;
   }
 }
@@ -154,34 +193,31 @@ export async function getStartupViews(id: string) {
 // Author related functions
 export async function createAuthor(author: Omit<Author, "_id">) {
   const db = await getDb();
-  const result = await db.collection("authors").insertOne(author);
+  // Ensure 'id' is present (OAuth provider ID or generated)
+  const authorData = {
+    ...author,
+    createdAt: new Date()
+  };
+  const result = await db.collection("authors").insertOne(authorData);
 
   return {
     _id: result.insertedId.toString(),
-    ...author
+    ...authorData
   };
 }
 
 export async function getAuthorById(id: string) {
   const db = await getDb();
-
   try {
-    // First try to find by the 'id' field (OAuth provider ID)
+    // Try to find by 'id' (OAuth provider ID)
     let author = await db.collection("authors").findOne({ id });
-
-    // If not found by 'id', try by '_id' directly
+    // If not found, try by MongoDB _id
     if (!author && ObjectId.isValid(id)) {
       author = await db
         .collection("authors")
         .findOne({ _id: new ObjectId(id) });
     }
-
-    return author
-      ? {
-          ...author,
-          _id: author._id.toString()
-        }
-      : null;
+    return author ? { ...author, _id: author._id.toString() } : null;
   } catch (error) {
     console.error("Error in getAuthorById:", error);
     return null;

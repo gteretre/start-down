@@ -1,5 +1,4 @@
 "use client";
-import clearAuthor from "@/sanity/deletionTool";
 function Page() {
   return (
     <>
@@ -7,9 +6,6 @@ function Page() {
         <div className="textBox">Dev Tools</div>
         <div className="search-form m-10">
           <input className="search-input"></input>
-          <button className="search-btn" onClick={clearAuthor}>
-            clear author
-          </button>
         </div>
       </div>
       <div className="flex justify-center m-20">

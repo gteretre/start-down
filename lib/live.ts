@@ -9,7 +9,6 @@ import {
 } from "./mongodb-service";
 
 // Create a cached version of the MongoDB queries to provide similar functionality
-// to what we had with Sanity's live queries
 export const mongoFetch = cache(
   async ({ query, params }: { query: string; params?: any }) => {
     // Map query identifiers to MongoDB service functions
@@ -37,8 +36,3 @@ export const mongoFetch = cache(
     return { data: [] };
   }
 );
-
-// Stub component to maintain API compatibility with previous code
-export function SanityLive() {
-  return null;
-}

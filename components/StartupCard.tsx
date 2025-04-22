@@ -6,9 +6,9 @@ import View from "./View";
 import Tooltip from "./Tooltip";
 import { Skeleton } from "./ui/skeleton";
 
-function StartupCard({ post, key }: any) {
+function StartupCard({ post }: { post: StartupCardType }) {
   return (
-    <li className="startup-card" key={key}>
+    <li className="startup-card">
       <div>
         <div className="flex justify-between">
           <p>{formatDate(post?._createdAt || new Date())}</p>
@@ -36,46 +36,49 @@ function StartupCard({ post, key }: any) {
               ></Image>
             </Link>
           </Tooltip>
-        </div>
-
-        <div className="flex-between gap-2">
+        </div>{" "}
+        <div className="flex-between gap-3 mt-3">
           <div className="flex-1">
             <Link
               className="flex flex-col items-start"
               href={`/startup/${post?._id}`}
             >
-              <h1>{post?.title || "ERROR"}</h1>
+              <h1 className="mb-1">{post?.title || "ERROR"}</h1>
             </Link>
             <Link
               className="flex flex-col items-end"
               href={`/user/${post?.author?.username}`}
             >
-              <p className="mt-2 text-16-medium line-clamp-1">
+              <p className="text-sm text-gray-500">
                 created by <strong>{post?.author?.name}</strong>
               </p>
             </Link>
           </div>
-          <Link className="flex flex-col" href={`/startup/${post?._id}`}>
-            <p className="text-justify mt-3 mb-5 line-clamp-3 min-h-[4.5em]">
+
+          <Link className="flex flex-col w-full" href={`/startup/${post?._id}`}>
+            <p className="text-justify mb-4 line-clamp-3 min-h-[4.5em]">
               {post?.description}
             </p>
-            <div className="flex justify-center">
+            <div className="flex justify-center mb-2">
               <div className="relative w-full h-0 pb-[66.67%] overflow-hidden">
                 <Image
                   src={
                     post?.image && post.image.startsWith("http")
                       ? post.image
-                      : `https://placehold.co/600x400?text=${encodeURIComponent(post?.title || "Startup")}`
+                      : `https://placehold.co/600x400?text=${encodeURIComponent(
+                          post?.title || "Startup"
+                        )}`
                   }
                   alt="startup image"
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                   className="rounded-3xl ease-in-out"
                 />
               </div>
             </div>
           </Link>
-          <div className="flex justify-between mt-5">
+
+          <div className="flex justify-between mt-4 w-full">
             <Link href={`/?query=${post?.category}`}>
               <p className="category">
                 {post?.category || "something went wrong"}

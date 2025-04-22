@@ -14,12 +14,14 @@ import { View, ViewUpdate } from "@/components/View";
 import Tooltip from "@/components/Tooltip";
 import FeaturedStartups from "@/components/FeaturedStartups";
 import { mongoFetch } from "@/lib/live";
-// import { SanityLive } from "@/lib/live";
+import { ObjectId } from "mongodb";
 
-export const experimental_ppr = true;
+// export const experimental_ppr = true;
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
+  // Check if id is a valid ObjectId before querying DB
+  if (!ObjectId.isValid(id)) return notFound();
   let post;
 
   try {
@@ -45,7 +47,9 @@ async function Page({ params }: { params: { id: string } }) {
             {" "}
             <div className="flex justify-between gap-20 mx-6 md:mx-12 my-8">
               <Tooltip
-                text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}
+                text={`Created: ${formatDateAgo(
+                  post?.createdAt || new Date()
+                )}`}
               >
                 <p className="text-start">
                   {formatDate(post?.createdAt || new Date())}
@@ -59,11 +63,16 @@ async function Page({ params }: { params: { id: string } }) {
                   </Suspense>
                 </span>
               </div>
+            </div>{" "}
+            <h1 className="textBox">{post?.title}</h1>{" "}
+            <div className="mx-8 mt-8 lg:mx-32 text-start">
+              <div
+                className="prose dark:prose-invert prose-headings:font-bold prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4 prose-h1:text-primary/90 prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3 prose-h2:text-primary/80 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2 prose-p:text-base max-w-none leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: md.render(post?.description || "")
+                }}
+              />
             </div>
-            <h1 className="textBox">{post?.title}</h1>
-            <p className="mx-8 mt-8 lg:mx-32 text-start justify-start">
-              {post?.description}
-            </p>
           </div>
           <div className="author mx-12">
             <Tooltip text={post.author?.bio}>
@@ -103,7 +112,9 @@ async function Page({ params }: { params: { id: string } }) {
             src={
               post.image && post.image.startsWith("http")
                 ? post.image
-                : `https://placehold.co/600x400?text=${encodeURIComponent(post.title || "Startup")}`
+                : `https://placehold.co/600x400?text=${encodeURIComponent(
+                    post.title || "Startup"
+                  )}`
             }
             width={600}
             height={400}

@@ -43,6 +43,19 @@ body {
   hover:rounded-lg hover:scale-110;
 }
 
+#footer {
+  @apply bg-[var(--backHeader)] text-[var(--foreHeader)] 
+    flex justify-between items-center flex-row px-5 py-3 shadow-sm font-mono;
+}
+
+#footer a {
+  @apply hover:underline hover:text-secondary transition-colors;
+}
+
+#footer .font-semibold {
+  @apply text-lg;
+}
+
 @layer base {
   :root {
     --background: 0 0% 95%;
