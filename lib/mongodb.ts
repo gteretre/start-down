@@ -9,10 +9,10 @@ const options = {};
 
 // Add global type definitions for TypeScript
 declare global {
-  var _mongoClientPromise: Promise<MongoClient>;
+  const _mongoClientPromise: Promise<MongoClient>;
 }
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === "development") {

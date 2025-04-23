@@ -29,7 +29,9 @@
     ".next/types/**/*.ts",
     "app/api/auth/[...nextauth]/options.js",
     "app/api/auth/[...nextauth]/route.js",
-    "auth.ts"
-, "auth.ts.fuck"  ],
+    "auth.ts",
+    "auth.ts.fuck",
+    "lib/queries.ts"
+  ],
   "exclude": ["node_modules"]
 }

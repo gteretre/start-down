@@ -2,11 +2,10 @@ import { after } from "next/server";
 
 import Ping from "@/components/Ping";
 import { formatNumber } from "@/lib/utils";
-import { STARTUP_VIEWS_QUERY } from "@/lib/queries";
 import Tooltip from "./Tooltip";
 import { mongoFetch } from "@/lib/live";
-import { getStartupViews, updateStartupViews } from "@/lib/mongodb-service";
-
+import { getStartupViews } from "@/lib/queries";
+import { updateStartupViews } from "@/lib/mutations";
 const View = async ({ id }: { id: string }) => {
   // Get views directly from MongoDB service
   const views = await getStartupViews(id);

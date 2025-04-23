@@ -6,11 +6,10 @@ import SearchFormReset from "@/components/SearchFormReset";
 import { Search } from "lucide-react";
 import Tooltip from "./Tooltip";
 
-// Sanitize search query to prevent regex errors
 const sanitizeSearchQuery = (query: string): string => {
-  // Remove regex special characters and escape sequences
   return query.replace(/[.*+?^${}()|[\]\\]/g, "");
 };
+
 function SearchForm({ query }: { query?: string }) {
   const router = useRouter();
 
@@ -18,15 +17,11 @@ function SearchForm({ query }: { query?: string }) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const rawQuery = formData.get("query")?.toString() || "";
-
-    // Sanitize the query to prevent regex errors
     const searchQuery = sanitizeSearchQuery(rawQuery);
-
     if (searchQuery.trim()) {
-      // Update to search for users instead of startups
-      router.push(`/users?query=${encodeURIComponent(searchQuery)}`);
+      router.push(`?query=${encodeURIComponent(searchQuery)}`);
     } else {
-      router.push("/users");
+      router.push("/");
     }
   };
 
@@ -37,7 +32,7 @@ function SearchForm({ query }: { query?: string }) {
         name="query"
         defaultValue={query}
         className="search-input"
-        placeholder="Search Users"
+        placeholder="Search Startups"
         autoComplete="off"
       />
       <div className="flex gap-2">{query && <SearchFormReset />}</div>

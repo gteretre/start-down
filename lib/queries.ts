@@ -13,14 +13,31 @@ export const PLAYLIST_BY_SLUG_QUERY = "playlist.bySlug";
 
 export async function getStartups(search?: string) {
   const db = await getDb();
-  const query: any = {
-    ...(search && {
+  let query: any = {};
+  let authorIds: ObjectId[] = [];
+
+  if (search) {
+    // Find authors matching name or username
+    const authorMatches = await db
+      .collection("authors")
+      .find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { username: { $regex: search, $options: "i" } }
+        ]
+      })
+      .project({ _id: 1 })
+      .toArray();
+    authorIds = authorMatches.map((a) => a._id);
+
+    query = {
       $or: [
         { title: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } }
+        { category: { $regex: search, $options: "i" } },
+        ...(authorIds.length > 0 ? [{ author: { $in: authorIds } }] : [])
       ]
-    })
-  };
+    };
+  }
 
   const startups = await db
     .collection("startups")
@@ -29,36 +46,27 @@ export async function getStartups(search?: string) {
     .toArray();
 
   // Get all unique author IDs from startups
-  const authorIds = [
-    ...new Set(
-      startups.map((startup) =>
-        startup.author instanceof ObjectId
-          ? startup.author
-          : new ObjectId(startup.author)
-      )
-    )
-  ];
+  const allAuthorIds = [
+    ...new Set(startups.map((startup) => startup.author?.toString()))
+  ]
+    .filter(Boolean)
+    .map((id) => new ObjectId(id));
 
-  // Fetch all authors in one query if there are any startups
-  let authors = [];
-  if (authorIds.length > 0) {
-    authors = await db
-      .collection("authors")
-      .find({ _id: { $in: authorIds } })
-      .toArray();
-  }
+  // Fetch all authors in one query
+  const authors = allAuthorIds.length
+    ? await db
+        .collection("authors")
+        .find({ _id: { $in: allAuthorIds } })
+        .toArray()
+    : [];
 
   // Map author data to each startup
   return startups.map((startup) => ({
     ...startup,
     _id: startup._id.toString(),
     author:
-      authors.find((author) =>
-        author._id.equals(
-          startup.author instanceof ObjectId
-            ? startup.author
-            : new ObjectId(startup.author)
-        )
+      authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
       ) || null
   }));
 }
@@ -66,18 +74,17 @@ export async function getStartups(search?: string) {
 export async function getStartupsByAuthor(username: string) {
   const db = await getDb();
 
-  // First find the author by username
+  // First find the author
   const author = await db.collection("authors").findOne({ username });
   if (!author) return [];
 
-  // Find all startups by this author using the author's ID
+  // Then find startups by that author
   const startups = await db
     .collection("startups")
-    .find({ author: author._id })
+    .find({ author: new ObjectId(author._id) })
     .sort({ createdAt: -1 })
     .toArray();
 
-  // Include author details with each startup
   return startups.map((startup) => ({
     ...startup,
     _id: startup._id.toString(),
@@ -87,31 +94,23 @@ export async function getStartupsByAuthor(username: string) {
 
 export async function getStartupById(id: string) {
   const db = await getDb();
-  try {
-    // Find the startup
-    const startup = await db.collection("startups").findOne({
-      _id: typeof id === "string" ? new ObjectId(id) : id
-    });
+  const startup = await db
+    .collection("startups")
+    .findOne({ _id: new ObjectId(id) });
 
-    if (!startup) return null;
-
-    // Get the author details
-    const authorId =
-      startup.author instanceof ObjectId
-        ? startup.author
-        : new ObjectId(startup.author);
-    const author = await db.collection("authors").findOne({ _id: authorId });
-
-    // Return the startup with author details included
+  if (startup) {
+    // Fetch the author information
+    const author = await db
+      .collection("authors")
+      .findOne({ _id: new ObjectId(startup.author.toString()) });
     return {
       ...startup,
       _id: startup._id.toString(),
       author
     };
-  } catch (error) {
-    console.error("Error fetching startup by ID:", error);
-    return null;
   }
+
+  return null;
 }
 
 export async function getPlaylistBySlug(slug: string) {
@@ -154,44 +153,32 @@ export async function getStartupViews(id: string) {
       );
     return startup?.views || 0;
   } catch (error) {
-    console.error("Error fetching startup views:", error);
-    return 0;
-  }
-}
-
-export async function updateStartupViews(id: string) {
-  const db = await getDb();
-  try {
-    const result = await db
-      .collection("startups")
-      .updateOne(
-        { _id: typeof id === "string" ? new ObjectId(id) : id },
-        { $inc: { views: 1 } }
-      );
-
-    return result.modifiedCount > 0;
-  } catch (error) {
-    console.error("Error updating startup views:", error);
-    return false;
+    throw new Error(
+      `Error fetching startup views: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
 export async function getAuthorById(id: string) {
   const db = await getDb();
   try {
-    const author = await db
-      .collection("authors")
-      .findOne({ _id: id instanceof ObjectId ? id : new ObjectId(id) });
-
-    return author
-      ? {
-          ...author,
-          _id: author._id.toString()
-        }
-      : null;
+    // Try to find by 'id' (OAuth provider ID)
+    let author = await db.collection("authors").findOne({ id });
+    // If not found, try by MongoDB _id
+    if (!author && ObjectId.isValid(id)) {
+      author = await db
+        .collection("authors")
+        .findOne({ _id: new ObjectId(id) });
+    }
+    return author ? { ...author, _id: author._id.toString() } : null;
   } catch (error) {
-    console.error("Error fetching author by ID:", error);
-    return null;
+    throw new Error(
+      `Error in getAuthorById: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
@@ -199,16 +186,13 @@ export async function getAuthorByEmail(email: string) {
   const db = await getDb();
   try {
     const author = await db.collection("authors").findOne({ email });
-
-    return author
-      ? {
-          ...author,
-          _id: author._id.toString()
-        }
-      : null;
+    return author ? { ...author, _id: author._id.toString() } : null;
   } catch (error) {
-    console.error("Error fetching author by email:", error);
-    return null;
+    throw new Error(
+      `Error in getAuthorByEmail: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
@@ -216,35 +200,12 @@ export async function getAuthorByUsername(username: string) {
   const db = await getDb();
   try {
     const author = await db.collection("authors").findOne({ username });
-
-    return author
-      ? {
-          ...author,
-          _id: author._id.toString()
-        }
-      : null;
+    return author ? { ...author, _id: author._id.toString() } : null;
   } catch (error) {
-    console.error("Error fetching author by username:", error);
-    return null;
-  }
-}
-
-// Add a function to create an author
-export async function createAuthor(authorData: any) {
-  const db = await getDb();
-  try {
-    const result = await db.collection("authors").insertOne({
-      ...authorData,
-      createdAt: new Date()
-    });
-
-    return {
-      _id: result.insertedId.toString(),
-      ...authorData,
-      createdAt: new Date()
-    };
-  } catch (error) {
-    console.error("Error creating author:", error);
-    return null;
+    throw new Error(
+      `Error in getAuthorByUsername: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }

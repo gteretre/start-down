@@ -5,6 +5,7 @@ import { Github, Chrome, Unplug, Pencil, User } from "lucide-react";
 
 import Tooltip from "./Tooltip";
 import UIMode from "@/components/UIMode";
+import GoogleTranslateToggle from "./GoogleTranslate";
 
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth/next";
@@ -30,6 +31,7 @@ const Navbar = async () => {
           <Tooltip text="Toogle Dark Mode">
             <UIMode />
           </Tooltip>
+          <GoogleTranslateToggle />
         </div>
         <div className="hidden md:block">
           <Tooltip text="Dev Only">
@@ -104,11 +106,12 @@ const Navbar = async () => {
             //       </button>
             //     </Tooltip>
             //   </form>
-              // </>
-              
-          <Link href="/api/auth/signin" className="nav-link">
-            <Github /><Chrome />
-          </Link>
+            // </>
+
+            <Link href="/api/auth/signin" className="nav-link">
+              <Github />
+              <Chrome />
+            </Link>
           )}
         </div>
       </nav>

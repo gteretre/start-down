@@ -3,9 +3,8 @@ import GoogleProvider from "next-auth/providers/google";
 import {
   getAuthorById,
   getAuthorByEmail,
-  createAuthor
-} from "@/lib/mongodb-service";
-
+} from "@/lib/queries";
+import {createAuthor} from "@/lib/mutations";
 export const options = {
   providers: [
     GitHubProvider({
@@ -41,28 +40,34 @@ export const options = {
 
       let dbUser = null;
       try {
-        dbUser = await getAuthorById(profile?.id || user.id);
-      } catch {}
+        dbUser = await getAuthorById(profile.id);
+      } catch (err) {
+        console.error("Error in getAuthorById:", err);
+      }
       if (!dbUser) {
         try {
           dbUser = await getAuthorByEmail(user.email);
-        } catch {}
+        } catch (err) {
+          console.error("Error in getAuthorByEmail:", err);
+        }
       }
 
       if (!dbUser) {
+        let image = profile.avatar_url || profile.picture || user.image || "/logo.png";
         const username =
           profile?.login ||
-          user.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") ||
+          (user.email ? user.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") : null) ||
           `user_${Date.now().toString().slice(-6)}`;
         try {
           await createAuthor({
-            id: profile?.id || user.id,
-            name: user.name || username,
+            id: profile.id,
+            name: user.name,
             username,
             email: user.email,
-            image: "public/logo.png",
+            image,
             bio: "",
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            role: user.role,
           });
         } catch (err) {
           console.error("Failed to create user", err);
@@ -76,9 +81,9 @@ export const options = {
       if (user) {
         token.role = user.role;
         token.username = user.username;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
+        // token.name = user.name;
+        // token.email = user.email;
+        // token.image = user.image;
       }
       return token;
     },
@@ -86,9 +91,9 @@ export const options = {
     async session({ session, token }) {
       session.user.role = token.role;
       session.user.username = token.username;
-      session.user.name = token.name;
-      session.user.email = token.email;
-      session.user.image = token.image;
+      // session.user.name = token.name;
+      // session.user.email = token.email;
+      // session.user.image = token.image;
       return session;
     }
   }

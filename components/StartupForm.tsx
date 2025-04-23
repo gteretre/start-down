@@ -62,22 +62,12 @@ function StartupForm() {
       validatedFormData.append("category", currentValues.category);
       validatedFormData.append("link", currentValues.link);
 
-      console.log("Submitting startup data to server action:", {
-        title: currentValues.title,
-        description: currentValues.description.substring(0, 30) + "...",
-        category: currentValues.category,
-        linkLength: currentValues.link.length,
-        pitchLength: currentValues.pitch.length
-      });
-
       // Pass the validated FormData to the createPitch function
       const result = await createPitch(
         prevState,
         validatedFormData,
         currentValues.pitch
       );
-
-      console.log("Result from server action:", result);
 
       if (result && result.status === "SUCCESS" && result._id) {
         toast({

@@ -9,7 +9,3 @@ export { handler as GET, handler as POST };
 export async function auth() {
   return getServerSession(options);
 }
-
-const { handlers, signIn, signOut } = NextAuth(options);
-
-export { handlers, signIn, signOut };

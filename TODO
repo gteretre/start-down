@@ -1,4 +1,0 @@
-⚠ `devIndicators.appIsrStatus` is deprecated and no longer configurable. Please remove it from next.config.ts.
-⚠ `devIndicators.buildActivity` is deprecated and no longer configurable. Please remove it from next.config.ts.
-⚠ `devIndicators.buildActivityPosition` has been renamed to `devIndicators.position`. Please update your next.config.ts file accordingly.
-⚠ The `devIndicators` option `buildActivityPosition` ("bottom-right") conflicts with `position` ("bottom-left"). Using `buildActivityPosition` ("bottom-right") for backward compatibility.

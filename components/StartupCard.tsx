@@ -11,7 +11,8 @@ function StartupCard({ post }: { post: StartupCardType }) {
     <li className="startup-card">
       <div>
         <div className="flex justify-between">
-          <p>{formatDate(post?._createdAt || new Date())}</p>
+          <p>{formatDate(post?.createdAt || new Date())}</p>
+
           <div className="flex gap-1">
             <EyeIcon className="size-6 text-primary" />
             <span className="text-16-medium">
@@ -25,7 +26,8 @@ function StartupCard({ post }: { post: StartupCardType }) {
             <Link href={`/user/${post?.author?.username}`}>
               <Image
                 src={
-                  post.author?.image?.startsWith("http")
+                  post.author?.image?.startsWith("http") ||
+                  post.author?.image?.startsWith("/")
                     ? post.author.image
                     : "/logo.png"
                 }
@@ -63,10 +65,11 @@ function StartupCard({ post }: { post: StartupCardType }) {
               <div className="relative w-full h-0 pb-[66.67%] overflow-hidden">
                 <Image
                   src={
-                    post?.image && post.image.startsWith("http")
+                    post.image?.startsWith("http") ||
+                    post.image?.startsWith("/")
                       ? post.image
                       : `https://placehold.co/600x400?text=${encodeURIComponent(
-                          post?.title || "Startup"
+                          post.title || "Startup"
                         )}`
                   }
                   alt="startup image"

@@ -4,10 +4,9 @@ import {
   getStartups,
   getStartupById,
   getStartupsByAuthor,
-  updateStartupViews,
   getAuthorByUsername
-} from "./mongodb-service";
-
+} from "@/lib/queries";
+import { updateStartupViews } from "@/lib/mutations";
 // Create a cached version of the MongoDB queries to provide similar functionality
 export const mongoFetch = cache(
   async ({ query, params }: { query: string; params?: any }) => {

@@ -40,10 +40,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                     <Tooltip text="Edit Profile Picture">
                       <Image
                         src={
-                          user.image && user.image.startsWith("http")
-                            ? user.image
-                            : "/logo.png"
-                        }
+                  user.image?.startsWith("http") ||
+                  user.image?.startsWith("/")
+                    ? user.image
+                    : "/logo.png"
+                }
                         alt={user.username + "'s avatar"}
                         width={120}
                         height={120}
@@ -54,10 +55,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                 ) : (
                   <Image
                     src={
-                      user.image && user.image.startsWith("http")
-                        ? user.image
-                        : "/logo.png"
-                    }
+                  user.image?.startsWith("http") ||
+                  user.image?.startsWith("/")
+                    ? user.image
+                    : "/logo.png"
+                }
                     alt={user.username + "'s avatar"}
                     width={120}
                     height={120}

@@ -81,7 +81,12 @@ async function Page({ params }: { params: { id: string } }) {
                 href={`/user/${post.author?.username}`}
               >
                 <Image
-                  src="/logo.png"
+                  src={
+                    post.author?.image?.startsWith("http") ||
+                    post.author?.image?.startsWith("/")
+                      ? post.author.image
+                      : "/logo.png"
+                  }
                   alt={post.author?.name + "s avatar"}
                   width={48}
                   height={48}
@@ -110,7 +115,7 @@ async function Page({ params }: { params: { id: string } }) {
           {" "}
           <Image
             src={
-              post.image && post.image.startsWith("http")
+              post.image?.startsWith("http") || post.image?.startsWith("/")
                 ? post.image
                 : `https://placehold.co/600x400?text=${encodeURIComponent(
                     post.title || "Startup"
@@ -151,6 +156,5 @@ async function Page({ params }: { params: { id: string } }) {
     </>
   );
 }
-//src={post.author?.image ? post.author.image : "/logo.png"}
 
 export default Page;
