@@ -279,13 +279,6 @@ button {
     transition-all duration-300 ease-linear;
   }
 
-  .tooltip {
-    @apply absolute w-auto p-2 m-2 min-w-max
-    rounded-md  text-primary
-    text-xs font-semibold transition-all duration-100 
-    ease-linear scale-0 origin-left bg-secondary ring-1 ring-ring
-    -translate-x-1/2;
-  }
 }
 
 .marked-text {

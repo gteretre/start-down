@@ -8,13 +8,19 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --production
 
 # Copy the rest of the application code
 COPY . .
 
+# Copy environment variables (if you want to bake them in, not recommended for secrets)
+# COPY .env.local .env.local
+
 # Build the Next.js application
 RUN npm run build
+
+# Set environment to production
+ENV NODE_ENV=production
 
 # Expose the port (adjust if needed)
 EXPOSE 3000

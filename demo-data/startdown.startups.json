@@ -1,0 +1,122 @@
+[
+  {
+    "_id": {
+      "$oid": "67f63d2e64c2503554b71237"
+    },
+    "title": "AI-Powered Cat Translator",
+    "slug": {
+      "current": "ai-powered-cat-translator"
+    },
+    "description": "An app that translates your cat's meows into human language",
+    "category": "tech",
+    "image": "/catai.png",
+    "pitch": "# AI-Powered Cat Translator\n\n## The Problem\nCat owners often struggle to understand what their feline friends are trying to communicate. Is your cat hungry? Bored? Plotting world domination? Without proper translation, it's hard to tell!\n\n## The Solution\nOur AI-powered Cat Translator uses advanced machine learning algorithms to analyze the frequency, duration, and intonation of cat meows to accurately translate them into human language. The app also considers the cat's body language using your phone's camera for context.\n\n## Market Potential\nThere are over 370 million pet cats worldwide, with cat owners spending an average of $1,200 per year on their pets. The pet tech market is projected to reach $20 billion by 2025.\n\n## Business Model\nWe'll offer a freemium model with basic translations available for free, and premium features like detailed emotion analysis and behavior predictions available via subscription ($4.99/month).\n\n## Next Steps\nWe're currently training our AI model and developing an MVP. We're seeking seed funding to accelerate development and bring this revolutionary product to market within 6 months.",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 97,
+    "createdAt": {
+      "$date": "2025-04-04T22:56:06.874Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "67f648e964c2503554b71238"
+    },
+    "title": "Forgetting Floss: A Dental Reminder App",
+    "slug": {
+      "current": "forgetting-floss-a-dental-reminder-app"
+    },
+    "description": "An app that nags you more than your dentist, sending embarrassing notifications if you haven't flossed today",
+    "category": "health",
+    "image": "/dentistapp.jpg",
+    "pitch": "# Forgetting Floss: A Dental Reminder App\n\n## The Problem\nDentists always know when you lie about flossing. Despite promises to do better, most people forget to floss regularly, leading to preventable dental issues and uncomfortable dental visits.\n\n## The Solution\nForgetting Floss is an app that sends increasingly embarrassing notifications when you haven't logged a floss session. After three days of not flossing, it starts posting to your social media accounts about your poor dental hygiene (with your pre-approval, of course).\n\n## Market Potential\nThe dental floss market is valued at $2.3 billion globally, yet studies show only 30% of Americans floss daily. Our target market includes the guilty 70% who know they should floss but 'forget'.\n\n## Business Model\nThe app is free with in-app purchases for premium features like custom notification sounds recorded by disappointed dentists and integration with smart floss dispensers to verify actual flossing activity.\n\n## Next Steps\nWe're developing the MVP and seeking partnerships with dental associations who are desperate to increase flossing compliance rates among their patients.\n",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 17,
+    "createdAt": {
+      "$date": "2025-04-09T10:16:09.869Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "67f648e964c2503554b71239"
+    },
+    "title": "Sock Matcher: Orphan Sock Dating Service",
+    "slug": {
+      "current": "sock-matcher-orphan-sock-dating-service"
+    },
+    "description": "A platform where people can find new partners for their single socks or repurpose lonely socks into something useful",
+    "category": "lifestyle",
+    "image": "/findsock.png",
+    "pitch": "# Sock Matcher: Orphan Sock Dating Service\n\n## The Problem\nThe average household loses 1.3 socks per month to the mysterious sock void. With over 128 million households in the US alone, that's 166.4 million orphaned socks annually - a silent tragedy.\n\n## The Solution\nSock Matcher is a revolutionary platform where users upload photos of their single socks. Our proprietary algorithm matches them with similar (but not identical) socks from other users in their neighborhood for potential pairing or facilitates sock upcycling projects.\n\n## Market Potential\nWith approximately 2 billion orphaned socks globally each year and growing environmental awareness, the market for sock recycling and repurposing is untapped and enormous.\n\n## Business Model\nFree basic matching service with premium subscription for 'picky socks' that need exact pattern types. Revenue also comes from sock craft kits, sock adoption fees, and partnership with sock manufacturers offering 'genetic testing' to find the closest match to your orphaned sock.\n\n## Next Steps\nWe've built a prototype app and tested it with 50 households who collectively matched 37 sock pairs and created 42 sock puppets. We're seeking funding to scale our sock-matching algorithm and develop a national sock exchange network.",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 29,
+    "createdAt": {
+      "$date": "2025-04-15T17:16:09.869Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "67f648e964c2503554b7123a"
+    },
+    "title": "Passive-Aggressive Roommate Bot",
+    "slug": {
+      "current": "passive-aggressive-roommate-bot"
+    },
+    "description": "An AI assistant that leaves subtle hints about cleaning, similar to a passive-aggressive roommate but without the awkward confrontations",
+    "category": "home",
+    "image": "/roommateai.png",
+    "pitch": "# Passive-Aggressive Roommate Bot\n\n## The Problem\nLiving with roommates often leads to conflict over cleaning, food sharing, and general household etiquette. Direct confrontation feels uncomfortable, so issues fester until they explode.\n\n## The Solution\nOur AI-powered smart home assistant delivers perfectly calibrated passive-aggressive reminders about household chores. Instead of you having to confront your roommate, our bot will audibly sigh when someone leaves dishes in the sink, play cleaning ASMR videos when the apartment is messy, and 'accidentally' set alarms for whoever's turn it is to take out the trash.\n\n## Market Potential\nWith 32% of Americans living with roommates and 87% reporting roommate conflicts, our target market includes approximately 26 million conflict-avoidant individuals willing to outsource their confrontations.\n\n## Business Model\nSubscription-based model ($9.99/month) with different personality settings ranging from 'Mildly Suggestive' to 'Guilt-Tripping Grandma.' Premium features include trash bin sensors, refrigerator cameras to detect who ate the last yogurt, and custom voice packs featuring disappointed parents.\n\n## Next Steps\nWe've completed our prototype and initial testing in a 5-person apartment where chore compliance increased by 74% within two weeks. We're now seeking funding to develop advanced guilt-inducing algorithms and expand our range of passive-aggressive behaviors.",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 52,
+    "createdAt": {
+      "$date": "2025-04-13T12:09:09.869Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "67f648e964c2503554b7123b"
+    },
+    "title": "FOMO Insurance",
+    "slug": {
+      "current": "fomo-insurance"
+    },
+    "description": "Insurance that pays out when you miss amazing social events, with compensation based on how awesome the event actually was",
+    "category": "finance",
+    "image": "/fomoinsurance.png",
+    "pitch": "# FOMO Insurance\n\n## The Problem\nFear Of Missing Out (FOMO) causes significant social anxiety, yet sometimes life obligations force you to miss truly epic events that everyone talks about for years afterward.\n\n## The Solution\nFOMO Insurance provides financial compensation when you're forced to miss significant social events. Our proprietary algorithm analyzes social media activity, attendee reviews, and event photos to calculate a FOMO Score determining your payout. The more legendary the event you missed, the higher your compensation.\n\n## Market Potential\nStudies show 56% of social media users experience FOMO regularly, with millennials and Gen Z willing to spend up to $1,500 more annually on events due to FOMO. Our addressable market includes 97 million FOMO-susceptible individuals in the US alone.\n\n## Business Model\nMonthly premium ($4.99) with tiered coverage levels. Basic coverage for local events, Premium for concerts and festivals, and Elite for once-in-a-lifetime events like destination weddings and surprise celebrity appearances. We also offer 'FOMO Therapy' - a service that digitally removes you from event photos and inserts you into the background.\n\n## Next Steps\nWe've developed our FOMO scoring algorithm and completed actuary tables based on event types. We're seeking seed funding to launch in major metropolitan areas where FOMO levels are highest according to our research.",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 38,
+    "createdAt": {
+      "$date": "2025-04-09T10:16:09.869Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "67f648e964c2503554b7123c"
+    },
+    "title": "Quantum Procrastination",
+    "slug": {
+      "current": "quantum-procrastination"
+    },
+    "description": "An app that uses quantum computing principles to help you get things done by delegating tasks to parallel universe versions of yourself",
+    "category": "productivity",
+    "image": "/quantumapp.png",
+    "pitch": "# Quantum Procrastination\n\n## The Problem\nProcrastination costs the US economy an estimated $997 billion annually. Traditional productivity apps focus on completing tasks, but what if we could leverage quantum mechanics to completely reimagine productivity?\n\n## The Solution\nQuantum Procrastination uses pseudo-scientific quantum principles to 'delegate' your tasks to theoretical parallel universe versions of yourself. When you add a task, our app performs a 'quantum calculation' and declares the task complete in another dimension, providing you with the psychological satisfaction of task completion without the effort.\n\n## Market Potential\nWith 95% of people admitting to procrastination and the productivity app market valued at $6.8 billion, there's significant opportunity for a solution that works with human psychology rather than against it.\n\n## Business Model\nSubscription-based service ($7.99/month) with tiered pricing based on the complexity of quantum calculations. Premium features include 'Quantum Accountability' which connects you with the theoretical version of yourself that actually completed the task, and 'Schrödinger's Deadline' which places your deadlines in a state of quantum uncertainty.\n\n## Next Steps\nWe've tested our prototype with chronic procrastinators who report a 73% increase in perceived productivity and a 68% decrease in productivity guilt. We're now seeking investment to develop more convincing quantum animations and expand our library of scientific-sounding explanations for why users can feel accomplished without doing anything.",
+    "author": {
+      "$oid": "67f63c6764c2503554b71236"
+    },
+    "views": 64,
+    "createdAt": {
+      "$date": "2025-04-09T10:16:09.869Z"
+    }
+  }
+]
