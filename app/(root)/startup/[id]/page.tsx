@@ -11,7 +11,8 @@ import ViewClient from '@/components/ViewClient';
 import Tooltip from '@/components/Tooltip';
 import FeaturedStartups from '@/components/FeaturedStartups';
 import { ObjectId } from 'mongodb';
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
+import Adds from '@/components/Adds';
 
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -23,16 +24,20 @@ async function Page({ params }: { params: { id: string } }) {
   const post = await getStartupById(id);
   if (!post) return notFound();
   const parsedContent = md.render(post?.pitch || '');
-  // lg:mx-28 my-4 mx-2
   return (
     <>
       <section className="blueContainer flex flex-col px-8 py-4">
         <div className="m-auto max-w-[800px] justify-center">
           <div>
             {' '}
-            <div className="mx-6 my-8 flex justify-between gap-20 md:mx-12">
+            <div
+              className="mx-6 my-8 flex justify-between gap-20 md:mx-12"
+              style={{ cursor: 'default' }}
+            >
               <Tooltip text={`Created: ${formatDateAgo(post?.createdAt || new Date())}`}>
-                <p className="text-start">{formatDate(post?.createdAt || new Date())}</p>
+                <p className="cursor-default text-start">
+                  {formatDate(post?.createdAt || new Date())}
+                </p>
               </Tooltip>
               <ViewClient
                 id={id}
@@ -41,14 +46,22 @@ async function Page({ params }: { params: { id: string } }) {
                 isLoggedIn={!!session}
               />
             </div>{' '}
-            <h1 className="textBox">{post?.title}</h1>{' '}
+            <div className="textBox">
+              <p
+                className={
+                  post?.title.length <= 40
+                    ? 'animated-heading text-4xl font-bold'
+                    : post?.title.length <= 60
+                      ? 'animated-heading text-2xl font-bold'
+                      : 'animated-heading truncate text-xl font-bold'
+                }
+                title={post?.title}
+              >
+                {post?.title}
+              </p>
+            </div>{' '}
             <div className="mx-8 mt-8 text-start lg:mx-32">
-              <div
-                className="prose dark:prose-invert prose-headings:font-bold prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4 prose-h1:text-primary/90 prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3 prose-h2:text-primary/80 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2 prose-p:text-base max-w-none leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: md.render(post?.description || ''),
-                }}
-              />
+              <h3>{post?.description}</h3>
             </div>
           </div>
           <div className="author mx-12">
@@ -95,7 +108,7 @@ async function Page({ params }: { params: { id: string } }) {
             width={600}
             height={400}
             alt={post?.title || 'Startup image'}
-            className="mb-8 rounded-xl"
+            className="startup-image mb-8"
           />
           <div className="articleBox">
             {parsedContent ? (
@@ -111,8 +124,12 @@ async function Page({ params }: { params: { id: string } }) {
       </section>
       <hr />
 
-      <section>
-        <FeaturedStartups />
+      <section className="flex flex-row items-start justify-center">
+        <Adds position="left" session={session} />
+        <div className="mx-4 flex-1">
+          <FeaturedStartups />
+        </div>
+        <Adds position="right" session={session} />
       </section>
       <hr />
 

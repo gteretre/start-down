@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
 import StartupForm from '@/components/StartupForm';
 
 const Page = async () => {

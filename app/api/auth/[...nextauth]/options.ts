@@ -78,9 +78,6 @@ export const options = {
       if (user) {
         token.role = user.role;
         token.username = user.username;
-        // token.name = user.name;
-        // token.email = user.email;
-        // token.image = user.image;
       }
       return token;
     },
@@ -88,9 +85,6 @@ export const options = {
     async session({ session, token }) {
       session.user.role = token.role;
       session.user.username = token.username;
-      // session.user.name = token.name;
-      // session.user.email = token.email;
-      // session.user.image = token.image;
       return session;
     },
   },

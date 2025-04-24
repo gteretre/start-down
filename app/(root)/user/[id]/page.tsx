@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
 import { getAuthorByUsername } from '@/lib/queries';
 import Tooltip from '@/components/Tooltip';
 import { PenBoxIcon } from 'lucide-react';
@@ -43,7 +43,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                         alt={user.username + "'s avatar"}
                         width={120}
                         height={120}
-                        className="rounded-full object-cover ring-4 ring-ring"
+                        className="rounded-full object-cover ring-2 ring-ring"
                       />
                     </Tooltip>
                   </Link>
@@ -57,7 +57,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                     alt={user.username + "'s avatar"}
                     width={120}
                     height={120}
-                    className="rounded-full object-cover ring-4 ring-ring"
+                    className="rounded-full object-cover ring-2 ring-ring"
                   />
                 )}
               </div>

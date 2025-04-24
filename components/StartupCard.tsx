@@ -10,69 +10,92 @@ import type { Author } from '@/lib/models';
 async function StartupCard({ post }: { post: StartupCardType }) {
   const views = await getStartupViews(post?._id);
   return (
-    <li className="startup-card">
-      <div>
-        <div className="flex justify-between">
-          <p>{formatDate(post?.createdAt || new Date())}</p>
+    <li className="startup-card flex select-none flex-col gap-3">
+      <div className="flex items-center justify-between gap-4">
+        <Link href={`/startup/${post?._id}`} className="flex min-w-0 flex-1 items-center gap-4">
+          <p className="truncate">{formatDate(post?.createdAt || new Date())}</p>
           <View id={post?._id} initialViews={views} />
-          <Tooltip text={`${post?.author ? post.author.name : 'Someone'}'s Profile`}>
-            <Link href={`/user/${post?.author?.username}`}>
-              <Image
-                src={
-                  post.author?.image?.startsWith('http') || post.author?.image?.startsWith('/')
-                    ? post.author.image
-                    : '/logo.png'
-                }
-                alt="profile picture"
-                width={48}
-                height={48}
-                className="avatar"
-              ></Image>
-            </Link>
-          </Tooltip>
-        </div>{' '}
-        <div className="flex-between mt-3 gap-3">
-          <div className="flex-1">
-            <Link className="flex flex-col items-start" href={`/startup/${post?._id}`}>
-              <h1 className="mb-1">{post?.title || 'ERROR'}</h1>
-            </Link>
-            <Link className="flex flex-col items-end" href={`/user/${post?.author?.username}`}>
-              <p className="text-sm text-gray-500">
-                created by <strong>{post?.author?.name}</strong>
-              </p>
-            </Link>
-          </div>
-
-          <Link className="flex w-full flex-col" href={`/startup/${post?._id}`}>
-            <p className="mb-4 line-clamp-3 min-h-[4.5em] text-justify">{post?.description}</p>
-            <div className="mb-2 flex justify-center">
-              <div className="relative h-0 w-full overflow-hidden pb-[66.67%]">
-                <Image
-                  src={
-                    post.image?.startsWith('http') || post.image?.startsWith('/')
-                      ? post.image
-                      : `https://placehold.co/600x400?text=${encodeURIComponent(
-                          post.title || 'Startup'
-                        )}`
-                  }
-                  alt="startup image"
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  className="rounded-3xl ease-in-out"
-                />
-              </div>
-            </div>
+        </Link>
+        {/* Right: Author image, link to author */}
+        <Tooltip text={`${post?.author ? post.author.name : 'Someone'}'s Profile`}>
+          <Link href={`/user/${post?.author?.username}`} className="flex-shrink-0">
+            <Image
+              src={
+                post.author?.image?.startsWith('http') || post.author?.image?.startsWith('/')
+                  ? post.author.image
+                  : '/logo.png'
+              }
+              alt="profile picture"
+              width={48}
+              height={48}
+              className="avatar"
+            />
           </Link>
+        </Tooltip>
+      </div>
 
-          <div className="mt-4 flex w-full justify-between">
-            <Link href={`/?query=${post?.category}`}>
-              <p className="category">{post?.category || 'something went wrong'}</p>
-            </Link>
-            <Link href={`/startup/${post?._id}`}>
-              <button className="search-btn p-2">More...</button>
-            </Link>
+      <Link
+        className="mb-1 flex h-[2.8em] items-center justify-center"
+        href={`/startup/${post?._id}`}
+      >
+        <p
+          className={
+            'overflow-hidden break-words text-center font-bold ' +
+            (post?.title.length <= 25
+              ? 'text-2xl'
+              : post?.title.length <= 40
+                ? 'text-xl'
+                : 'text-md')
+          }
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            hyphens: 'auto',
+            WebkitHyphens: 'auto',
+            msHyphens: 'auto',
+            wordBreak: 'break-word',
+            maxWidth: '100%',
+          }}
+          title={post?.title}
+        >
+          {post?.title || 'ERROR'}
+        </p>
+      </Link>
+      <Link className="flex flex-col items-end" href={`/user/${post?.author?.username}`}>
+        <p className="text-sm text-gray-500">
+          created by <strong>{post?.author?.name}</strong>
+        </p>
+      </Link>
+      <Link className="flex flex-col" href={`/startup/${post?._id}`}>
+        <div className="flex min-h-[300px] flex-col justify-between">
+          {' '}
+          {/* Adjust min-h as needed */}
+          <p className="mb-4 line-clamp-3 min-h-[5em] text-justify">{post?.description}</p>
+          <div className="relative aspect-[3/2] w-full flex-shrink-0 rounded-3xl bg-gray-100">
+            <Image
+              src={
+                post.image?.startsWith('http') || post.image?.startsWith('/')
+                  ? post.image
+                  : `https://placehold.co/600x400?text=${encodeURIComponent(post.title || 'Startup')}`
+              }
+              alt="startup image"
+              fill
+              className="startup-image object-cover ring-2"
+              style={{ objectPosition: 'center top' }}
+              sizes="(max-width: 600px) 100vw, 600px"
+            />
           </div>
         </div>
+      </Link>
+      <div className="mt-2 flex w-full justify-between">
+        <Link href={`/?query=${post?.category}`}>
+          <p className="category">{post?.category || 'something went wrong'}</p>
+        </Link>
+        <Link href={`/startup/${post?._id}`}>
+          <button className="search-btn p-2">More...</button>
+        </Link>
       </div>
     </li>
   );

@@ -93,7 +93,7 @@ const ViewClient = ({
 
   return (
     <Tooltip text={`${views} Views`}>
-      <div className="flex items-center gap-1">
+      <div className="flex cursor-default items-center gap-1">
         <EyeIcon className="size-6 text-primary" />
         <span className={`text-16-medium flex gap-1 ${animate ? 'view-update-animate' : ''}`}>
           {formatNumber(views)}

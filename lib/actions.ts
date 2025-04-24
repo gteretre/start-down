@@ -1,6 +1,6 @@
 'use server';
 
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
 import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
 import { createStartup } from '@/lib/mutations';

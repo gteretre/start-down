@@ -7,32 +7,38 @@ import { signIn, signOut } from 'next-auth/react';
 export function SignInButtons() {
   return (
     <>
-      <Tooltip text="Sign In With GitHub">
-        <button className="btn-pure" type="button" onClick={() => signIn('github')}>
-          <span>
-            <Github />
-          </span>
-        </button>
-      </Tooltip>
-      <Tooltip text="Sign In With Google">
-        <button className="btn-pure" type="button" onClick={() => signIn('google')}>
-          <span>
-            <Chrome />
-          </span>
-        </button>
-      </Tooltip>
+      <div className="nav-element">
+        <Tooltip text="Sign In With GitHub" position="left">
+          <button className="btn-pure" type="button" onClick={() => signIn('github')}>
+            <span>
+              <Github />
+            </span>
+          </button>
+        </Tooltip>
+      </div>
+      <div className="nav-element">
+        <Tooltip text="Sign In With Google" position="left">
+          <button className="btn-pure" type="button" onClick={() => signIn('google')}>
+            <span>
+              <Chrome />
+            </span>
+          </button>
+        </Tooltip>
+      </div>
     </>
   );
 }
 
 export function SignOutButton() {
   return (
-    <Tooltip text="Logout">
-      <button className="btn-pure" type="button" onClick={() => signOut({ callbackUrl: '/' })}>
-        <span>
-          <Unplug />
-        </span>
-      </button>
-    </Tooltip>
+    <div className="nav-element">
+      <Tooltip text="Logout" position="left">
+        <button className="btn-pure" type="button" onClick={() => signOut({ callbackUrl: '/' })}>
+          <span>
+            <Unplug />
+          </span>
+        </button>
+      </Tooltip>
+    </div>
   );
 }

@@ -11,8 +11,7 @@ function Page() {
         <br />
         <h3 className="max-w-[800px] justify-center">
           Welcome to StartDown! It&apos;s not quite a startup, and not quite a breakdown — just a
-          quirky little platform I built as part of my portfolio (yes, the code is clean, I
-          promise).
+          quirky little platform I built as part of my portfolio.
         </h3>
       </section>
 

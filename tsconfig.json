@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     "app/api/auth/[...nextauth]/options.ts",
     "app/api/auth/[...nextauth]/route.ts",
-    "auth.ts",
+    "lib/auth.ts",
     "auth.ts.fuck",
     "lib/queries.ts"
   ],

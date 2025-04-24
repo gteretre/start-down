@@ -12,7 +12,7 @@ async function Home({ searchParams }: { searchParams: Promise<{ query?: string }
     <>
       <section className="blueContainer items-center px-8 pb-12 pt-16">
         <div className="textBox">
-          <h1>Bring Light to Your Misery</h1>
+          <h1 className="animated-heading">Bring Light to Your Misery</h1>
         </div>
         <br />
         <h3>Submit Stupid ideas, Vote on the Most Stupid One, and Get Bullied</h3>
