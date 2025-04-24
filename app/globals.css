@@ -80,8 +80,20 @@
     @apply border-border;
   }
   body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
     @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
   input:focus {
     outline: none;
@@ -234,6 +246,31 @@ button {
 }
 .dark .marked-text {
   @apply text-blue-200;
+}
+
+/* =========================
+   View Update Animation
+   ========================= */
+.view-update-animate {
+  animation: view-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes view-pop {
+  0% {
+    transform: scale(1);
+    background-color: transparent;
+  }
+  20% {
+    transform: scale(1.2);
+    background-color: #ffe066;
+  }
+  60% {
+    transform: scale(0.95);
+    background-color: #fffbe6;
+  }
+  100% {
+    transform: scale(1);
+    background-color: transparent;
+  }
 }
 
 /* =========================

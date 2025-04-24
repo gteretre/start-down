@@ -1,60 +1,44 @@
-import { after } from "next/server";
+'use client';
+import useSWR from 'swr';
+import { formatNumber } from '@/lib/utils';
+import Tooltip from './Tooltip';
+import { EyeIcon } from 'lucide-react';
+import { useRef, useEffect, useState } from 'react';
 
-import Ping from "@/components/Ping";
-import { formatNumber } from "@/lib/utils";
-import Tooltip from "./Tooltip";
-import { mongoFetch } from "@/lib/live";
-import { getStartupViews } from "@/lib/queries";
-import { updateStartupViews } from "@/lib/mutations";
-const View = async ({ id }: { id: string }) => {
-  // Get views directly from MongoDB service
-  const views = await getStartupViews(id);
+const fetcher = (id: string) => fetch(`/api/startup/${id}/views`).then((res) => res.json());
+
+const View = ({ id, initialViews = 0 }: { id: string; initialViews?: number }) => {
+  const { data } = useSWR(id ? `/api/startup/${id}/views` : null, () => fetcher(id), {
+    fallbackData: { views: initialViews },
+    revalidateOnFocus: true,
+    refreshInterval: 120000,
+  });
+
+  const views = data?.views ?? initialViews;
+  const prevViews = useRef(views);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (prevViews.current !== views) {
+      setAnimate(true);
+      prevViews.current = views;
+      const timeout = setTimeout(() => setAnimate(false), 600);
+      return () => clearTimeout(timeout);
+    }
+  }, [views]);
 
   return (
     <Tooltip text={`${views} Views`}>
-      <div className="flex">
-        {formatNumber(views || 0)}
-        <div className="" style={{ transform: "translate(16px, -1px)" }}>
-          <Ping />
-        </div>
+      <div className="flex gap-1">
+        <EyeIcon className="size-6 text-primary" />
+        <span className="text-16-medium">
+          <span className={`flex ${animate ? 'view-update-animate' : ''}`}>
+            {formatNumber(views)}
+          </span>
+        </span>
       </div>
     </Tooltip>
   );
 };
 
-const ViewUpdate = async ({ id }: { id: string }) => {
-  if (typeof window !== "undefined" && id) {
-    try {
-      const hasViewed = sessionStorage.getItem(`viewed_${id}`);
-      if (!hasViewed) {
-        // Use MongoDB function to update views
-        await updateStartupViews(id);
-        sessionStorage.setItem(`viewed_${id}`, "true");
-      }
-    } catch (error) {
-      console.error("Error updating view count:", error);
-    }
-  }
-  return;
-};
-
-// const ViewUpdate = async ({ id }: { id: string }) => {
-//   if (typeof window !== "undefined" && id) {
-//     try {
-//       const hasViewed = sessionStorage.getItem(`viewed_${id}`);
-//       if (!hasViewed) {
-//         await writeClient
-//           .transaction()
-//           .patch(id, (patch) => patch.inc({ views: 1 }))
-//           .commit();
-//         sessionStorage.setItem(`viewed_${id}`, "true");
-//       }
-//     } catch (error) {
-//       console.error("Error updating view count:", error);
-//     }
-//   }
-//   return;
-// };
-
 export default View;
-export { View, ViewUpdate };

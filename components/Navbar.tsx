@@ -1,18 +1,16 @@
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Pencil, User } from "lucide-react";
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Pencil, User } from 'lucide-react';
 
-import Tooltip from "./Tooltip";
-import UIMode from "@/components/UIMode";
-import GoogleTranslateToggle from "./GoogleTranslate";
-import { SignInButtons, SignOutButton } from "./AuthButtons";
-
-import { options } from "@/app/api/auth/[...nextauth]/options";
-import { getServerSession } from "next-auth/next";
+import Tooltip from './Tooltip';
+import UIMode from '@/components/UIMode';
+import GoogleTranslateToggle from './GoogleTranslate';
+import { SignInButtons, SignOutButton } from './AuthButtons';
+import { auth } from '@/auth';
 
 const Navbar = async () => {
-  const session = await getServerSession(options);
+  const session = await auth();
 
   return (
     <header id="header">
@@ -20,13 +18,7 @@ const Navbar = async () => {
         <div id="navbar-text">
           <Tooltip text="Home">
             <Link href="/">
-              <Image
-                id="logo"
-                src="/logo.png"
-                alt="logo"
-                width={50}
-                height={50}
-              />
+              <Image id="logo" src="/logo.png" alt="logo" width={50} height={50} />
             </Link>
           </Tooltip>
           <Tooltip text="Toogle Dark Mode">
@@ -35,10 +27,7 @@ const Navbar = async () => {
           <GoogleTranslateToggle />
         </div>
         <div className="hidden md:block">
-          <Tooltip text="Dev Only">
-            {" "}
-            Compiled: {new Date().toLocaleTimeString()}
-          </Tooltip>
+          <Tooltip text="Dev Only"> Compiled: {new Date().toLocaleTimeString()}</Tooltip>
         </div>
 
         <div id="navbar-text">

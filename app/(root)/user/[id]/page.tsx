@@ -1,15 +1,14 @@
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { auth } from "@/auth";
-import { AUTHOR_BY_USERNAME_QUERY } from "@/lib/queries";
-import { mongoFetch } from "@/lib/live";
-import Tooltip from "@/components/Tooltip";
-import { PenBoxIcon } from "lucide-react";
-import UserStartups from "@/components/UserStartups";
-import { Suspense } from "react";
-import { StartupCardSkeleton } from "@/components/StartupCard";
+import { auth } from '@/auth';
+import { getAuthorByUsername } from '@/lib/queries';
+import Tooltip from '@/components/Tooltip';
+import { PenBoxIcon } from 'lucide-react';
+import UserStartups from '@/components/UserStartups';
+import { Suspense } from 'react';
+import { StartupCardSkeleton } from '@/components/StartupCard';
 
 // export const experimental_ppr = true;
 
@@ -17,10 +16,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: username } = await params;
   const session = await auth();
 
-  const { data: user } = await mongoFetch({
-    query: AUTHOR_BY_USERNAME_QUERY,
-    params: { username }
-  });
+  const user = await getAuthorByUsername(username);
 
   if (!user) {
     return notFound();
@@ -30,9 +26,9 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col gap-8 lg:flex-row">
         <section className="w-full lg:w-1/3">
-          <div className="blueContainer flex flex-col my-10 mt-10 p-6 rounded-lg shadow-lg lg:sticky lg:top-8 lg:p-8">
+          <div className="blueContainer my-10 mt-10 flex flex-col rounded-lg p-6 shadow-lg lg:sticky lg:top-8 lg:p-8">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 {profileOwner ? (
@@ -40,30 +36,28 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                     <Tooltip text="Edit Profile Picture">
                       <Image
                         src={
-                  user.image?.startsWith("http") ||
-                  user.image?.startsWith("/")
-                    ? user.image
-                    : "/logo.png"
-                }
+                          user.image?.startsWith('http') || user.image?.startsWith('/')
+                            ? user.image
+                            : '/logo.png'
+                        }
                         alt={user.username + "'s avatar"}
                         width={120}
                         height={120}
-                        className="rounded-full ring-4 ring-ring object-cover"
+                        className="rounded-full object-cover ring-4 ring-ring"
                       />
                     </Tooltip>
                   </Link>
                 ) : (
                   <Image
                     src={
-                  user.image?.startsWith("http") ||
-                  user.image?.startsWith("/")
-                    ? user.image
-                    : "/logo.png"
-                }
+                      user.image?.startsWith('http') || user.image?.startsWith('/')
+                        ? user.image
+                        : '/logo.png'
+                    }
                     alt={user.username + "'s avatar"}
                     width={120}
                     height={120}
-                    className="rounded-full ring-4 ring-ring object-cover"
+                    className="rounded-full object-cover ring-4 ring-ring"
                   />
                 )}
               </div>
@@ -83,17 +77,17 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
               )}
             </div>
 
-            <p className="text-sm text-center mt-4">{user.bio}</p>
-            <p className="text-sm text-center mt-2 text-gray-500">
+            <p className="mt-4 text-center text-sm">{user.bio}</p>
+            <p className="mt-2 text-center text-sm text-gray-500">
               On Start Down since {user.createdAt.toLocaleDateString()}
             </p>
           </div>
         </section>
 
         <section className="w-full lg:w-2/3">
-          <div className="flex flex-col justify-center mx-4 mt-4 p-6 rounded-lg shadow-lg">
-            <p className="text-2xl font-semibold text-center mb-6">
-              {profileOwner ? "Your Startups" : `${user.name}'s Startups`}
+          <div className="mx-4 mt-4 flex flex-col justify-center rounded-lg p-6 shadow-lg">
+            <p className="mb-6 text-center text-2xl font-semibold">
+              {profileOwner ? 'Your Startups' : `${user.name}'s Startups`}
             </p>
             <Suspense fallback={<StartupCardSkeleton />}>
               <UserStartups username={user.username} />

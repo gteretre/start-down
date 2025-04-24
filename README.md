@@ -1,18 +1,22 @@
-# StartDown
+<p align="center">
+  <img src="/mainpage.jpeg" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
+</p>
+
+<h1 align="center">🚀 StartDown <span style="font-size:1.2em;">✨</span></h1>
 
 StartDown is a playful web platform built with Next.js and React, designed for sharing, browsing, and voting on unconventional startup ideas. Whether you want feedback, inspiration, or just a laugh, StartDown is the place to unleash your creativity.
 
-## Features
+## ✨ Features
 
-- Submit, browse, and vote on unique startup ideas
-- Modern, responsive UI with mobile and desktop support
-- Secure authentication with GitHub and Google (NextAuth.js)
-- MongoDB-backed data storage and querying
-- Real-time view tracking and search functionality
-- Modular, reusable React components
-- Developer-friendly codebase and structure
+- 💡 Submit, browse, and vote on unique startup ideas
+- 📱 Modern, responsive UI with mobile and desktop support
+- 🔒 Secure authentication with GitHub and Google (NextAuth.js)
+- 🗄️ MongoDB-backed data storage and querying
+- 👀 Real-time view tracking and search functionality
+- 🧩 Modular, reusable React components
+- 👨‍💻 Developer-friendly codebase and structure
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - [Next.js](https://nextjs.org/) (App Router, SSR, API routes)
 - [React](https://react.dev/)
@@ -22,7 +26,7 @@ StartDown is a playful web platform built with Next.js and React, designed for s
 - [NextAuth.js](https://next-auth.js.org/) (authentication)
 - [Lucide React](https://lucide.dev/) (icons)
 
-## Project Structure
+## 🗂️ Project Structure
 
 - `app/` — Main application code (routing, pages, layouts, API endpoints)
   - `(root)/` — Home page and main entry point
@@ -31,7 +35,7 @@ StartDown is a playful web platform built with Next.js and React, designed for s
 - `lib/` — Utility functions, database queries, mutations, and type definitions
 - `public/` — Static assets (images, icons)
 
-## Getting Started
+## 🚀 Getting Started
 
 1. **Clone the repository:**
    ```bash
@@ -64,7 +68,7 @@ StartDown is a playful web platform built with Next.js and React, designed for s
    ```
 5. **Open [http://localhost:3000](http://localhost:3000) to view the app.**
 
-## Demo Data
+## 🧪 Demo Data
 
 Demo data is available in [`/demo-data/startdown.startups.json`](./demo-data/startdown.startups.json) and [`/demo-data/startdown.authors.json`](./demo-data/startdown.authors.json).
 
@@ -77,7 +81,7 @@ mongoimport --uri="your_local_connection_string" --collection=startups --file=de
 
 This will populate your database with sample authors and startup ideas for testing and development.
 
-## Deployment
+## 🚢 Deployment
 
 To run in Docker:
 
@@ -86,26 +90,15 @@ docker build -t startdown .
 docker run -p 3000:3000 --env-file [.env.local](http://_vscodecontentref_/0) startdown
 ```
 
-## Contribution & Feedback
+## 🤝 Contribution & Feedback
 
 Contributions, bug reports, and feature suggestions are welcome! Please open an issue or submit a pull request.
 
-## About
+## 💡 About
 
-In the world of tech, everyone's chasing that mythical "unicorn"
-— the billion-dollar startup idea. So, I thought, why not have a
-little fun with it? StartDown is my tongue-in-cheek tribute to
-those wild ideas that might just be brilliant... or totally
-bonkers. It’s a space where people can throw their craziest
-concepts into the void (or the internet) and maybe, just maybe,
-get some feedback. It's also part of my portfolio. A functional
-joke with real code behind it.
+In the world of tech, everyone's chasing that mythical "unicorn" — the billion-dollar startup idea. So, I thought, why not have a little fun with it? StartDown is my tongue-in-cheek tribute to those wild ideas that might just be brilliant... or totally bonkers. It’s a space where people can throw their craziest concepts into the void (or the internet) and maybe, just maybe, get some feedback. It's also part of my portfolio. A functional joke with real code behind it.
 
-## Contribution & Feedback
-
-Contributions, bug reports, and feature suggestions are welcome! Please open an issue or submit a pull request.
-
-## License
+## 📬 License
 
 **Copyright © 2025 Michał Kowalski. All Rights Reserved.**
 
