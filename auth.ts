@@ -1,6 +1,6 @@
-import NextAuth from "next-auth";
-import { getServerSession } from "next-auth/next";
-import { options } from "@/app/api/auth/[...nextauth]/options";
+import NextAuth from 'next-auth';
+import { getServerSession } from 'next-auth/next';
+import { options } from '@/app/api/auth/[...nextauth]/options';
 
 const handler = NextAuth(options);
 

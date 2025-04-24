@@ -1,15 +1,15 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric"
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -19,10 +19,10 @@ export function formatDateAgo(date: string) {
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
   if (days === 0) {
-    if (hours === 0) return "Just now";
+    if (hours === 0) return 'Just now';
     return `${hours} hours ago`;
   }
-  if (days === 1) return "Yesterday";
+  if (days === 1) return 'Yesterday';
   if (days < 7) return `${days} days ago`;
 
   const weeks = Math.floor(days / 7);
@@ -37,11 +37,11 @@ export function formatDateAgo(date: string) {
 
 export function formatNumber(num: number) {
   if (num >= 1_000_000_000) {
-    return (num / 1_000_000_000).toFixed(1) + "B";
+    return (num / 1_000_000_000).toFixed(1) + 'B';
   } else if (num >= 1_000_000) {
-    return (num / 1_000_000).toFixed(1) + "M";
+    return (num / 1_000_000).toFixed(1) + 'M';
   } else if (num >= 1_000) {
-    return (num / 1_000).toFixed(1) + "K";
+    return (num / 1_000).toFixed(1) + 'K';
   }
   return num.toString();
 }
@@ -51,8 +51,8 @@ export function parseServerActionResponse<T>(response: T) {
 }
 
 export function generateRandomString(length: number): string {
-  const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -63,10 +63,10 @@ export function slugify(data: string) {
   const slug = data
     .trim()
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove diacritical marks
-    .replace(/[^a-z0-9\s-]/g, "") // Remove non-alphanumeric characters except spaces and hyphens
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-"); // Replace multiple hyphens with a single one
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
+    .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric characters except spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-'); // Replace multiple hyphens with a single one
   return `${slug}-${generateRandomString(10)}`;
 }

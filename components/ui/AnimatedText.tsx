@@ -1,9 +1,9 @@
-"use client";
-import React from "react";
+'use client';
+import React from 'react';
 
 function AnimatedText({
   children,
-  animation = "typewriter"
+  animation = 'typewriter',
 }: {
   children: React.ReactNode;
   animation: string;

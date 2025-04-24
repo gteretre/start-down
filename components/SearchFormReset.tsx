@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { X } from "lucide-react";
+import Link from 'next/link';
+import { X } from 'lucide-react';
 
-import Tooltip from "./Tooltip";
+import Tooltip from './Tooltip';
 
 function SearchFormReset() {
   const reset = () => {
-    const form = document.querySelector(".search-form") as HTMLFormElement;
+    const form = document.querySelector('.search-form') as HTMLFormElement;
     if (form) form.reset();
   };
 

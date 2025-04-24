@@ -5,6 +5,7 @@ import View from '@/components/View';
 import Tooltip from './Tooltip';
 import { Skeleton } from './ui/skeleton';
 import { getStartupViews } from '@/lib/queries';
+import type { Author } from '@/lib/models';
 
 async function StartupCard({ post }: { post: StartupCardType }) {
   const views = await getStartupViews(post?._id);
@@ -81,14 +82,13 @@ type StartupCardType = {
   _id: string;
   title: string;
   slug: { current: string };
-  createAt: string;
-  author: { _id: string; name: string; image: string; bio: string };
+  createdAt: Date | string;
+  author: Author;
   views: number;
   description: string;
   category: string;
-  image: string;
+  image?: string;
 };
-
 export default StartupCard;
 export type { StartupCardType };
 

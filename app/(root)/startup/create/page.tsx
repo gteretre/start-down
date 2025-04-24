@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import { auth } from "@/auth";
-import StartupForm from "@/components/StartupForm";
+import { auth } from '@/auth';
+import StartupForm from '@/components/StartupForm';
 
 const Page = async () => {
   const session = await auth();
@@ -11,8 +11,7 @@ const Page = async () => {
       <section className="blueContainer items-center px-8 pb-12 pt-16">
         <div className="textBox">
           <h1>
-            Submit Your <span className="marked-text">Terrible</span> Startup
-            Idea
+            Submit Your <span className="marked-text">Terrible</span> Startup Idea
           </h1>
         </div>
         <div className="mt-10">

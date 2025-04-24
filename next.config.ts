@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -7,11 +7,11 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "placehold.co"
-      }
-    ]
-  }
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+    ],
+  },
   // experimental: {
   //   ppr: "incremental"
   // },

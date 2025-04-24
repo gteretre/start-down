@@ -1,6 +1,5 @@
-import { auth } from "@/auth";
-import { AUTHOR_BY_ID_QUERY } from "@/lib/queries";
-import { notFound } from "next/navigation";
+import { auth } from '@/auth';
+import { notFound } from 'next/navigation';
 // import "@/app/(root)/settings/profile/stars.css"; // Import the CSS file
 
 const Page = async () => {
@@ -11,9 +10,7 @@ const Page = async () => {
 
   return (
     <>
-      <div className="blueContainer p-10">
-        Hello, this site is not yet implemented (:
-      </div>
+      <div className="blueContainer p-10">Hello, this site is not yet implemented (:</div>
       <section className="stars relative">
         <div>
           <span></span>

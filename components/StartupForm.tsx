@@ -1,87 +1,86 @@
-"use client";
-import React from "react";
-import { useActionState } from "react";
-import { validateForm } from "@/lib/validation";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+'use client';
+import React from 'react';
+import { useActionState } from 'react';
+import { validateForm } from '@/lib/validation';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
-import { Button } from "./ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import MDEditor from "@uiw/react-md-editor";
-import { PlaneTakeoff } from "lucide-react";
-import { createPitch } from "@/lib/actions";
+import { Button } from './ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import MDEditor from '@uiw/react-md-editor';
+import { PlaneTakeoff } from 'lucide-react';
+import { createPitch } from '@/lib/actions';
 
 function StartupForm() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [formValues, setFormValues] = React.useState({
-    title: "",
-    description: "",
-    category: "",
-    link: "",
-    pitch: ""
+    title: '',
+    description: '',
+    category: '',
+    link: '',
+    pitch: '',
   });
   const { pitch } = formValues;
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePitchChange = (value: string | undefined) => {
-    setFormValues((prev) => ({ ...prev, pitch: value || "" }));
+    setFormValues((prev) => ({ ...prev, pitch: value || '' }));
   };
-  const handleFormSubmit = async (prevState: any, formData: FormData) => {
+  const handleFormSubmit = async (prevState) => {
+    // Example: You can also get values from FormData if needed
+    // const titleFromFormData = formData.get('title');
+    // console.log('FormData title:', titleFromFormData);
+    // (prevState, formData: FormData)
+
     // Use values from our state instead of directly from formData
     const currentValues = {
       title: formValues.title,
       description: formValues.description,
       category: formValues.category,
       link: formValues.link,
-      pitch: formValues.pitch
+      pitch: formValues.pitch,
     };
 
     const fieldErrors = validateForm(currentValues);
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
       toast({
-        title: "Input Error",
-        description: "Please check Your inputs and try again",
-        variant: "destructive"
+        title: 'Input Error',
+        description: 'Please check Your inputs and try again',
+        variant: 'destructive',
       });
-      return { ...prevState, error: "Validation failed", status: "ERROR" };
+      return { ...prevState, error: 'Validation failed', status: 'ERROR' };
     }
 
     try {
       const validatedFormData = new FormData();
-      validatedFormData.append("title", currentValues.title);
-      validatedFormData.append("description", currentValues.description);
-      validatedFormData.append("category", currentValues.category);
-      validatedFormData.append("link", currentValues.link);
+      validatedFormData.append('title', currentValues.title);
+      validatedFormData.append('description', currentValues.description);
+      validatedFormData.append('category', currentValues.category);
+      validatedFormData.append('link', currentValues.link);
 
       // Pass the validated FormData to the createPitch function
-      const result = await createPitch(
-        prevState,
-        validatedFormData,
-        currentValues.pitch
-      );
+      const result = await createPitch(prevState, validatedFormData, currentValues.pitch);
 
-      if (result && result.status === "SUCCESS" && result._id) {
+      if (result && result.status === 'SUCCESS' && result._id) {
         toast({
-          title: "Success",
-          description: "Congratulations! Your new startup has been created!"
+          title: 'Success',
+          description: 'Congratulations! Your new startup has been created!',
         });
 
         // Only reset form on success
         setFormValues({
-          title: "",
-          description: "",
-          category: "",
-          link: "",
-          pitch: ""
+          title: '',
+          description: '',
+          category: '',
+          link: '',
+          pitch: '',
         });
 
         // Add a small delay before redirecting to ensure database operation completes
@@ -91,52 +90,48 @@ function StartupForm() {
       } else {
         // Handle case where result doesn't have expected structure
         toast({
-          title: "Warning",
-          description:
-            "Startup was created but there might be an issue with navigation",
-          variant: "destructive"
+          title: 'Warning',
+          description: 'Startup was created but there might be an issue with navigation',
+          variant: 'destructive',
         });
       }
 
       return result;
     } catch (error) {
+      console.error('Error creating pitch:', error);
       toast({
-        title: "Input Error",
-        description: "An unexpected error occured",
-        variant: "destructive"
+        title: 'Input Error',
+        description: 'An unexpected error occured',
+        variant: 'destructive',
       });
       return {
         ...prevState,
-        error: "An unexpected error occured",
-        status: "ERROR"
+        error: 'An unexpected error occured',
+        status: 'ERROR',
       };
     }
   };
 
   const [state, formAction, isPending] = useActionState(handleFormSubmit, {
-    error: "",
-    status: "INITIAL"
+    error: '',
+    status: 'INITIAL',
   });
-  const [colorMode, setColorMode] = React.useState("light");
+  const [colorMode, setColorMode] = React.useState('light');
 
   React.useEffect(() => {
     // Set initial color mode based on system preference or body class
-    const isDarkMode = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    setColorMode(
-      document.body.classList.contains("dark") || isDarkMode ? "dark" : "light"
-    );
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setColorMode(document.body.classList.contains('dark') || isDarkMode ? 'dark' : 'light');
 
     // Set up observer for theme changes
     const observer = new MutationObserver(() => {
-      const isDark = document.body.classList.contains("dark");
-      setColorMode(isDark ? "dark" : "light");
+      const isDark = document.body.classList.contains('dark');
+      setColorMode(isDark ? 'dark' : 'light');
     });
 
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ["class"]
+      attributeFilter: ['class'],
     });
 
     return () => observer.disconnect();
@@ -144,16 +139,11 @@ function StartupForm() {
   return (
     <form
       action={formAction}
-      className="articleBox max-w-3xl mx-auto my-12 space-y-10 px-8 shadow-md rounded-xl bg-card p-8"
+      className="articleBox mx-auto my-12 max-w-3xl space-y-10 rounded-xl bg-card p-8 px-8 shadow-md"
     >
-      <h2 className="text-2xl font-bold text-center mb-6">
-        Create Your Startup Pitch
-      </h2>{" "}
+      <h2 className="mb-6 text-center text-2xl font-bold">Create Your Startup Pitch</h2>{' '}
       <div className="form-section">
-        <label
-          htmlFor="title"
-          className="form-label text-lg font-medium mb-2 block"
-        >
+        <label htmlFor="title" className="form-label mb-2 block text-lg font-medium">
           Project Name
         </label>
         <input
@@ -166,17 +156,10 @@ function StartupForm() {
           value={formValues.title}
           onChange={handleInputChange}
         />
-        {errors.title && (
-          <p className="text-red-500 mt-1 text-sm font-medium">
-            {errors.title}
-          </p>
-        )}
+        {errors.title && <p className="mt-1 text-sm font-medium text-red-500">{errors.title}</p>}
       </div>
       <div className="form-section">
-        <label
-          htmlFor="description"
-          className="form-label text-lg font-medium mb-2 block"
-        >
+        <label htmlFor="description" className="form-label mb-2 block text-lg font-medium">
           Executive Summary
         </label>
         <Textarea
@@ -189,16 +172,11 @@ function StartupForm() {
           onChange={handleInputChange}
         />
         {errors.description && (
-          <p className="text-red-500 mt-1 text-sm font-medium">
-            {errors.description}
-          </p>
+          <p className="mt-1 text-sm font-medium text-red-500">{errors.description}</p>
         )}
       </div>
       <div className="form-section">
-        <label
-          htmlFor="category"
-          className="form-label text-lg font-medium mb-2 block"
-        >
+        <label htmlFor="category" className="form-label mb-2 block text-lg font-medium">
           Industry Category
         </label>
         <input
@@ -212,16 +190,11 @@ function StartupForm() {
           onChange={handleInputChange}
         />
         {errors.category && (
-          <p className="text-red-500 mt-1 text-sm font-medium">
-            {errors.category}
-          </p>
+          <p className="mt-1 text-sm font-medium text-red-500">{errors.category}</p>
         )}
       </div>
       <div className="form-section">
-        <label
-          htmlFor="link"
-          className="form-label text-lg font-medium mb-2 block"
-        >
+        <label htmlFor="link" className="form-label mb-2 block text-lg font-medium">
           Image URL
         </label>
         <input
@@ -233,53 +206,45 @@ function StartupForm() {
           value={formValues.link}
           onChange={handleInputChange}
         />
-        {errors.link && (
-          <p className="text-red-500 mt-1 text-sm font-medium">{errors.link}</p>
-        )}
+        {errors.link && <p className="mt-1 text-sm font-medium text-red-500">{errors.link}</p>}
       </div>
       <div className="form-section" data-color-mode={colorMode}>
-        <label htmlFor="pitch" className="text-lg font-medium mb-3 block">
+        <label htmlFor="pitch" className="mb-3 block text-lg font-medium">
           Complete Pitch Details
-        </label>{" "}
-        <div className="ring-1 ring-ring rounded-lg overflow-hidden">
+        </label>{' '}
+        <div className="overflow-hidden rounded-lg ring-1 ring-ring">
           <MDEditor
             value={pitch}
             onChange={handlePitchChange}
             height={500}
             id="pitch"
             preview="edit"
-            style={{ borderRadius: 8, overflow: "hidden" }}
-            previewOptions={{ disallowedElements: ["style"] }}
+            style={{ borderRadius: 8, overflow: 'hidden' }}
+            previewOptions={{ disallowedElements: ['style'] }}
             textareaProps={{
               placeholder:
-                "# Your Startup Pitch\n\n## Problem Statement\n\n## Solution\n\n## Market Opportunity\n\n## Business Model\n\nDescribe your startup concept in detail here..."
+                '# Your Startup Pitch\n\n## Problem Statement\n\n## Solution\n\n## Market Opportunity\n\n## Business Model\n\nDescribe your startup concept in detail here...',
             }}
           />
         </div>
-        {errors.pitch && (
-          <p className="text-red-500 mt-1 text-sm font-medium">
-            {errors.pitch}
-          </p>
-        )}
-        {state.error && (
-          <p className="text-red-500 mt-2 text-sm font-medium">{state.error}</p>
-        )}
-      </div>{" "}
-      <div className="flex justify-center mt-8 pt-6 border-t border-muted">
+        {errors.pitch && <p className="mt-1 text-sm font-medium text-red-500">{errors.pitch}</p>}
+        {state.error && <p className="mt-2 text-sm font-medium text-red-500">{state.error}</p>}
+      </div>{' '}
+      <div className="mt-8 flex justify-center border-t border-muted pt-6">
         <Button
           type="submit"
-          className="px-10 py-5 text-lg font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30 transform hover:-translate-y-1 flex items-center justify-center gap-3 min-w-[220px]"
+          className="flex min-w-[220px] transform items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 px-10 py-5 text-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:from-purple-700 hover:to-blue-600 hover:shadow-lg hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30"
           disabled={isPending}
         >
           {isPending ? (
             <>
-              <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-1"></div>
+              <div className="mr-1 h-5 w-5 animate-spin rounded-full border-b-2 border-t-2 border-white"></div>
               Processing...
             </>
           ) : (
             <>
               Submit Pitch
-              <PlaneTakeoff className="w-5 h-5" />
+              <PlaneTakeoff className="h-5 w-5" />
             </>
           )}
         </Button>

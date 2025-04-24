@@ -1,8 +1,8 @@
-"use client";
-import React from "react";
-import { Share2 } from "lucide-react";
+'use client';
+import React from 'react';
+import { Share2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface ShareButtonProps {
   title: string;
@@ -15,12 +15,12 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
     const shareData = {
       title,
       text,
-      url
+      url,
     };
     try {
       await navigator.share(shareData);
     } catch (error) {
-      console.error("Error sharing:", error);
+      console.error('Error sharing:', error);
     }
   };
 

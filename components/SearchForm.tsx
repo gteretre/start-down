@@ -1,13 +1,13 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { FormEvent } from "react";
+'use client';
+import { useRouter } from 'next/navigation';
+import { FormEvent } from 'react';
 
-import SearchFormReset from "@/components/SearchFormReset";
-import { Search } from "lucide-react";
-import Tooltip from "./Tooltip";
+import SearchFormReset from '@/components/SearchFormReset';
+import { Search } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 const sanitizeSearchQuery = (query: string): string => {
-  return query.replace(/[.*+?^${}()|[\]\\]/g, "");
+  return query.replace(/[.*+?^${}()|[\]\\]/g, '');
 };
 
 function SearchForm({ query }: { query?: string }) {
@@ -16,18 +16,18 @@ function SearchForm({ query }: { query?: string }) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const rawQuery = formData.get("query")?.toString() || "";
+    const rawQuery = formData.get('query')?.toString() || '';
     const searchQuery = sanitizeSearchQuery(rawQuery);
     if (searchQuery.trim()) {
       router.push(`?query=${encodeURIComponent(searchQuery)}`);
     } else {
-      router.push("/");
+      router.push('/');
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="search-form" autoComplete="off">
-      {" "}
+      {' '}
       <input
         name="query"
         defaultValue={query}
