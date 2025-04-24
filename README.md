@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/mainpage.jpeg" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
+  <img src="https://github.com/user-attachments/assets/7dc02235-8bca-4520-9924-b1a7e1980b2d" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
 </p>
 
 <h1 align="center">🚀 StartDown <span style="font-size:1.2em;">✨</span></h1>
