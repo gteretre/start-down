@@ -1,7 +1,6 @@
 import Footer from '@/components/Footer';
+import GoUpButton from '@/components/GoUpButton';
 import Navbar from '@/components/Navbar';
-// import SideBar from "@/components/SideBar";
-// import { Banner } from "@/components/Banner";
 import { Toaster } from '@/components/ui/toaster';
 
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -13,6 +12,7 @@ export default function Layout({ children }: Readonly<{ children: React.ReactNod
         <Toaster />
       </div>
       <Footer />
+      <GoUpButton />
     </main>
   );
 }

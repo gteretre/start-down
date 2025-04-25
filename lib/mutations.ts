@@ -48,7 +48,6 @@ export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>)
 
 export async function updateStartupViews(id: string) {
   const db = await getDb();
-  console.log('Updating views for startup with ID:', id);
   try {
     const result = await db
       .collection('startups')

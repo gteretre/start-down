@@ -4,28 +4,45 @@ import { Sun, Moon, CircleArrowRight, CircleArrowLeft } from 'lucide-react';
 
 function UIMode() {
   const [colorMode, setColorMode] = React.useState('light');
+  const [mounted, setMounted] = React.useState(false);
 
+  // On mount, get theme from localStorage or system
   React.useEffect(() => {
-    const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    let mode = localStorage.getItem('colorMode');
+    if (!mode) {
+      mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
     setColorMode(mode);
+    document.documentElement.classList.toggle('dark', mode === 'dark');
+    setMounted(true);
   }, []);
 
+  // Toggle and persist theme
   const toggleMode = () => {
+    document.documentElement.classList.add('disable-transitions');
     const newMode = colorMode === 'light' ? 'dark' : 'light';
     setColorMode(newMode);
-    document.body.classList.toggle('dark', newMode === 'dark');
+    localStorage.setItem('colorMode', newMode);
+    document.documentElement.classList.toggle('dark', newMode === 'dark');
+    setTimeout(() => {
+      document.documentElement.classList.remove('disable-transitions');
+    }, 100);
   };
 
+  // Listen for system theme changes
   React.useEffect(() => {
-    document.body.classList.toggle('dark', colorMode === 'dark');
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      setColorMode(e.matches ? 'dark' : 'light');
-      document.body.classList.toggle('dark', e.matches);
+      if (!localStorage.getItem('colorMode')) {
+        setColorMode(e.matches ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', e.matches);
+      }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [colorMode]);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <button
@@ -33,16 +50,12 @@ function UIMode() {
       onClick={toggleMode}
     >
       <div
-        className={`transition-opacity duration-700 group-hover:opacity-0 ${
-          colorMode === 'light' ? 'translate-x-0' : 'translate-x-6'
-        }`}
+        className={`transition-opacity duration-700 group-hover:opacity-0 ${colorMode === 'light' ? 'translate-x-0' : 'translate-x-6'}`}
       >
         {colorMode === 'light' ? <Sun className="size-4" /> : <Moon className="size-4" />}
       </div>
       <div
-        className={`transform transition-transform duration-200 ${
-          colorMode === 'light' ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`transform transition-transform duration-200 ${colorMode === 'light' ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {colorMode === 'light' ? (
           <CircleArrowLeft className="ml-2 size-4" />

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import markdownit from 'markdown-it';
 const md = markdownit({ html: true });
 
-import { getStartupById, getStartupViews } from '@/lib/queries';
+import { getStartupById } from '@/lib/queries';
 import { formatDate, formatDateAgo } from '@/lib/utils';
 import ShareButton from '@/components/ui/ShareButton';
 import ViewClient from '@/components/ViewClient';
@@ -17,8 +17,6 @@ import Adds from '@/components/Adds';
 async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
   const session = await auth();
-  const views = await getStartupViews(id);
-  // Check if id is a valid ObjectId before querying DB
   if (!ObjectId.isValid(id)) return notFound();
 
   const post = await getStartupById(id);
@@ -41,7 +39,7 @@ async function Page({ params }: { params: { id: string } }) {
               </Tooltip>
               <ViewClient
                 id={id}
-                initialViews={views}
+                initialViews={post?.views}
                 incrementOnMount={true}
                 isLoggedIn={!!session}
               />

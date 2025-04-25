@@ -11,10 +11,11 @@ export const AUTHOR_BY_USERNAME_QUERY = 'author.byUsername';
 export const STARTUP_VIEWS_QUERY = 'startup.views';
 export const PLAYLIST_BY_SLUG_QUERY = 'playlist.bySlug';
 
-export async function getStartups(search?: string) {
+export async function getStartups(search?: string, sort?: string) {
   const db = await getDb();
   let query = {};
   let authorIds: ObjectId[] = [];
+  let sortObj: Record<string, 1 | -1> = { createdAt: -1 };
 
   if (search) {
     // Find authors matching name or username
@@ -39,7 +40,30 @@ export async function getStartups(search?: string) {
     };
   }
 
-  const startups = await db.collection('startups').find(query).sort({ createdAt: -1 }).toArray();
+  switch (sort) {
+    case 'createdAt-asc':
+      sortObj = { createdAt: 1 };
+      break;
+    case 'createdAt-desc':
+      sortObj = { createdAt: -1 };
+      break;
+    case 'views-asc':
+      sortObj = { views: 1 };
+      break;
+    case 'views-desc':
+      sortObj = { views: -1 };
+      break;
+    case 'title-asc':
+      sortObj = { title: 1 };
+      break;
+    case 'title-desc':
+      sortObj = { title: -1 };
+      break;
+    default:
+      break;
+  }
+
+  const startups = await db.collection('startups').find(query).sort(sortObj).toArray();
 
   // Get all unique author IDs from startups
   const allAuthorIds = [...new Set(startups.map((startup) => startup.author?.toString()))]

@@ -109,6 +109,10 @@
   .ring-ring-small {
     @apply ring-2 ring-offset-2;
   }
+  body.disable-transitions *,
+  body.disable-transitions {
+    transition: none !important;
+  }
 }
 
 /* =========================

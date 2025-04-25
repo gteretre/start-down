@@ -7,10 +7,6 @@ import Tooltip from './Tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { EyeIcon } from 'lucide-react';
 
-// For now we use local storage to store the visitor ID
-// but in the future we will use a cookie to check the visitor ID on the server side
-// and prevent multiple views from the same user
-
 function getVisitorId() {
   let id = document.cookie.match(/(^|;) ?visitor_id=([^;]*)(;|$)/)?.[2];
   if (!id) {
@@ -36,14 +32,29 @@ const ViewClient = ({
   const { toast } = useToast();
   const hasPostedRef = useRef(false);
 
+  // SWR: do not fetch on mount, only after mutate is called
   const { data, mutate } = useSWR(id ? `/api/startup/${id}/views` : null, () => fetcher(id), {
     fallbackData: { views: initialViews },
-    revalidateOnFocus: true,
-    refreshInterval: 7000,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    refreshInterval: 0, // We'll handle polling manually
   });
 
   const [animate, setAnimate] = useState(false);
   const prevViews = useRef(data?.views ?? initialViews);
+
+  // Start polling after 7 seconds
+  useEffect(() => {
+    if (!id) return;
+    const timer = setTimeout(() => {
+      mutate(); // First fetch after 7s
+      const interval = setInterval(() => {
+        mutate();
+      }, 7000);
+      return () => clearInterval(interval);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [id, mutate]);
 
   useEffect(() => {
     if (!id || !incrementOnMount || hasPostedRef.current) return;
