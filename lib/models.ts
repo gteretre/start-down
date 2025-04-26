@@ -1,7 +1,5 @@
-import { ObjectId } from 'mongodb';
-
 export interface Author {
-  _id: string; //  ObjectId as string
+  _id: string;
   id: string;
   name: string;
   username: string;
@@ -12,13 +10,13 @@ export interface Author {
 }
 
 export interface Startup {
-  _id: string; //  ObjectId as string
+  _id: string;
   title: string;
   slug: {
     current: string;
   };
   createdAt: Date;
-  author: ObjectId;
+  author: Author;
   views: number;
   description: string;
   category: string;

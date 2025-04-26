@@ -6,8 +6,19 @@ import Tooltip from './Tooltip';
 import { Skeleton } from './ui/skeleton';
 import type { Author } from '@/lib/models';
 
-function StartupCard({ post }: { post: StartupCardType }) {
-  // Ensure createdAt is a string
+function getAuthorImage(author: Author) {
+  return author.image?.startsWith('http') || author.image?.startsWith('/')
+    ? author.image
+    : '/logo.png';
+}
+
+function getStartupImage(post: StartupCardType) {
+  return post.image?.startsWith('http') || post.image?.startsWith('/')
+    ? post.image
+    : `https://placehold.co/600x400?text=${encodeURIComponent(post.title)}`;
+}
+
+const StartupCard: React.FC<{ post: StartupCardType }> = ({ post }) => {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
   return (
@@ -17,15 +28,10 @@ function StartupCard({ post }: { post: StartupCardType }) {
           <p className="truncate">{formatDate(createdAtStr)}</p>
           <View id={post._id} initialViews={post.views} />
         </Link>
-        {/* Right: Author image, link to author */}
-        <Tooltip text={`${post.author ? post.author.name : 'Someone'}'s Profile`}>
+        <Tooltip text={`${post.author.name}'s Profile`}>
           <Link href={`/user/${post.author.username}`} className="flex-shrink-0">
             <Image
-              src={
-                post.author.image?.startsWith('http') || post.author.image?.startsWith('/')
-                  ? post.author.image
-                  : '/logo.png'
-              }
+              src={getAuthorImage(post.author)}
               alt="profile picture"
               width={48}
               height={48}
@@ -41,7 +47,7 @@ function StartupCard({ post }: { post: StartupCardType }) {
       >
         <p
           className={
-            'overflow-hidden break-words text-center font-bold ' +
+            'overflow-hidden break-words text-left font-bold ' +
             (post.title.length <= 25 ? 'text-2xl' : post.title.length <= 40 ? 'text-xl' : 'text-md')
           }
           style={{
@@ -57,7 +63,7 @@ function StartupCard({ post }: { post: StartupCardType }) {
           }}
           title={post.title}
         >
-          {post.title || 'ERROR'}
+          {post.title}
         </p>
       </Link>
       <Link className="flex flex-col items-end" href={`/user/${post.author.username}`}>
@@ -72,11 +78,7 @@ function StartupCard({ post }: { post: StartupCardType }) {
           <p className="mb-4 line-clamp-3 min-h-[5em] text-justify">{post.description}</p>
           <div className="relative aspect-[3/2] w-full flex-shrink-0 rounded-3xl bg-gray-100">
             <Image
-              src={
-                post.image?.startsWith('http') || post.image?.startsWith('/')
-                  ? post.image
-                  : `https://placehold.co/600x400?text=${encodeURIComponent(post.title || 'Startup')}`
-              }
+              src={getStartupImage(post)}
               alt="startup image"
               fill
               className="startup-image object-cover ring-2"
@@ -88,7 +90,7 @@ function StartupCard({ post }: { post: StartupCardType }) {
       </Link>
       <div className="mt-2 flex w-full justify-between">
         <Link href={`/?query=${post.category}`}>
-          <p className="category">{post.category || 'something went wrong'}</p>
+          <p className="category">{post.category}</p>
         </Link>
         <Link href={`/startup/${post._id}`}>
           <button className="search-btn p-2">More...</button>
@@ -96,7 +98,7 @@ function StartupCard({ post }: { post: StartupCardType }) {
       </div>
     </li>
   );
-}
+};
 
 type StartupCardType = {
   _id: string;

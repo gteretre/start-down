@@ -11,6 +11,60 @@ export const AUTHOR_BY_USERNAME_QUERY = 'author.byUsername';
 export const STARTUP_VIEWS_QUERY = 'startup.views';
 export const PLAYLIST_BY_SLUG_QUERY = 'playlist.bySlug';
 
+type RawAuthor = {
+  _id: string | ObjectId;
+  id?: string;
+  name?: string;
+  username?: string;
+  email?: string;
+  createdAt?: Date | string;
+  image?: string;
+  bio?: string;
+};
+
+type RawStartup = {
+  _id: string | ObjectId;
+  title?: string;
+  slug?: { current: string };
+  createdAt?: Date | string;
+  author: RawAuthor;
+  views?: number;
+  description?: string;
+  category?: string;
+  image?: string;
+  pitch?: string;
+};
+
+function mapAuthor(raw: RawAuthor): import('./models').Author {
+  return {
+    _id: raw._id?.toString() || '',
+    id: raw.id || '',
+    name: raw.name || '',
+    username: raw.username || '',
+    email: raw.email || '',
+    createdAt:
+      raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
+    image: raw.image || '',
+    bio: raw.bio || '',
+  };
+}
+
+function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('./models').Startup {
+  return {
+    _id: raw._id?.toString() || '',
+    title: raw.title || '',
+    slug: raw.slug || { current: '' },
+    createdAt:
+      raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
+    author: mapAuthor(authorObj),
+    views: typeof raw.views === 'number' ? raw.views : 0,
+    description: raw.description || '',
+    category: raw.category || '',
+    image: raw.image || '',
+    pitch: raw.pitch || '',
+  };
+}
+
 export async function getStartups(search?: string, sort?: string) {
   const db = await getDb();
   let query = {};
@@ -79,11 +133,14 @@ export async function getStartups(search?: string, sort?: string) {
     : [];
 
   // Map author data to each startup
-  return startups.map((startup) => ({
-    ...startup,
-    _id: startup._id.toString(),
-    author: authors.find((author) => author._id.toString() === startup.author?.toString()) || null,
-  }));
+  return startups
+    .filter((startup) => !!startup.author) // Only include startups with an author field
+    .map((startup) => {
+      const authorObj = authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
+      );
+      return mapStartup(startup as RawStartup, authorObj as RawAuthor);
+    });
 }
 
 export async function getStartupsByAuthor(username: string) {
@@ -100,11 +157,9 @@ export async function getStartupsByAuthor(username: string) {
     .sort({ createdAt: -1 })
     .toArray();
 
-  return startups.map((startup) => ({
-    ...startup,
-    _id: startup._id.toString(),
-    author,
-  }));
+  return startups
+    .filter((startup) => !!startup.author)
+    .map((startup) => mapStartup(startup as RawStartup, author as RawAuthor));
 }
 
 export async function getStartupById(id: string) {
@@ -116,11 +171,9 @@ export async function getStartupById(id: string) {
     const author = await db
       .collection('authors')
       .findOne({ _id: new ObjectId(startup.author.toString()) });
-    return {
-      ...startup,
-      _id: startup._id.toString(),
-      author,
-    };
+    if (startup && author && startup.author) {
+      return mapStartup(startup as RawStartup, author as RawAuthor);
+    }
   }
 
   return null;
