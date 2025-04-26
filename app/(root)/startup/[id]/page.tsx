@@ -111,11 +111,11 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
       <hr />
 
       <section className="flex flex-row items-start justify-center">
-        <Adds session={session} />
+        {(!session || session.user.role !== 'admin') && <Adds />}
         <div className="mx-4 flex-1">
           <FeaturedStartups />
         </div>
-        <Adds session={session} />
+        {(!session || session.user.role !== 'admin') && <Adds />}
       </section>
       <hr />
 

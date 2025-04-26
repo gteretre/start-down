@@ -20,6 +20,7 @@ type RawAuthor = {
   createdAt?: Date | string;
   image?: string;
   bio?: string;
+  role?: string;
 };
 
 type RawStartup = {
@@ -46,6 +47,7 @@ function mapAuthor(raw: RawAuthor): import('./models').Author {
       raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
     image: raw.image || '',
     bio: raw.bio || '',
+    role: raw.role || '',
   };
 }
 

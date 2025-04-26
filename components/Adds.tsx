@@ -1,11 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 
-type AddsProps = {
-  session?: { user?: { role?: string } };
-};
-
-const Adds = ({ session }: AddsProps) => {
+const Adds = () => {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.adsbygoogle) {
       try {
@@ -15,8 +11,6 @@ const Adds = ({ session }: AddsProps) => {
       }
     }
   }, []);
-
-  if (session?.user?.role === 'admin') return null;
 
   return (
     <div className="bg-bg relative mx-8 my-8 hidden h-[600px] w-40 select-none flex-col items-center justify-center rounded-lg text-sm text-foreground ring-1 ring-ring lg:flex">

@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import MDEditor from '@uiw/react-md-editor';
 import { PlaneTakeoff } from 'lucide-react';
 import { createPitch } from '@/lib/actions';
+import Tooltip from './Tooltip';
+import { Info } from 'lucide-react';
 
 function StartupForm() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -32,7 +34,8 @@ function StartupForm() {
   const handlePitchChange = (value: string | undefined) => {
     setFormValues((prev) => ({ ...prev, pitch: value || '' }));
   };
-  const handleFormSubmit = async (prevState) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleFormSubmit = async (prevState: any) => {
     // Example: You can also get values from FormData if needed
     // const titleFromFormData = formData.get('title');
     // console.log('FormData title:', titleFromFormData);
@@ -143,8 +146,14 @@ function StartupForm() {
     >
       <h2 className="mb-6 text-center text-2xl font-bold">Create Your Startup Pitch</h2>{' '}
       <div className="form-section">
-        <label htmlFor="title" className="form-label mb-2 block text-lg font-medium">
+        <label
+          htmlFor="title"
+          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
+        >
           Project Name
+          <Tooltip text="3-80 characters" position="right">
+            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
+          </Tooltip>
         </label>
         <input
           type="text"
@@ -159,8 +168,14 @@ function StartupForm() {
         {errors.title && <p className="mt-1 text-sm font-medium text-red-500">{errors.title}</p>}
       </div>
       <div className="form-section">
-        <label htmlFor="description" className="form-label mb-2 block text-lg font-medium">
+        <label
+          htmlFor="description"
+          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
+        >
           Executive Summary
+          <Tooltip text="20-500 characters" position="right">
+            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
+          </Tooltip>
         </label>
         <Textarea
           id="description"
@@ -176,8 +191,14 @@ function StartupForm() {
         )}
       </div>
       <div className="form-section">
-        <label htmlFor="category" className="form-label mb-2 block text-lg font-medium">
+        <label
+          htmlFor="category"
+          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
+        >
           Industry Category
+          <Tooltip text="3-20 characters" position="right">
+            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
+          </Tooltip>
         </label>
         <input
           type="text"
@@ -194,23 +215,39 @@ function StartupForm() {
         )}
       </div>
       <div className="form-section">
-        <label htmlFor="link" className="form-label mb-2 block text-lg font-medium">
+        <label
+          htmlFor="link"
+          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
+        >
           Image URL
+          <Tooltip
+            text={`Allowed domains:
+          placehold.co, drive.google.com, docs.google.com, photos.google.com,
+          dl.dropboxusercontent.com, onedrive.live.com, icloud.com, i.imgur.com,
+          live.staticflickr.com, *.s3.amazonaws.com, www.dropbox.com`}
+            position="right"
+            multiline={true}
+          >
+            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
+          </Tooltip>
         </label>
         <input
           type="url"
           id="link"
           name="link"
           className="form-input transition-all duration-200 focus:ring-2"
-          placeholder="(Optional) Enter a URL for your startup's featured image"
+          placeholder="(Optional) Enter a URL for your startup's image"
           value={formValues.link}
           onChange={handleInputChange}
         />
         {errors.link && <p className="mt-1 text-sm font-medium text-red-500">{errors.link}</p>}
       </div>
       <div className="form-section" data-color-mode={colorMode}>
-        <label htmlFor="pitch" className="mb-3 block text-lg font-medium">
+        <label htmlFor="pitch" className="mb-3 flex items-center gap-2 text-lg font-medium">
           Complete Pitch Details
+          <Tooltip text="100-10,000 characters" position="right">
+            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
+          </Tooltip>
         </label>{' '}
         <div className="overflow-hidden rounded-lg ring-1 ring-ring">
           <MDEditor
@@ -222,8 +259,7 @@ function StartupForm() {
             style={{ borderRadius: 8, overflow: 'hidden' }}
             previewOptions={{ disallowedElements: ['style'] }}
             textareaProps={{
-              placeholder:
-                '# Your Startup Pitch\n\n## Problem Statement\n\n## Solution\n\n## Market Opportunity\n\n## Business Model\n\nDescribe your startup concept in detail here...',
+              placeholder: '# Your Startup Pitch\n\n## Problem Statement\n\n## Solution etc.',
             }}
           />
         </div>

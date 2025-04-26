@@ -1,40 +1,87 @@
-import { MongoClient, Db } from 'mongodb';
+import { MongoClient, Db, MongoClientOptions } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your MongoDB URI to .env.local');
+  throw new Error(
+    'Missing MongoDB URI. Please set MONGODB_URI in your .env.local file (e.g., MONGODB_URI=mongodb://localhost:27017).'
+  );
+}
+if (!process.env.MONGODB_DB) {
+  throw new Error(
+    'Missing MongoDB database name. Please set MONGODB_DB in your .env.local file (e.g., MONGODB_DB=startdown).'
+  );
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const dbName = process.env.MONGODB_DB;
 
-// Add global type definitions for TypeScript
+const options: MongoClientOptions = {
+  maxPoolSize: 10,
+  wtimeoutMS: 2500,
+};
+
 declare global {
-  const _mongoClientPromise: Promise<MongoClient>;
+  // eslint-disable-next-line no-var
+  var _mongoClientPromise: Promise<MongoClient>;
 }
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+    global._mongoClientPromise = client
+      .connect()
+      .then((connectedClient) => {
+        console.log('MongoDB connected successfully (development)');
+        return connectedClient;
+      })
+      .catch((err) => {
+        console.error('MongoDB connection error (development):', err);
+        throw err;
+      });
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = client
+    .connect()
+    .then((connectedClient) => {
+      console.log('MongoDB connected successfully (production)');
+      return connectedClient;
+    })
+    .catch((err) => {
+      console.error('MongoDB connection error (production):', err);
+      throw err;
+    });
 }
 
-// Export a function to get the database
 export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
-  return client.db(process.env.MONGODB_DB || 'startdown');
+  if (!dbName) {
+    console.error('MongoDB database name is not configured.');
+    throw new Error('MongoDB database name is not configured.');
+  }
+  const connectedClient = await clientPromise;
+  return connectedClient.db(dbName);
 }
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
+let isShuttingDown = false;
+async function shutdown() {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log('Attempting graceful shutdown...');
+  try {
+    const clientToClose = await clientPromise;
+    await clientToClose.close();
+    console.log('MongoDB connection closed successfully.');
+    process.exit(0);
+  } catch (err) {
+    console.error('Error during MongoDB connection close:', err);
+    process.exit(1);
+  }
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
 export default clientPromise;

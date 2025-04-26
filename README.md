@@ -58,7 +58,6 @@ StartDown is a playful web platform built with Next.js and React, designed for s
    AUTH_GOOGLE_SECRET=your_google_client_secret
    MONGODB_URI=mongodb://localhost:27017
    MONGODB_DB=startdown
-   ADMIN=your_email@example.com # Optional, for admin access
    ```
 4. **Run the development server:**
    ```bash

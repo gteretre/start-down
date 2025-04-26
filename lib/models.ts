@@ -7,6 +7,7 @@ export interface Author {
   createdAt: Date;
   image?: string;
   bio?: string;
+  role?: string;
 }
 
 export interface Startup {

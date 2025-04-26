@@ -18,7 +18,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const fetchedUser = await getAuthorByUsername(username);
   if (!fetchedUser) return notFound();
   const user: Author = fetchedUser;
-  const profileOwner = session?.user?.username === user.username;
+  const profileOwner = session?.user.username === user.username;
 
   return (
     <>
