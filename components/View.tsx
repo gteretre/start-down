@@ -10,7 +10,10 @@ const fetcher = (id: string) => fetch(`/api/startup/${id}/views`).then((res) => 
 const View = ({ id, initialViews = 0 }: { id: string; initialViews?: number }) => {
   const { data } = useSWR(id ? `/api/startup/${id}/views` : null, () => fetcher(id), {
     fallbackData: { views: initialViews },
-    revalidateOnFocus: true,
+    revalidateOnFocus: false,
+    revalidateOnMount: false,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
     refreshInterval: 120000,
   });
 

@@ -7,6 +7,9 @@ import Tooltip from './Tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { EyeIcon } from 'lucide-react';
 
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+const REFRESH_INTERVAL = 10000;
+
 function getVisitorId() {
   let id = document.cookie.match(/(^|;) ?visitor_id=([^;]*)(;|$)/)?.[2];
   if (!id) {
@@ -16,45 +19,33 @@ function getVisitorId() {
   return id;
 }
 
-const fetcher = (id: string) => fetch(`/api/startup/${id}/views`).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+interface ViewClientProps {
+  id: string;
+  initialViews?: number;
+  incrementOnMount?: boolean;
+  isLoggedIn?: boolean;
+}
 
 const ViewClient = ({
   id,
   initialViews = 0,
   incrementOnMount = false,
   isLoggedIn = false,
-}: {
-  id: string;
-  initialViews?: number;
-  incrementOnMount?: boolean;
-  isLoggedIn?: boolean;
-}) => {
+}: ViewClientProps) => {
   const { toast } = useToast();
   const hasPostedRef = useRef(false);
-
-  // SWR: do not fetch on mount, only after mutate is called
-  const { data, mutate } = useSWR(id ? `/api/startup/${id}/views` : null, () => fetcher(id), {
-    fallbackData: { views: initialViews },
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    refreshInterval: 0, // We'll handle polling manually
-  });
-
   const [animate, setAnimate] = useState(false);
-  const prevViews = useRef(data?.views ?? initialViews);
-
-  // Start polling after 7 seconds
-  useEffect(() => {
-    if (!id) return;
-    const timer = setTimeout(() => {
-      mutate(); // First fetch after 7s
-      const interval = setInterval(() => {
-        mutate();
-      }, 7000);
-      return () => clearInterval(interval);
-    }, 7000);
-    return () => clearTimeout(timer);
-  }, [id, mutate]);
+  const { data, mutate } = useSWR(id ? `/api/startup/${id}/views` : null, fetcher, {
+    fallbackData: { views: initialViews },
+    revalidateOnFocus: true,
+    revalidateOnMount: false,
+    refreshInterval: REFRESH_INTERVAL,
+    refreshWhenHidden: false,
+    refreshWhenOffline: false,
+    dedupingInterval: REFRESH_INTERVAL,
+  });
 
   useEffect(() => {
     if (!id || !incrementOnMount || hasPostedRef.current) return;
@@ -71,9 +62,6 @@ const ViewClient = ({
     const lastViewed = localStorage.getItem(storageKey);
     const now = Date.now();
 
-    // 24 hours in milliseconds
-    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
     if (!lastViewed || now - Number(lastViewed) > TWENTY_FOUR_HOURS) {
       localStorage.setItem(storageKey, now.toString());
       hasPostedRef.current = true;
@@ -82,8 +70,13 @@ const ViewClient = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitorId }),
       })
-        .then(() => {
-          mutate(); // Only re-fetch after increment
+        .then(async (res) => {
+          if (res.ok) {
+            const updatedData = await res.json();
+            mutate(updatedData, false);
+          } else {
+            console.error('Error posting view:', res.statusText);
+          }
         })
         .catch((error) => {
           console.error('Error posting view:', error);
@@ -91,19 +84,22 @@ const ViewClient = ({
     }
   }, [id, mutate, incrementOnMount, isLoggedIn, toast]);
 
+  const prevViews = useRef(data?.views ?? initialViews);
   useEffect(() => {
-    if (prevViews.current !== data?.views) {
+    if (data?.views !== undefined && prevViews.current !== data.views) {
       setAnimate(true);
-      prevViews.current = data?.views ?? initialViews;
+      prevViews.current = data.views;
       const timeout = setTimeout(() => setAnimate(false), 600);
       return () => clearTimeout(timeout);
+    } else if (data?.views === undefined && prevViews.current !== initialViews) {
+      prevViews.current = initialViews;
     }
   }, [data?.views, initialViews]);
 
   const views = data?.views ?? initialViews;
 
   return (
-    <Tooltip text={`${views} Views`}>
+    <Tooltip text={`${formatNumber(views)} Views`}>
       <div className="flex cursor-default items-center gap-1">
         <EyeIcon className="size-6 text-primary" />
         <span className={`text-16-medium flex gap-1 ${animate ? 'view-update-animate' : ''}`}>
