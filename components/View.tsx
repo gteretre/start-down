@@ -1,23 +1,10 @@
 'use client';
-import useSWR from 'swr';
 import { formatNumber } from '@/lib/utils';
 import Tooltip from './Tooltip';
 import { EyeIcon } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
 
-const fetcher = (id: string) => fetch(`/api/startup/${id}/views`).then((res) => res.json());
-
-const View = ({ id, initialViews = 0 }: { id: string; initialViews?: number }) => {
-  const { data } = useSWR(id ? `/api/startup/${id}/views` : null, () => fetcher(id), {
-    fallbackData: { views: initialViews },
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    refreshWhenHidden: false,
-    refreshWhenOffline: false,
-    refreshInterval: 120000,
-  });
-
-  const views = data?.views ?? initialViews;
+const View = ({ views }: { views: number }) => {
   const prevViews = useRef(views);
   const [animate, setAnimate] = useState(false);
 
@@ -28,10 +15,12 @@ const View = ({ id, initialViews = 0 }: { id: string; initialViews?: number }) =
       const timeout = setTimeout(() => setAnimate(false), 600);
       return () => clearTimeout(timeout);
     }
+    // Update ref even if views haven't changed, in case component re-renders
+    prevViews.current = views;
   }, [views]);
 
   return (
-    <Tooltip text={`${views} Views`}>
+    <Tooltip text={`${formatNumber(views)} Views`}>
       <div className="flex gap-1">
         <EyeIcon className="size-6 text-primary" />
         <span className="text-16-medium">

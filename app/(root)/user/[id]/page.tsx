@@ -1,27 +1,23 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { auth } from '@/lib/auth';
 import { getAuthorByUsername } from '@/lib/queries';
 import Tooltip from '@/components/Tooltip';
 import { PenBoxIcon } from 'lucide-react';
 import UserStartups from '@/components/UserStartups';
-import { Suspense } from 'react';
 import { StartupCardSkeleton } from '@/components/StartupCard';
-
-// export const experimental_ppr = true;
+import { getAuthorImage } from '@/lib/utils';
+import type { Author } from '@/lib/models';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: username } = await params;
   const session = await auth();
-
-  const user = await getAuthorByUsername(username);
-
-  if (!user) {
-    return notFound();
-  }
-
+  const fetchedUser = await getAuthorByUsername(username);
+  if (!fetchedUser) return notFound();
+  const user: Author = fetchedUser;
   const profileOwner = session?.user?.username === user.username;
 
   return (
@@ -35,11 +31,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                   <Link href="/settings/profile">
                     <Tooltip text="Edit Profile Picture">
                       <Image
-                        src={
-                          user.image?.startsWith('http') || user.image?.startsWith('/')
-                            ? user.image
-                            : '/logo.png'
-                        }
+                        src={getAuthorImage(user)}
                         alt={user.username + "'s avatar"}
                         width={120}
                         height={120}
@@ -49,11 +41,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                   </Link>
                 ) : (
                   <Image
-                    src={
-                      user.image?.startsWith('http') || user.image?.startsWith('/')
-                        ? user.image
-                        : '/logo.png'
-                    }
+                    src={getAuthorImage(user)}
                     alt={user.username + "'s avatar"}
                     width={120}
                     height={120}

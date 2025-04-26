@@ -5,7 +5,7 @@ import markdownit from 'markdown-it';
 const md = markdownit({ html: true });
 
 import { getStartupById } from '@/lib/queries';
-import { formatDate, formatDateAgo } from '@/lib/utils';
+import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
 import ShareButton from '@/components/ui/ShareButton';
 import ViewClient from '@/components/ViewClient';
 import Tooltip from '@/components/Tooltip';
@@ -19,10 +19,9 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
   const { id } = await props.params;
   const session = await auth();
   if (!ObjectId.isValid(id)) return notFound();
-
-  const postOrNull = await getStartupById(id);
-  if (!postOrNull) return notFound();
-  const post: Startup = postOrNull;
+  const fetchedPost = await getStartupById(id);
+  if (!fetchedPost) return notFound();
+  const post: Startup = fetchedPost;
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
 
@@ -68,11 +67,7 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
             <Tooltip text={post.author.bio}>
               <Link className="flex justify-between gap-2" href={`/user/${post.author.username}`}>
                 <Image
-                  src={
-                    post.author.image?.startsWith('http') || post.author.image?.startsWith('/')
-                      ? post.author.image
-                      : '/logo.png'
-                  }
+                  src={getAuthorImage(post.author)}
                   alt={post.author.name + 's avatar'}
                   width={48}
                   height={48}
@@ -95,11 +90,7 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
       <section>
         <div className="mx-6 my-6 flex flex-col items-center justify-center md:mx-20 md:my-12 lg:mx-32">
           <Image
-            src={
-              post.image?.startsWith('http') || post.image?.startsWith('/')
-                ? post.image
-                : `https://placehold.co/600x400?text=${encodeURIComponent(post.title)}`
-            }
+            src={getStartupImage(post)}
             width={600}
             height={400}
             alt={post.title}
@@ -112,7 +103,7 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
                 dangerouslySetInnerHTML={{ __html: parsedContent }}
               />
             ) : (
-              <p>No details available</p>
+              <p>Something went wrong...</p>
             )}
           </div>
         </div>

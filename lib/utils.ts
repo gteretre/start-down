@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { Author, Startup } from './models'; // Import types
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -69,4 +70,23 @@ export function slugify(data: string) {
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-'); // Replace multiple hyphens with a single one
   return `${slug}-${generateRandomString(10)}`;
+}
+
+export function getAuthorImage(author: Author | null | undefined): string {
+  if (!author || typeof author !== 'object') return '/logo.png';
+  const image = author.image;
+  if (typeof image === 'string' && (image.startsWith('http') || image.startsWith('/'))) {
+    return image;
+  }
+  return '/logo.png';
+}
+
+export function getStartupImage(post: Startup | null | undefined): string {
+  if (!post || typeof post !== 'object') return 'https://placehold.co/600x400?text=Startup+Image';
+  const image = post.image;
+  const title = typeof post.title === 'string' && post.title.trim() ? post.title : 'Startup Image';
+  if (typeof image === 'string' && (image.startsWith('http') || image.startsWith('/'))) {
+    return image;
+  }
+  return `https://placehold.co/600x400?text=${encodeURIComponent(title)}`;
 }

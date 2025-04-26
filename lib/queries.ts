@@ -221,7 +221,7 @@ export async function getStartupViews(id: string) {
   }
 }
 
-export async function getAuthorById(id: string) {
+export async function getAuthorById(id: string): Promise<import('./models').Author | null> {
   const db = await getDb();
   try {
     // Try to find by 'id' (OAuth provider ID)
@@ -230,32 +230,40 @@ export async function getAuthorById(id: string) {
     if (!author && ObjectId.isValid(id)) {
       author = await db.collection('authors').findOne({ _id: new ObjectId(id) });
     }
-    return author ? { ...author, _id: author._id.toString() } : null;
+    // Use mapAuthor to ensure correct type
+    return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
+    console.error('Error in getAuthorById:', error);
     throw new Error(
       `Error in getAuthorById: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
 
-export async function getAuthorByEmail(email: string) {
+export async function getAuthorByEmail(email: string): Promise<import('./models').Author | null> {
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ email });
-    return author ? { ...author, _id: author._id.toString() } : null;
+    // Use mapAuthor to ensure correct type
+    return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
+    console.error('Error in getAuthorByEmail:', error);
     throw new Error(
       `Error in getAuthorByEmail: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
 
-export async function getAuthorByUsername(username: string) {
+export async function getAuthorByUsername(
+  username: string
+): Promise<import('./models').Author | null> {
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ username });
-    return author ? { ...author, _id: author._id.toString() } : null;
+    // Use mapAuthor to ensure correct type
+    return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
+    console.error('Error in getAuthorByUsername:', error);
     throw new Error(
       `Error in getAuthorByUsername: ${error instanceof Error ? error.message : String(error)}`
     );

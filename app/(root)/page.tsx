@@ -1,24 +1,19 @@
 import { Squirrel } from 'lucide-react';
 import SearchForm from '@/components/SearchForm';
-import StartupCard from '@/components/StartupCard';
 import { getStartups } from '@/lib/queries';
-import StartupCardSmall from '@/components/StartupCardSmall';
-import StartupCardList from '@/components/StartupCardList';
 import type { Startup } from '@/lib/models';
+import StartupListClientWrapper from '@/components/StartupListClientWrapper'; // Import the wrapper
 
 const viewOptions = {
   card: {
     ulClass: 'mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3',
-    CardComponent: StartupCard,
   },
   small: {
     ulClass:
       'mt-7 grid grid-cols-1 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6',
-    CardComponent: StartupCardSmall,
   },
   list: {
     ulClass: 'mt-7 flex flex-col gap-4',
-    CardComponent: null,
   },
 };
 
@@ -34,7 +29,7 @@ async function Home({
   const cardView: ViewKey = (
     ['card', 'small', 'list'].includes(view as string) ? view : 'card'
   ) as ViewKey;
-  const { ulClass, CardComponent } = viewOptions[cardView];
+  const { ulClass } = viewOptions[cardView];
 
   return (
     <>
@@ -93,26 +88,16 @@ async function Home({
             Apply
           </button>
         </form>
-        {cardView === 'list' ? (
-          posts.length > 0 ? (
-            <StartupCardList posts={posts} />
-          ) : (
-            <p className="m-auto">
-              <Squirrel /> No posts found
-            </p>
-          )
+        {posts.length === 0 ? (
+          <p className="m-auto">
+            <Squirrel /> No posts found
+          </p>
         ) : (
-          <ul className={ulClass}>
-            {posts.length > 0 ? (
-              posts.map((post: Startup) =>
-                CardComponent ? <CardComponent key={post._id} post={post} /> : null
-              )
-            ) : (
-              <p className="m-auto">
-                <Squirrel /> No posts found
-              </p>
-            )}
-          </ul>
+          <StartupListClientWrapper
+            initialPosts={posts}
+            ulClass={ulClass} // ulClass might not be used by list view, but pass it anyway
+            viewType={cardView}
+          />
         )}
       </section>
     </>

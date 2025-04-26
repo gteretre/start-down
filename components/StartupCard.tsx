@@ -1,24 +1,12 @@
-import { cn, formatDate } from '@/lib/utils';
+import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils'; // Import utils
 import Link from 'next/link';
 import Image from 'next/image';
 import View from '@/components/View';
 import Tooltip from './Tooltip';
 import { Skeleton } from './ui/skeleton';
-import type { Author } from '@/lib/models';
+import type { Startup } from '@/lib/models';
 
-function getAuthorImage(author: Author) {
-  return author.image?.startsWith('http') || author.image?.startsWith('/')
-    ? author.image
-    : '/logo.png';
-}
-
-function getStartupImage(post: StartupCardType) {
-  return post.image?.startsWith('http') || post.image?.startsWith('/')
-    ? post.image
-    : `https://placehold.co/600x400?text=${encodeURIComponent(post.title)}`;
-}
-
-const StartupCard: React.FC<{ post: StartupCardType }> = ({ post }) => {
+const StartupCard: React.FC<{ post: Startup }> = ({ post }) => {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
   return (
@@ -26,7 +14,7 @@ const StartupCard: React.FC<{ post: StartupCardType }> = ({ post }) => {
       <div className="flex items-center justify-between gap-4">
         <Link href={`/startup/${post._id}`} className="flex min-w-0 flex-1 items-center gap-4">
           <p className="truncate">{formatDate(createdAtStr)}</p>
-          <View id={post._id} initialViews={post.views} />
+          <View views={post.views} />
         </Link>
         <Tooltip text={`${post.author.name}'s Profile`}>
           <Link href={`/user/${post.author.username}`} className="flex-shrink-0">
@@ -73,8 +61,6 @@ const StartupCard: React.FC<{ post: StartupCardType }> = ({ post }) => {
       </Link>
       <Link className="flex flex-col" href={`/startup/${post._id}`}>
         <div className="flex min-h-[300px] flex-col justify-between">
-          {' '}
-          {/* Adjust min-h as needed */}
           <p className="mb-4 line-clamp-3 min-h-[5em] text-justify">{post.description}</p>
           <div className="relative aspect-[3/2] w-full flex-shrink-0 rounded-3xl bg-gray-100">
             <Image
@@ -100,19 +86,7 @@ const StartupCard: React.FC<{ post: StartupCardType }> = ({ post }) => {
   );
 };
 
-type StartupCardType = {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  createdAt: Date | string;
-  author: Author;
-  views: number;
-  description: string;
-  category: string;
-  image?: string;
-};
 export default StartupCard;
-export type { StartupCardType };
 
 export const StartupCardSkeleton = () => {
   return (

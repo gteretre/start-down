@@ -1,55 +1,54 @@
-import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
-import type { Author } from '@/lib/models';
+import { formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
+import View from './View';
+import type { Startup } from '@/lib/models';
 
-function StartupCardList({ posts }: { posts: StartupCardType[] }) {
+function StartupCardList({ posts }: { posts: Startup[] }) {
   return (
-    <ul className="flex w-full flex-col gap-3">
+    <ul className="flex flex-col gap-4">
       {posts.map((post) => {
         const createdAtStr =
           typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
         return (
           <li
             key={post._id}
-            className="startup-card mx-auto flex w-full max-w-full select-none flex-row items-center gap-2 bg-card px-2 py-1 shadow ring-1 ring-ring"
-            style={{ borderRadius: '12px', minHeight: 0, height: '60px' }}
+            className="startup-card-list-item flex items-center gap-4 border-b pb-4"
           >
-            <Link href={`/startup/${post._id}`} className="flex-shrink-0">
-              <div className="relative h-12 w-16 overflow-hidden rounded bg-gray-100">
-                <Image
-                  src={
-                    post.image?.startsWith('http') || post.image?.startsWith('/')
-                      ? post.image
-                      : `https://placehold.co/128x96?text=${encodeURIComponent(post.title)}`
-                  }
-                  alt="startup image"
-                  fill
-                  className="startup-image object-cover"
-                  style={{ objectPosition: 'center top', borderRadius: '6px' }}
-                  sizes="64px"
-                />
-              </div>
+            <Link href={`/startup/${post._id}`} className="relative h-16 w-24 flex-shrink-0">
+              <Image
+                src={getStartupImage(post)}
+                alt="startup image"
+                fill
+                className="rounded object-cover ring-1"
+                sizes="100px"
+              />
             </Link>
-            <Link
-              href={`/startup/${post._id}`}
-              className="flex min-w-0 flex-1 flex-row items-center gap-1"
-            >
-              <div className="min-w-[40ch] max-w-[40ch] truncate text-xs font-bold">
-                {post.title}
+            <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+              <Link href={`/startup/${post._id}`}>
+                <h3 className="truncate text-lg font-semibold" title={post.title}>
+                  {post.title}
+                </h3>
+              </Link>
+              <p className="line-clamp-2 text-sm text-gray-600">{post.description}</p>
+              <div className="flex items-center gap-4 text-xs text-gray-500">
+                <Link href={`/user/${post.author.username}`} className="flex items-center gap-1">
+                  <Image
+                    src={getAuthorImage(post.author)}
+                    alt="author image"
+                    width={16}
+                    height={16}
+                    className="rounded-full"
+                  />
+                  <span>{post.author.name}</span>
+                </Link>
+                <span>{formatDate(createdAtStr)}</span>
+                <View views={post.views} />
+                <Link href={`/?query=${post.category}`} className="ml-auto capitalize">
+                  {post.category}
+                </Link>
               </div>
-              <span className="max-w-[8ch] truncate text-[9px] text-gray-400 sm:inline">
-                {formatDate(createdAtStr)}
-              </span>
-              {post.views}
-              <p className="ml-1 hidden min-w-[20ch] max-w-[20ch] truncate text-[9px] text-gray-500 sm:inline">
-                by <strong>{post.author.name}</strong>
-              </p>
-              <p className="ml-1 flex-1 truncate text-[9px] text-gray-500">{post.description}</p>
-              <div className="ml-2 flex flex-row items-center gap-1">
-                <span className="category max-w-[14ch] truncate text-[9px]">{post.category}</span>
-              </div>
-            </Link>
+            </div>
           </li>
         );
       })}
@@ -57,16 +56,4 @@ function StartupCardList({ posts }: { posts: StartupCardType[] }) {
   );
 }
 
-type StartupCardType = {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  createdAt: Date | string;
-  author: Author;
-  views: number;
-  description: string;
-  category: string;
-  image?: string;
-};
 export default StartupCardList;
-export type { StartupCardType };
