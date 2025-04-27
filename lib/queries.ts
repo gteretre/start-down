@@ -21,6 +21,7 @@ type RawAuthor = {
   image?: string;
   bio?: string;
   role?: string;
+  provider: string;
 };
 
 type RawStartup = {
@@ -48,6 +49,7 @@ function mapAuthor(raw: RawAuthor): import('./models').Author {
     image: raw.image || '',
     bio: raw.bio || '',
     role: raw.role || '',
+    provider: raw.provider,
   };
 }
 

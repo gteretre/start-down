@@ -1,5 +1,6 @@
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
+import AzureADProvider from 'next-auth/providers/azure-ad';
 import { getAuthorById, getAuthorByEmail, getAuthorByUsername } from '@/lib/queries';
 import { createAuthor } from '@/lib/mutations';
 import type { Author } from '@/lib/models';
@@ -7,7 +8,8 @@ import type { JWT } from 'next-auth/jwt';
 
 function getEnvVar(name: string): string {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing env var: ${name}`);
+  if (!value)
+    throw new Error(`Environment variable "${name}" is missing. Please check your .env.local.`);
   return value;
 }
 
@@ -57,6 +59,7 @@ type ProviderUser = {
   image?: string | null;
   role?: string;
   username?: string;
+  provider?: string;
 };
 
 type ProviderProfile = Record<string, unknown>;
@@ -87,6 +90,7 @@ export const options = {
           image: (profile.avatar_url as string) || '',
           role: 'GithubUser',
           username: (profile.login as string) || '',
+          provider: 'github',
         };
       },
     }),
@@ -103,69 +107,101 @@ export const options = {
           image: (profile.picture as string) || '',
           role: 'GoogleUser',
           username,
+          provider: 'google',
+        };
+      },
+    }),
+    AzureADProvider({
+      clientId: getEnvVar('AUTH_AZURE_AD_ID'),
+      clientSecret: getEnvVar('AUTH_AZURE_AD_SECRET'),
+      tenantId: getEnvVar('AUTH_AZURE_AD_TENANT'),
+      profile(profile: ProviderProfile): ProviderUser {
+        const email = (profile.email as string) || (profile.upn as string) || '';
+        const username = email ? email.split('@')[0] : '';
+        return {
+          id: String(profile.oid || profile.id || ''),
+          name: (profile.name as string) || username || '',
+          email,
+          image: (profile.picture as string) || '',
+          role: 'MicrosoftUser',
+          username,
+          provider: 'azuread',
         };
       },
     }),
   ],
   callbacks: {
     async signIn({ user, profile }: { user: ProviderUser; profile: ProviderProfile }) {
-      if (typeof window !== 'undefined' || !user?.email) return false;
+      const rawEmail = user.email as string | null | undefined;
+      const email = sanitizeEmail(rawEmail);
+      if (!email) {
+        console.error('SignIn: Invalid or missing email.');
+        return false;
+      }
+      let provider = '';
+      if (user.role === 'GithubUser') provider = 'github';
+      else if (user.role === 'GoogleUser') provider = 'google';
+      else if (user.role === 'MicrosoftUser') provider = 'azuread';
+
       let dbUser: Author | null = null;
       try {
         dbUser = await getAuthorById(profile.id ? String(profile.id) : '');
       } catch (err) {
         console.error('Error in getAuthorById:', err);
       }
+      // Always check by email if not found by id
       if (!dbUser) {
         try {
-          dbUser = await getAuthorByEmail(user.email!);
+          dbUser = await getAuthorByEmail(email);
         } catch (err) {
           console.error('Error in getAuthorByEmail:', err);
         }
       }
-      if (!dbUser) {
-        // Sanitize and validate all fields
-        const rawEmail = user.email as string | null | undefined;
-        const rawUsername = (profile.login as string) || (rawEmail ? rawEmail.split('@')[0] : '');
-        const rawName = user.name as string | null | undefined;
-        const rawImage =
-          (profile.avatar_url as string) || (profile.picture as string) || user.image;
-        const rawBio = typeof profile.bio === 'string' ? profile.bio : undefined;
-        const email = sanitizeEmail(rawEmail);
-        let username = sanitizeUsername(rawUsername);
-        if (!username) username = `user_${Date.now().toString().slice(-6)}`;
-        const name = sanitizeName(rawName) || username;
-        const image = sanitizeImage(rawImage);
-        const bio = sanitizeBio(rawBio) || 'I am a freshman here';
-        const role = user.role || '';
-        try {
-          await createAuthor({
-            id: profile.id ? String(profile.id) : '',
-            name,
-            username,
-            email,
-            image,
-            bio,
-            role,
-            createdAt: new Date(),
-          });
-          user.role = role;
-          user.username = username;
-        } catch (err: unknown) {
-          if (
-            err &&
-            typeof err === 'object' &&
-            'code' in err &&
-            (err as { code?: number }).code === 11000
-          ) {
-            throw new Error('EmailOrUsernameExists');
-          }
-          console.error('Failed to create user', err);
-          return false;
+
+      if (dbUser) {
+        if (!dbUser.provider || dbUser.provider !== provider) {
+          return '/auth/error?error=EmailOrUsernameExists';
         }
-      } else {
         user.role = dbUser.role;
         user.username = dbUser.username;
+        return true;
+      }
+
+      const rawUsername = (profile.login as string) || (email ? email.split('@')[0] : '');
+      const rawName = user.name as string | null | undefined;
+      const rawImage = (profile.avatar_url as string) || (profile.picture as string) || user.image;
+      const rawBio = typeof profile.bio === 'string' ? profile.bio : undefined;
+      let username = sanitizeUsername(rawUsername);
+      if (!username) username = `user_${Date.now().toString().slice(-6)}`;
+      const name = sanitizeName(rawName) || username;
+      const image = sanitizeImage(rawImage);
+      const bio = sanitizeBio(rawBio) || 'I am a freshman here';
+      const role = user.role || '';
+      try {
+        await createAuthor({
+          id: profile.id ? String(profile.id) : '',
+          name,
+          username,
+          email,
+          image,
+          bio,
+          role,
+          provider,
+          createdAt: new Date(),
+        });
+        user.role = role;
+        user.username = username;
+      } catch (err: unknown) {
+        if (
+          err &&
+          typeof err === 'object' &&
+          'code' in err &&
+          (err as { code?: number }).code === 11000
+        ) {
+          return '/auth/error?error=EmailOrUsernameExists';
+        }
+        console.error('Failed to create user', err);
+        return false;
       }
       return true;
     },
@@ -198,6 +234,6 @@ export const options = {
     },
   },
   pages: {
-    error: '/auth/error', // Custom error page for authentication errors
+    error: '/auth/error',
   },
 };
