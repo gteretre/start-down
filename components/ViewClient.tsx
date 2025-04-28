@@ -9,6 +9,7 @@ import { EyeIcon } from 'lucide-react';
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 const REFRESH_INTERVAL = 10000;
+const LIVE_VIEW_MAX_THRESHOLD = 100_000;
 
 function getVisitorId() {
   let id = document.cookie.match(/(^|;) ?visitor_id=([^;]*)(;|$)/)?.[2];
@@ -34,6 +35,11 @@ const ViewClient = ({
   incrementOnMount = false,
   isLoggedIn = false,
 }: ViewClientProps) => {
+  // Determine refresh interval based on views
+  const [dynamicRefresh, setDynamicRefresh] = useState(
+    initialViews > LIVE_VIEW_MAX_THRESHOLD ? 0 : REFRESH_INTERVAL
+  );
+
   const { toast } = useToast();
   const hasPostedRef = useRef(false);
   const [animate, setAnimate] = useState(false);
@@ -41,11 +47,21 @@ const ViewClient = ({
     fallbackData: { views: initialViews },
     revalidateOnFocus: true,
     revalidateOnMount: false,
-    refreshInterval: REFRESH_INTERVAL,
+    refreshInterval: dynamicRefresh,
     refreshWhenHidden: false,
     refreshWhenOffline: false,
     dedupingInterval: REFRESH_INTERVAL,
   });
+
+  // Update refresh interval if views cross threshold
+  useEffect(() => {
+    const views = data?.views ?? initialViews;
+    if (views > LIVE_VIEW_MAX_THRESHOLD && dynamicRefresh !== 0) {
+      setDynamicRefresh(0);
+    } else if (views <= LIVE_VIEW_MAX_THRESHOLD && dynamicRefresh === 0) {
+      setDynamicRefresh(REFRESH_INTERVAL);
+    }
+  }, [data?.views, initialViews, dynamicRefresh]);
 
   useEffect(() => {
     if (!id || !incrementOnMount || hasPostedRef.current) return;
@@ -99,7 +115,7 @@ const ViewClient = ({
   const views = data?.views ?? initialViews;
 
   return (
-    <Tooltip text={`${formatNumber(views)} Views`}>
+    <Tooltip text={`${views} Views`}>
       <div className="flex cursor-default items-center gap-1">
         <EyeIcon className="size-6 text-primary" />
         <span className={`text-16-medium flex gap-1 ${animate ? 'view-update-animate' : ''}`}>

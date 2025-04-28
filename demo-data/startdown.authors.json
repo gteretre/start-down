@@ -11,6 +11,8 @@
     "bio": "This is a demo user for testing purposes",
     "createdAt": {
       "$date": "2025-04-09T09:22:47.768Z"
-    }
+    },
+    "role": "demo",
+    "provider": "demo"
   }
 ]

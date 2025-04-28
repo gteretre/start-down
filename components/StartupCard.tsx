@@ -1,4 +1,4 @@
-import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils'; // Import utils
+import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import View from '@/components/View';
@@ -10,76 +10,58 @@ const StartupCard: React.FC<{ post: Startup }> = ({ post }) => {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
   return (
-    <li className="startup-card flex select-none flex-col gap-3">
-      <div className="flex items-center justify-between gap-4">
-        <Link href={`/startup/${post._id}`} className="flex min-w-0 flex-1 items-center gap-4">
-          <p className="truncate">{formatDate(createdAtStr)}</p>
+    <li className="startup-card">
+      <div className="flex items-center justify-between gap-2">
+        <div className="card-metadata flex-1">
+          <span>{formatDate(createdAtStr)}</span>
           <View views={post.views} />
-        </Link>
+        </div>
         <Tooltip text={`${post.author.name}'s Profile`}>
           <Link href={`/user/${post.author.username}`} className="flex-shrink-0">
             <Image
               src={getAuthorImage(post.author)}
               alt="profile picture"
-              width={48}
-              height={48}
+              width={32}
+              height={32}
               className="avatar"
             />
           </Link>
         </Tooltip>
       </div>
-
-      <Link
-        className="mb-1 flex h-[2.8em] items-center justify-center"
-        href={`/startup/${post._id}`}
-      >
-        <p
-          className={
-            'overflow-hidden break-words text-left font-bold ' +
-            (post.title.length <= 25 ? 'text-2xl' : post.title.length <= 40 ? 'text-xl' : 'text-md')
-          }
-          style={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            hyphens: 'auto',
-            WebkitHyphens: 'auto',
-            msHyphens: 'auto',
-            wordBreak: 'break-word',
-            maxWidth: '100%',
-          }}
-          title={post.title}
-        >
+      <Link href={`/startup/${post.slug}`} className="block">
+        <h2 className="card-title line-clamp-2 min-h-11" title={post.title}>
           {post.title}
+        </h2>
+      </Link>
+      <Link href={`/user/${post.author.username}`} className="block">
+        <p className="text-xs text-muted-foreground">
+          by <strong>{post.author.name}</strong>
         </p>
       </Link>
-      <Link className="flex flex-col items-end" href={`/user/${post.author.username}`}>
-        <p className="text-sm text-gray-500">
-          created by <strong>{post.author.name}</strong>
-        </p>
-      </Link>
-      <Link className="flex flex-col" href={`/startup/${post._id}`}>
-        <div className="flex min-h-[300px] flex-col justify-between">
-          <p className="mb-4 line-clamp-3 min-h-[5em] text-justify">{post.description}</p>
-          <div className="relative aspect-[3/2] w-full flex-shrink-0 rounded-3xl bg-gray-100">
-            <Image
-              src={getStartupImage(post)}
-              alt="startup image"
-              fill
-              className="startup-image object-cover ring-2"
-              style={{ objectPosition: 'center top' }}
-              sizes="(max-width: 600px) 100vw, 600px"
-            />
-          </div>
+      <Link href={`/startup/${post.slug}`} className="mt-2 block">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg">
+          <Image
+            src={getStartupImage(post)}
+            alt="startup image"
+            fill
+            className="startup-image"
+            style={{ objectPosition: 'center top' }}
+            sizes="(max-width: 600px) 90vw, (max-width: 900px) 400px, 450px"
+          />
         </div>
       </Link>
-      <div className="mt-2 flex w-full justify-between">
+      <Link
+        href={`/startup/${post.slug}`}
+        className="card-description mt-2 line-clamp-3 min-h-[4.5em]"
+      >
+        {post.description}
+      </Link>
+      <div className="mt-auto flex items-end justify-between pt-2">
         <Link href={`/?query=${post.category}`}>
-          <p className="category">{post.category}</p>
+          <span className="card-category">{post.category}</span>
         </Link>
-        <Link href={`/startup/${post._id}`}>
-          <button className="search-btn p-2">More...</button>
+        <Link href={`/startup/${post.slug}`} className="card-more-link">
+          More...
         </Link>
       </div>
     </li>
@@ -92,8 +74,20 @@ export const StartupCardSkeleton = () => {
   return (
     <>
       {[0, 1, 2, 3, 4].map((index: number) => (
-        <li key={cn('skeleton', index)}>
-          <Skeleton className="h-4 w-1/2" />
+        <li key={cn('skeleton-card', index)} className="startup-card space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+          <Skeleton className="h-11 w-4/5" />
+          <Skeleton className="h-3 w-1/4" />
+          <Skeleton className="mt-2 h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="mt-2 aspect-[16/10] w-full rounded-lg" />
+          <div className="flex items-center justify-between pt-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/6" />
+          </div>
         </li>
       ))}
     </>

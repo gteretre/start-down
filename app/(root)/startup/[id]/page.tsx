@@ -4,23 +4,22 @@ import Image from 'next/image';
 import markdownit from 'markdown-it';
 const md = markdownit({ html: true });
 
-import { getStartupById } from '@/lib/queries';
+import { getStartupBySlug } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
 import ShareButton from '@/components/ui/ShareButton';
 import ViewClient from '@/components/ViewClient';
 import Tooltip from '@/components/Tooltip';
 import FeaturedStartups from '@/components/FeaturedStartups';
-import { ObjectId } from 'mongodb';
 import { auth } from '@/lib/auth';
-import Adds from '@/components/Adds';
 import type { Startup } from '@/lib/models';
 
-const Page = async (props: { params: Promise<{ id: string }> }) => {
-  const { id } = await props.params;
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id: slug } = await params;
   const session = await auth();
-  if (!ObjectId.isValid(id)) return notFound();
-  const fetchedPost = await getStartupById(id);
+
+  const fetchedPost = await getStartupBySlug(slug);
   if (!fetchedPost) return notFound();
+
   const post: Startup = fetchedPost;
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
@@ -28,62 +27,52 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
   const parsedContent = md.render(post.pitch);
   return (
     <>
-      <section className="blueContainer flex flex-col px-8 py-4">
-        <div className="m-auto max-w-[800px] justify-center">
-          <div>
-            <div
-              className="mx-6 my-8 flex justify-between gap-20 md:mx-12"
-              style={{ cursor: 'default' }}
+      <section className="mb-8 bg-card p-6 px-10 shadow-sm md:px-20 lg:px-60">
+        <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+          <Tooltip text={`Created: ${formatDateAgo(createdAtStr)}`}>
+            <span className="cursor-default">{formatDate(createdAtStr)}</span>
+          </Tooltip>
+          <ViewClient
+            id={post._id}
+            initialViews={post.views}
+            incrementOnMount={true}
+            isLoggedIn={!!session}
+          />
+        </div>
+        <h1
+          className="mb-3 text-3xl font-bold leading-tight text-foreground md:text-4xl"
+          title={post.title}
+        >
+          {post.title}
+        </h1>
+        <p className="mb-5 text-base text-muted-foreground md:text-lg">{post.description}</p>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Tooltip text={post.author.bio || 'Author bio'}>
+            <Link
+              className="flex items-center gap-3 transition-opacity hover:opacity-80"
+              href={`/user/${post.author.username}`}
             >
-              <Tooltip text={`Created: ${formatDateAgo(createdAtStr)}`}>
-                <p className="cursor-default text-start">{formatDate(createdAtStr)}</p>
-              </Tooltip>
-              <ViewClient
-                id={id}
-                initialViews={post.views}
-                incrementOnMount={true}
-                isLoggedIn={!!session}
+              <Image
+                src={getAuthorImage(post.author)}
+                alt={post.author.name + 's avatar'}
+                width={40}
+                height={40}
+                className="avatar"
               />
-            </div>
-            <div className="textBox">
-              <p
-                className={
-                  post.title.length <= 40
-                    ? 'animated-heading text-4xl font-bold'
-                    : post.title.length <= 60
-                      ? 'animated-heading text-2xl font-bold'
-                      : 'animated-heading truncate text-xl font-bold'
-                }
-                title={post.title}
-              >
-                {post.title}
-              </p>
-            </div>
-            <div className="mx-8 mt-8 text-start lg:mx-32">
-              <h3>{post.description}</h3>
-            </div>
+              <div className="text-sm">
+                <p className="font-semibold text-foreground">{post.author.name}</p>
+                <p className="text-muted-foreground">@{post.author.username}</p>
+              </div>
+            </Link>
+          </Tooltip>
+          <div className="flex items-center gap-4">
+            <Link href={`/?query=${post.category}`}>
+              <span className="card-category rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20 hover:bg-primary/20">
+                {post.category}
+              </span>
+            </Link>
+            <ShareButton title={post.title} text={post.description} url={'/startup/' + post.slug} />
           </div>
-          <div className="author mx-12">
-            <Tooltip text={post.author.bio}>
-              <Link className="flex justify-between gap-2" href={`/user/${post.author.username}`}>
-                <Image
-                  src={getAuthorImage(post.author)}
-                  alt={post.author.name + 's avatar'}
-                  width={48}
-                  height={48}
-                  className="avatar"
-                />
-                <div className="flex flex-col items-start pt-1">
-                  <p className="text-24-medium">
-                    <strong>{post.author.name}</strong>
-                  </p>
-                  <p className="text-16-medium">@{post.author.username}</p>
-                </div>
-              </Link>
-            </Tooltip>
-            <ShareButton title={post.title} text={post.description} url={'/startup/' + post._id} />
-          </div>
-          <p className="category mx-12 text-end text-sm">{post.category}</p>
         </div>
       </section>
 
@@ -110,21 +99,19 @@ const Page = async (props: { params: Promise<{ id: string }> }) => {
       </section>
       <hr />
 
-      <section className="flex flex-row items-start justify-center">
-        {(!session || session.user.role !== 'admin') && <Adds />}
-        <div className="mx-4 flex-1">
-          <FeaturedStartups />
+      <section className="">
+        <div className="px-5">
+          <div className="">
+            <FeaturedStartups />
+          </div>
         </div>
-        {(!session || session.user.role !== 'admin') && <Adds />}
       </section>
       <hr />
 
       <section>
-        <div className="mx-6 my-6 flex justify-center md:mx-10 md:my-12 lg:mx-16">
-          <div className="articleBox">
-            <h2 className="text-24-medium">Comments</h2>
-            <p>Comments will be available soon</p>
-          </div>
+        <div className="mb-8 p-6 px-10 md:px-20 lg:px-60">
+          <h2 className="text-24-medium">Comments</h2>
+          <p>Comments will be available soon</p>
         </div>
       </section>
     </>

@@ -1,5 +1,4 @@
 'use server';
-
 import { auth } from '@/lib/auth';
 import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
@@ -13,12 +12,9 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
     });
   }
 
-  // Extract form data values
   const formEntries = Array.from(form.entries());
-
   const formData = Object.fromEntries(formEntries);
   const { title, description, category, link } = formData;
-
   if (!title || !description || !category || !pitch) {
     return parseServerActionResponse({
       error: 'Missing required fields',
@@ -26,9 +22,22 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
     });
   }
 
-  const slug = slugify(title as string);
+  // Check if a startup with the same slug exists
+  const checkSlugExists = async (slug: string) => {
+    const db = await import('./mongodb').then((m) => m.getDb());
+    const existing = await (await db).collection('startups').findOne({ slug });
+    return !!existing;
+  };
+
+  const slug = await slugify(title as string, checkSlugExists);
 
   try {
+    if (!session.user || !('username' in session.user) || !session.user.username) {
+      return parseServerActionResponse({
+        error: 'User session invalid',
+        status: 'ERROR',
+      });
+    }
     const author = await getAuthorByUsername(session.user.username);
 
     if (!author) {
@@ -39,13 +48,14 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
     }
 
     const startup = {
-      title,
-      description,
-      category,
-      image: link,
-      slug: { current: slug },
-      author: author._id, // Use the MongoDB ObjectId reference
+      title: title as string,
+      description: description as string,
+      category: category as string,
+      image: link as string,
+      slug: slug,
+      author: author._id,
       pitch,
+      views: 0,
     };
 
     const result = await createStartup(startup);

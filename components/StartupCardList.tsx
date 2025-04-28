@@ -6,45 +6,44 @@ import type { Startup } from '@/lib/models';
 
 function StartupCardList({ posts }: { posts: Startup[] }) {
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col">
       {posts.map((post) => {
         const createdAtStr =
           typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
         return (
-          <li
-            key={post._id}
-            className="startup-card-list-item flex items-center gap-4 border-b pb-4"
-          >
-            <Link href={`/startup/${post._id}`} className="relative h-16 w-24 flex-shrink-0">
+          <li key={post._id} className="startup-card-list-item">
+            <Link href={`/startup/${post.slug}`} className="relative h-14 w-20 flex-shrink-0">
               <Image
                 src={getStartupImage(post)}
                 alt="startup image"
                 fill
-                className="rounded object-cover ring-1"
-                sizes="100px"
+                className="startup-image rounded-md"
+                sizes="80px"
               />
             </Link>
-            <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-              <Link href={`/startup/${post._id}`}>
-                <h3 className="truncate text-lg font-semibold" title={post.title}>
+            <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+              <Link href={`/startup/${post.slug}`}>
+                <h3 className="card-title truncate text-base" title={post.title}>
                   {post.title}
                 </h3>
               </Link>
-              <p className="line-clamp-2 text-sm text-gray-600">{post.description}</p>
-              <div className="flex items-center gap-4 text-xs text-gray-500">
-                <Link href={`/user/${post.author.username}`} className="flex items-center gap-1">
+              <div className="card-metadata">
+                <Link
+                  href={`/user/${post.author.username}`}
+                  className="flex items-center gap-1 hover:underline"
+                >
                   <Image
                     src={getAuthorImage(post.author)}
                     alt="author image"
                     width={16}
                     height={16}
-                    className="rounded-full"
+                    className="avatar h-4 w-4"
                   />
-                  <span>{post.author.name}</span>
+                  <span className="text-xs">{post.author.name}</span>
                 </Link>
-                <span>{formatDate(createdAtStr)}</span>
+                <span className="text-xs">{formatDate(createdAtStr)}</span>
                 <View views={post.views} />
-                <Link href={`/?query=${post.category}`} className="ml-auto capitalize">
+                <Link href={`/?query=${post.category}`} className="card-category ml-auto pl-2">
                   {post.category}
                 </Link>
               </div>

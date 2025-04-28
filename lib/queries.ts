@@ -27,7 +27,7 @@ type RawAuthor = {
 type RawStartup = {
   _id: string | ObjectId;
   title?: string;
-  slug?: { current: string };
+  slug?: string;
   createdAt?: Date | string;
   author: RawAuthor;
   views?: number;
@@ -57,7 +57,7 @@ function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('./models').S
   return {
     _id: raw._id?.toString() || '',
     title: raw.title || '',
-    slug: raw.slug || { current: '' },
+    slug: raw.slug || '',
     createdAt:
       raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
     author: mapAuthor(authorObj),
@@ -183,29 +183,13 @@ export async function getStartupById(id: string) {
   return null;
 }
 
-export async function getPlaylistBySlug(slug: string) {
+export async function getStartupBySlug(slug: string): Promise<import('./models').Startup | null> {
   const db = await getDb();
-  const playlist = await db.collection('playlists').findOne({ 'slug.current': slug });
-
-  if (!playlist) return null;
-
-  // Get author information if author field exists
-  if (playlist.author) {
-    const authorId =
-      playlist.author instanceof ObjectId ? playlist.author : new ObjectId(playlist.author);
-    const author = await db.collection('authors').findOne({ _id: authorId });
-
-    return {
-      ...playlist,
-      _id: playlist._id.toString(),
-      author,
-    };
-  }
-
-  return {
-    ...playlist,
-    _id: playlist._id.toString(),
-  };
+  const raw = await db.collection('startups').findOne({ slug });
+  if (!raw) return null;
+  const author = await db.collection('authors').findOne({ _id: raw.author });
+  if (!author) return null;
+  return mapStartup(raw, author);
 }
 
 export async function getStartupViews(id: string) {

@@ -4,17 +4,15 @@
       "$oid": "67f63d2e64c2503554b71237"
     },
     "title": "AI-Powered Cat Translator",
-    "slug": {
-      "current": "ai-powered-cat-translator"
-    },
+    "slug": "ai-powered-cat-translator",
     "description": "An app that translates your cat's meows into human language",
     "category": "tech",
     "image": "/catai.png",
     "pitch": "# AI-Powered Cat Translator\n\n## The Problem\nCat owners often struggle to understand what their feline friends are trying to communicate. Is your cat hungry? Bored? Plotting world domination? Without proper translation, it's hard to tell!\n\n## The Solution\nOur AI-powered Cat Translator uses advanced machine learning algorithms to analyze the frequency, duration, and intonation of cat meows to accurately translate them into human language. The app also considers the cat's body language using your phone's camera for context.\n\n## Market Potential\nThere are over 370 million pet cats worldwide, with cat owners spending an average of $1,200 per year on their pets. The pet tech market is projected to reach $20 billion by 2025.\n\n## Business Model\nWe'll offer a freemium model with basic translations available for free, and premium features like detailed emotion analysis and behavior predictions available via subscription ($4.99/month).\n\n## Next Steps\nWe're currently training our AI model and developing an MVP. We're seeking seed funding to accelerate development and bring this revolutionary product to market within 6 months.",
     "author": {
-      "$oid": "67f63c6764c2503554b71236"
+      "$oid": "67f690133c7a1f679b1a2120"
     },
-    "views": 97,
+    "views": 124,
     "createdAt": {
       "$date": "2025-04-04T22:56:06.874Z"
     }
@@ -24,9 +22,7 @@
       "$oid": "67f648e964c2503554b71238"
     },
     "title": "Forgetting Floss: A Dental Reminder App",
-    "slug": {
-      "current": "forgetting-floss-a-dental-reminder-app"
-    },
+    "slug": "forgetting-floss-a-dental-reminder-app",
     "description": "An app that nags you more than your dentist, sending embarrassing notifications if you haven't flossed today",
     "category": "health",
     "image": "/dentistapp.jpg",
@@ -34,7 +30,7 @@
     "author": {
       "$oid": "67f63c6764c2503554b71236"
     },
-    "views": 17,
+    "views": 28,
     "createdAt": {
       "$date": "2025-04-09T10:16:09.869Z"
     }
@@ -44,9 +40,7 @@
       "$oid": "67f648e964c2503554b71239"
     },
     "title": "Sock Matcher: Orphan Sock Dating Service",
-    "slug": {
-      "current": "sock-matcher-orphan-sock-dating-service"
-    },
+    "slug": "sock-matcher-orphan-sock-dating-service",
     "description": "A platform where people can find new partners for their single socks or repurpose lonely socks into something useful",
     "category": "lifestyle",
     "image": "/findsock.png",
@@ -54,7 +48,7 @@
     "author": {
       "$oid": "67f63c6764c2503554b71236"
     },
-    "views": 29,
+    "views": 111,
     "createdAt": {
       "$date": "2025-04-15T17:16:09.869Z"
     }
@@ -64,9 +58,7 @@
       "$oid": "67f648e964c2503554b7123a"
     },
     "title": "Passive-Aggressive Roommate Bot",
-    "slug": {
-      "current": "passive-aggressive-roommate-bot"
-    },
+    "slug": "passive-aggressive-roommate-bot",
     "description": "An AI assistant that leaves subtle hints about cleaning, similar to a passive-aggressive roommate but without the awkward confrontations",
     "category": "home",
     "image": "/roommateai.png",
@@ -74,7 +66,7 @@
     "author": {
       "$oid": "67f63c6764c2503554b71236"
     },
-    "views": 52,
+    "views": 65,
     "createdAt": {
       "$date": "2025-04-13T12:09:09.869Z"
     }
@@ -84,9 +76,7 @@
       "$oid": "67f648e964c2503554b7123b"
     },
     "title": "FOMO Insurance",
-    "slug": {
-      "current": "fomo-insurance"
-    },
+    "slug": "fomo-insurance",
     "description": "Insurance that pays out when you miss amazing social events, with compensation based on how awesome the event actually was",
     "category": "finance",
     "image": "/fomoinsurance.png",
@@ -94,7 +84,7 @@
     "author": {
       "$oid": "67f63c6764c2503554b71236"
     },
-    "views": 38,
+    "views": 47,
     "createdAt": {
       "$date": "2025-04-09T10:16:09.869Z"
     }
@@ -104,9 +94,7 @@
       "$oid": "67f648e964c2503554b7123c"
     },
     "title": "Quantum Procrastination",
-    "slug": {
-      "current": "quantum-procrastination"
-    },
+    "slug": "quantum-procrastination",
     "description": "An app that uses quantum computing principles to help you get things done by delegating tasks to parallel universe versions of yourself",
     "category": "productivity",
     "image": "/quantumapp.png",
@@ -114,7 +102,7 @@
     "author": {
       "$oid": "67f63c6764c2503554b71236"
     },
-    "views": 64,
+    "views": 69,
     "createdAt": {
       "$date": "2025-04-09T10:16:09.869Z"
     }

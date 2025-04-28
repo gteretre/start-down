@@ -30,11 +30,11 @@
     --foreHeader: #ededed;
     --universal: rgb(156 163 175);
     --background: 0 0% 95%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --foreground: 222.2 84% 5%;
+    --card: 0 0% 96%;
+    --card-foreground: 222.2 84% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222.2 84% 5%;
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
@@ -47,8 +47,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --ring-small: 222.2 84% 4.9%;
+    --ring: 222.2 84% 5%;
+    --ring-small: 222.2 84% 5%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -57,11 +57,11 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222.2 84% 5%;
     --foreground: 210 40% 98%;
-    --card: 210 30% 12%;
+    --card: 222.2 84% 7%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 84% 5%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -148,6 +148,10 @@
   }
   .dark .blueContainer {
     @apply bg-gradient-to-r from-blue-700 via-blue-800 to-blue-950 text-gray-200;
+    /* Add a visible shadow for blueContainer in dark mode */
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.7),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.1);
   }
   .blueContainer h1 {
     @apply mb-4 text-4xl font-bold;
@@ -162,10 +166,14 @@
     @apply text-4xl font-semibold;
   }
   .articleBox {
-    @apply rounded-lg bg-gray-50 px-6 py-8 ring-1 ring-ring md:px-12 lg:px-20;
+    @apply rounded-lg bg-gray-50 px-6 py-8 md:px-12 lg:px-20;
   }
   .dark .articleBox {
     @apply bg-black;
+    /* Add a visible shadow for articleBox in dark mode */
+    box-shadow:
+      0 2px 16px 0 rgba(0, 0, 0, 0.6),
+      0 1px 4px 0 rgba(80, 180, 255, 0.08);
   }
   .articleBox h1 {
     @apply mb-10 text-4xl font-bold;
@@ -183,13 +191,63 @@
     @apply mx-auto max-w-7xl px-6 py-10;
   }
   .startup-card {
-    @apply max-h-[650px] min-h-[500px] min-w-[300px] max-w-[500px] rounded-[22px] bg-card p-6 px-5 shadow-lg ring-2 ring-ring transition-all duration-300 ease-in-out;
-  }
-  .startup-card h1 {
-    @apply line-clamp-1 text-2xl font-semibold;
+    @apply card-base flex select-none flex-col gap-4 p-4 shadow-md;
+    min-width: 280px; /* Adjusted min-width */
+    max-width: 450px; /* Adjusted max-width */
+    min-height: auto; /* Remove fixed min-height */
   }
   .startup-card:hover {
-    transform: translateY(-8px) scale(1.01);
+    @apply shadow-lg;
+    transform: translateY(-4px);
+  }
+  .dark .startup-card {
+    /* Stronger, more visible shadow for dark mode */
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.7),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.12);
+  }
+  .dark .startup-card:hover {
+    /* Even more visible on hover */
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.85),
+      0 2px 16px 0 rgba(80, 180, 255, 0.18);
+    /* Optionally add a subtle blue glow for accent */
+  }
+  .startup-card-list-item {
+    @apply flex items-start gap-3 border-b border-border p-3 transition-colors duration-150 hover:bg-muted/50; /* Added subtle hover */
+  }
+  .startup-card-small {
+    @apply card-base flex select-none flex-col gap-2 p-2 shadow;
+  }
+  .startup-card-small:hover {
+    @apply shadow-md;
+    transform: scale(1.03);
+  }
+  .dark .startup-card-small {
+    /* Stronger shadow for small cards in dark mode */
+    box-shadow:
+      0 2px 12px 0 rgba(0, 0, 0, 0.65),
+      0 1px 4px 0 rgba(80, 180, 255, 0.1);
+  }
+  .dark .startup-card-small:hover {
+    box-shadow:
+      0 4px 20px 0 rgba(0, 0, 0, 0.8),
+      0 2px 8px 0 rgba(80, 180, 255, 0.16);
+  }
+  .card-title {
+    @apply text-lg font-semibold leading-tight text-foreground;
+  }
+  .card-description {
+    @apply text-sm text-muted-foreground;
+  }
+  .card-metadata {
+    @apply flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground; /* Allow wrapping */
+  }
+  .card-category {
+    @apply text-xs font-medium capitalize text-primary hover:underline;
+  }
+  .card-more-link {
+    @apply mt-auto pt-2 text-sm font-medium text-primary hover:underline; /* Aligns link to bottom */
   }
   .category {
     @apply text-gray-400;
@@ -198,7 +256,7 @@
     @apply mx-auto mt-6 flex w-full max-w-4xl justify-between px-12 text-sm;
   }
   .avatar {
-    @apply max-h-48 min-h-12 min-w-12 max-w-48 rounded-3xl ring-2 transition-all duration-300 ease-in-out hover:rounded-lg;
+    @apply rounded-full ring-1 ring-border transition-transform duration-200 ease-in-out hover:scale-110; /* Standardized */
   }
   .divider {
     @apply mx-auto my-10 max-w-4xl border-dotted bg-zinc-400;
@@ -257,7 +315,7 @@
     @apply ring-gray-400;
   }
   .startup-image {
-    @apply rounded-lg object-cover shadow-md ring-1 ring-ring transition-all duration-300 ease-in-out;
+    @apply rounded-lg object-cover ring-1 ring-inset ring-border; /* Standardized rounding */
   }
   .nav-element {
     @apply flex cursor-pointer items-center justify-center px-1 focus:outline-none;
@@ -272,6 +330,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+  }
+  .card-base {
+    @apply rounded-xl bg-card ring-1 ring-border transition-all duration-200 ease-in-out;
   }
 }
 
@@ -412,4 +473,11 @@
         0 0 0 0 #ffe066;
     }
   }
+}
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+}
+.scroll-snap-align-start {
+  scroll-snap-align: start;
 }

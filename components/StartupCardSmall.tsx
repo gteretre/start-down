@@ -9,34 +9,37 @@ function StartupCardSmall({ post }: { post: Startup }) {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
   return (
-    <li className="startup-card-small flex select-none flex-col gap-1">
-      <Link href={`/startup/${post._id}`} className="relative aspect-[3/2] w-full rounded-lg">
+    <li className="startup-card-small">
+      <Link
+        href={`/startup/${post.slug}`}
+        className="relative block aspect-[16/10] w-full overflow-hidden rounded-md"
+      >
         <Image
           src={getStartupImage(post)}
           alt="startup image"
           fill
-          className="startup-image object-cover ring-2"
+          className="startup-image"
           style={{ objectPosition: 'center top' }}
           sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
       </Link>
-      <div className="flex items-center justify-between gap-1">
-        <Link href={`/startup/${post._id}`} className="flex min-w-0 flex-1 items-center gap-1">
-          <p className="truncate text-xs">{formatDate(createdAtStr)}</p>
+      <div className="card-metadata mt-1 flex items-center justify-between gap-1 px-0.5">
+        <div className="flex min-w-0 flex-1 items-center gap-1">
+          <span className="truncate text-xs">{formatDate(createdAtStr)}</span>
           <View views={post.views} />
-        </Link>
+        </div>
         <Link href={`/user/${post.author.username}`} className="flex-shrink-0">
           <Image
             src={getAuthorImage(post.author)}
             alt="profile picture"
-            width={12}
-            height={12}
-            className="avatar"
+            width={16}
+            height={16}
+            className="avatar h-4 w-4"
           />
         </Link>
       </div>
-      <Link href={`/startup/${post._id}`}>
-        <p className="line-clamp-2 text-sm font-semibold" title={post.title}>
+      <Link href={`/startup/${post.slug}`} className="block px-0.5 pb-1">
+        <p className="card-title line-clamp-2 text-sm" title={post.title}>
           {post.title}
         </p>
       </Link>
@@ -50,8 +53,13 @@ export const StartupCardSmallSkeleton = () => {
   return (
     <>
       {[0, 1, 2, 3, 4].map((index: number) => (
-        <li key={cn('skeleton-small', index)}>
-          <Skeleton className="h-2 w-1/4" />
+        <li key={cn('skeleton-small', index)} className="startup-card-small space-y-1.5 p-2">
+          <Skeleton className="aspect-[16/10] w-full rounded-md" />
+          <div className="flex items-center justify-between px-0.5">
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-4/5 px-0.5" />
         </li>
       ))}
     </>

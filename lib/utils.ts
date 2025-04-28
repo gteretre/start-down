@@ -60,16 +60,22 @@ export function generateRandomString(length: number): string {
   return result;
 }
 
-export function slugify(data: string) {
-  const slug = data
+export async function slugify(title: string, checkSlugExists: (slug: string) => Promise<boolean>) {
+  const baseSlug = title
     .trim()
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks
-    .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric characters except spaces and hyphens
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-'); // Replace multiple hyphens with a single one
-  return `${slug}-${generateRandomString(10)}`;
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+  let slug = baseSlug;
+  let attempt = 0;
+  while (await checkSlugExists(slug)) {
+    slug = `${baseSlug}-${generateRandomString(10)}`;
+    attempt++;
+    if (attempt > 5) break; // avoid infinite loop
+  }
+  return slug;
 }
 
 export function getAuthorImage(author: Author | null | undefined): string {

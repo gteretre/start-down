@@ -5,6 +5,7 @@ export interface Author {
   username: string;
   email: string;
   createdAt: Date;
+  provider: string;
   image?: string;
   bio?: string;
   role?: string;
@@ -13,9 +14,7 @@ export interface Author {
 export interface Startup {
   _id: string;
   title: string;
-  slug: {
-    current: string;
-  };
+  slug: string;
   createdAt: Date;
   author: Author;
   views: number;
