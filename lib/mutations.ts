@@ -8,13 +8,10 @@ export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>)
   if (!db) {
     throw new Error('Database connection failed');
   }
-
-  // Validate required fields
   if (!startup.title || !startup.description || !startup.author) {
     throw new Error('Missing required fields for startup');
   }
 
-  // Make sure author field is an ObjectId
   let authorObjectId;
   try {
     authorObjectId =
@@ -23,7 +20,6 @@ export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>)
     throw new Error('Invalid author ID format: ' + error.message);
   }
 
-  // Create the document with proper ObjectId
   const startupDoc = {
     ...startup,
     author: authorObjectId,

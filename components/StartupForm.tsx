@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
 import { useActionState } from 'react';
-import { validateForm } from '@/lib/validation';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
+import { validateForm } from '@/lib/validation';
 import { Button } from './ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import MDEditor from '@uiw/react-md-editor';
@@ -55,10 +55,10 @@ function StartupForm() {
       setErrors(fieldErrors);
       toast({
         title: 'Input Error',
-        description: 'Please check Your inputs and try again',
+        description: 'Please check your inputs and try again',
         variant: 'destructive',
       });
-      return { ...prevState, error: 'Validation failed', status: 'ERROR' };
+      return { ...prevState, error: '', status: 'ERROR' };
     }
 
     try {
@@ -88,8 +88,15 @@ function StartupForm() {
 
         // Add a small delay before redirecting to ensure database operation completes
         setTimeout(() => {
-          router.push(`/startup/${result._id}`);
+          router.push(`/startup/${result.slug}`);
         }, 1000);
+      } else if (result && result.error) {
+        // Show specific server error (e.g., forbidden name, duplicate, etc.)
+        toast({
+          title: 'Submission Error',
+          description: result.error,
+          variant: 'destructive',
+        });
       } else {
         // Handle case where result doesn't have expected structure
         toast({
@@ -103,19 +110,19 @@ function StartupForm() {
     } catch (error) {
       console.error('Error creating pitch:', error);
       toast({
-        title: 'Input Error',
-        description: 'An unexpected error occured',
+        title: 'Something went wrong',
+        description: 'Please try again later.',
         variant: 'destructive',
       });
       return {
         ...prevState,
-        error: 'An unexpected error occured',
+        error: '',
         status: 'ERROR',
       };
     }
   };
 
-  const [state, formAction, isPending] = useActionState(handleFormSubmit, {
+  const [, formAction, isPending] = useActionState(handleFormSubmit, {
     error: '',
     status: 'INITIAL',
   });
@@ -142,134 +149,197 @@ function StartupForm() {
   return (
     <form
       action={formAction}
-      className="articleBox mx-auto my-12 max-w-3xl space-y-10 rounded-xl bg-card p-8 px-8 shadow-md"
+      className="relative mx-auto my-16 max-w-3xl space-y-12 rounded-3xl border border-border bg-gradient-to-br from-blue-100 via-white to-blue-50 p-4 shadow-2xl dark:from-blue-950 dark:via-gray-900 dark:to-blue-900 md:p-10 lg:px-32"
     >
-      <h2 className="mb-6 text-center text-2xl font-bold">Create Your Startup Pitch</h2>{' '}
-      <div className="form-section">
-        <label
-          htmlFor="title"
-          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
-        >
-          Project Name
-          <Tooltip text="3-80 characters" position="right">
-            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
-          </Tooltip>
-        </label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          className="form-input w-full transition-all duration-200 focus:ring-2"
-          required
-          placeholder="Enter a memorable name for your startup idea"
-          value={formValues.title}
-          onChange={handleInputChange}
-        />
-        {errors.title && <p className="mt-1 text-sm font-medium text-red-500">{errors.title}</p>}
-      </div>
-      <div className="form-section">
-        <label
-          htmlFor="description"
-          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
-        >
-          Executive Summary
-          <Tooltip text="20-500 characters" position="right">
-            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
-          </Tooltip>
-        </label>
-        <Textarea
-          id="description"
-          name="description"
-          className="form-input min-h-[120px] transition-all duration-200 focus:ring-2"
-          required
-          placeholder="Provide a concise summary of your startup concept (2-3 sentences)"
-          value={formValues.description}
-          onChange={handleInputChange}
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm font-medium text-red-500">{errors.description}</p>
-        )}
-      </div>
-      <div className="form-section">
-        <label
-          htmlFor="category"
-          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
-        >
-          Industry Category
-          <Tooltip text="3-20 characters" position="right">
-            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
-          </Tooltip>
-        </label>
-        <input
-          type="text"
-          id="category"
-          name="category"
-          className="form-input transition-all duration-200 focus:ring-2"
-          required
-          placeholder="e.g., Tech, Health, Finance, Education"
-          value={formValues.category}
-          onChange={handleInputChange}
-        />
-        {errors.category && (
-          <p className="mt-1 text-sm font-medium text-red-500">{errors.category}</p>
-        )}
-      </div>
-      <div className="form-section">
-        <label
-          htmlFor="link"
-          className="form-label mb-2 flex items-center gap-2 text-lg font-medium"
-        >
-          Image URL
-          <Tooltip
-            text={`Allowed domains:
-          placehold.co, drive.google.com, docs.google.com, photos.google.com,
-          dl.dropboxusercontent.com, onedrive.live.com, icloud.com, i.imgur.com,
-          live.staticflickr.com, *.s3.amazonaws.com, www.dropbox.com`}
-            position="right"
-            multiline={true}
-          >
-            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
-          </Tooltip>
-        </label>
-        <input
-          type="url"
-          id="link"
-          name="link"
-          className="form-input transition-all duration-200 focus:ring-2"
-          placeholder="(Optional) Enter a URL for your startup's image"
-          value={formValues.link}
-          onChange={handleInputChange}
-        />
-        {errors.link && <p className="mt-1 text-sm font-medium text-red-500">{errors.link}</p>}
-      </div>
-      <div className="form-section" data-color-mode={colorMode}>
-        <label htmlFor="pitch" className="mb-3 flex items-center gap-2 text-lg font-medium">
-          Complete Pitch Details
-          <Tooltip text="100-10,000 characters" position="right">
-            <Info className="inline h-4 w-4 cursor-pointer text-muted-foreground" />
-          </Tooltip>
-        </label>{' '}
-        <div className="overflow-hidden rounded-lg ring-1 ring-ring">
-          <MDEditor
-            value={pitch}
-            onChange={handlePitchChange}
-            height={500}
-            id="pitch"
-            preview="edit"
-            style={{ borderRadius: 8, overflow: 'hidden' }}
-            previewOptions={{ disallowedElements: ['style'] }}
-            textareaProps={{
-              placeholder: '# Your Startup Pitch\n\n## Problem Statement\n\n## Solution etc.',
-            }}
-          />
+      <p className="mb-10 text-center text-xl text-muted-foreground md:text-xl">
+        Fill out the form below to share your idea with the world. Make it bold, creative, and
+        memorable!
+      </p>
+      <div className="grid gap-8">
+        {/* Project Name */}
+        <div className="form-section relative">
+          <label htmlFor="title" className="form-label">
+            Project Name
+            <Tooltip text="3-80 characters" position="right">
+              <Info className="info-icon" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              id="title"
+              name="title"
+              className="form-input"
+              required
+              placeholder="Enter a memorable name for your startup idea"
+              value={formValues.title}
+              onChange={handleInputChange}
+            />
+            {formValues.title && (
+              <button
+                type="button"
+                className="clear-btn clear-btn-center-y"
+                onClick={() => setFormValues((prev) => ({ ...prev, title: '' }))}
+                tabIndex={-1}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {errors.title && <p className="mt-1 text-sm font-medium text-red-500">{errors.title}</p>}
         </div>
-        {errors.pitch && <p className="mt-1 text-sm font-medium text-red-500">{errors.pitch}</p>}
-        {state.error && <p className="mt-2 text-sm font-medium text-red-500">{state.error}</p>}
-      </div>{' '}
-      <div className="mt-8 flex justify-center border-t border-muted pt-6">
+        <div className="form-section relative">
+          <label htmlFor="description" className="form-label">
+            Executive Summary
+            <Tooltip text="20-500 characters" position="right">
+              <Info className="info-icon" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            <Textarea
+              id="description"
+              name="description"
+              className="form-input min-h-[120px]"
+              required
+              placeholder="Provide a concise summary of your startup concept (2-3 sentences)"
+              value={formValues.description}
+              onChange={handleInputChange}
+            />
+            {formValues.description && (
+              <button
+                type="button"
+                className="clear-btn clear-btn-top-2"
+                onClick={() => setFormValues((prev) => ({ ...prev, description: '' }))}
+                tabIndex={-1}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {errors.description && (
+            <p className="mt-1 text-sm font-medium text-red-500">{errors.description}</p>
+          )}
+        </div>
+        <div className="form-section relative">
+          <label htmlFor="category" className="form-label">
+            Industry Category
+            <Tooltip text="3-20 characters" position="right">
+              <Info className="info-icon" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              id="category"
+              name="category"
+              className="form-input"
+              required
+              placeholder="e.g., Tech, Health, Finance, Education"
+              value={formValues.category}
+              onChange={handleInputChange}
+            />
+            {formValues.category && (
+              <button
+                type="button"
+                className="clear-btn clear-btn-center-y"
+                onClick={() => setFormValues((prev) => ({ ...prev, category: '' }))}
+                tabIndex={-1}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {errors.category && (
+            <p className="mt-1 text-sm font-medium text-red-500">{errors.category}</p>
+          )}
+        </div>
+        <div className="form-section relative">
+          <label htmlFor="link" className="form-label">
+            Image URL
+            <Tooltip text="See allowed domains below" position="right">
+              <Info className="info-icon" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            <input
+              type="url"
+              id="link"
+              name="link"
+              className="form-input"
+              placeholder="(Optional) Enter a URL for your startup's image"
+              value={formValues.link}
+              onChange={handleInputChange}
+            />
+            {formValues.link && (
+              <button
+                type="button"
+                className="clear-btn clear-btn-center-y"
+                onClick={() => setFormValues((prev) => ({ ...prev, link: '' }))}
+                tabIndex={-1}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Allowed domains:{' '}
+            <span className="whitespace-normal break-words">
+              placehold.co, drive.google.com, docs.google.com, photos.google.com,
+              dl.dropboxusercontent.com, onedrive.live.com, icloud.com, i.imgur.com,
+              live.staticflickr.com, *.s3.amazonaws.com, www.dropbox.com, imgur.com, imgbb.com,
+              images.unsplash.com, unsplash.com, cdn.pixabay.com, pixabay.com,
+              media.istockphoto.com, i.pinimg.com, pinimg.com, pbs.twimg.com, twitter.com,
+              facebook.com, pinterest.com, scontent.xx.fbcdn.net, media.tumblr.com, tumblr.com,
+              media.giphy.com, giphy.com, cdn.discordapp.com, discordapp.com,
+              raw.githubusercontent.com, githubusercontent.com, static.wikia.nocookie.net,
+              wikimedia.org, upload.wikimedia.org
+            </span>
+            <br />
+            <span className="italic">Remember to make the image public!</span>
+          </p>
+          {errors.link && <p className="mt-1 text-sm font-medium text-red-500">{errors.link}</p>}
+        </div>
+        <div className="form-section relative" data-color-mode={colorMode}>
+          <label htmlFor="pitch" className="form-label mb-3">
+            Complete Pitch Details
+            <Tooltip text="100-10,000 characters" position="right">
+              <Info className="info-icon" />
+            </Tooltip>
+          </label>
+          <div className="relative">
+            <div className="overflow-hidden rounded-lg ring-1 ring-ring">
+              <MDEditor
+                value={pitch}
+                onChange={handlePitchChange}
+                height={500}
+                id="pitch"
+                preview="edit"
+                style={{ borderRadius: 8, overflow: 'hidden' }}
+                previewOptions={{ disallowedElements: ['style'] }}
+                textareaProps={{
+                  placeholder: '# Your Startup Pitch\n\n## Problem Statement\n\n## Solution etc.',
+                  className: 'w-full',
+                }}
+              />
+            </div>
+            {pitch && (
+              <button
+                type="button"
+                className="clear-btn clear-btn-top-2"
+                onClick={() => setFormValues((prev) => ({ ...prev, pitch: '' }))}
+                tabIndex={-1}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          {errors.pitch && <p className="mt-1 text-sm font-medium text-red-500">{errors.pitch}</p>}
+        </div>
+      </div>
+      <div className="mt-12 flex justify-center border-t border-muted pt-8">
         <Button
           type="submit"
-          className="flex min-w-[220px] transform items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 px-10 py-5 text-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:from-purple-700 hover:to-blue-600 hover:shadow-lg hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30"
+          className="flex min-w-[220px] transform items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-500 px-12 py-6 text-xl font-bold shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-purple-700 hover:to-blue-600 hover:shadow-2xl hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30"
           disabled={isPending}
         >
           {isPending ? (

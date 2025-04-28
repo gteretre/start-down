@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { Squirrel } from 'lucide-react';
 import SearchForm from '@/components/SearchForm';
 import { getStartups } from '@/lib/queries';
@@ -30,16 +32,41 @@ async function Home({
     ['card', 'small', 'list'].includes(view as string) ? view : 'card'
   ) as ViewKey;
   const { ulClass } = viewOptions[cardView];
+  const subtexts = [
+    'Where bad ideas go to become legendary failures. Submit your concept, and watch as the internet either elevates it to meme status or buries it six feet under. The audience decides.',
+    'Share your wildest ideas, vote for the most outrageous, and let the community mock you mercilessly!',
+  ];
+  const weights = [0.75, 0.25];
+  const rand = Math.random();
+  const subtext = rand < weights[0] ? subtexts[0] : subtexts[1];
 
   return (
     <>
-      <section className="blueContainer items-center px-8 pb-12 pt-16">
-        <div className="textBox">
-          <h1 className="animated-heading">Bring Light to Your Misery</h1>
+      <section className="relative flex min-h-[60vh] flex-col-reverse items-center justify-between gap-10 overflow-hidden px-8 pb-16 pt-20 md:flex-row">
+        <div className="z-10 flex max-w-xl flex-1 flex-col items-start justify-center gap-7">
+          <h1 className="animated-heading mb-2 text-left text-5xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg md:text-6xl">
+            Bring Light to Your Misery
+          </h1>
+          <p className="mb-2 whitespace-normal break-words text-left text-xl font-medium text-muted-foreground md:text-2xl">
+            {subtext}
+          </p>
+          <div className="mt-2 w-full max-w-md">
+            <SearchForm query={query} />
+          </div>
         </div>
-        <br />
-        <h3>Submit Stupid ideas, Vote on the Most Stupid One, and Get Bullied</h3>
-        <SearchForm query={query} />
+        <div className="relative hidden h-72 w-full flex-1 items-center justify-center md:flex md:h-96">
+          <div className="absolute inset-0 scale-110 rounded-3xl bg-gradient-to-br from-blue-400 via-blue-200 to-transparent opacity-60 blur-2xl" />
+          <div className="relative z-10 flex items-center justify-center lg:h-[400px] lg:w-[400px]">
+            <Image
+              src="/mainpageimage.jpg"
+              alt="Main page illustration"
+              width={400}
+              height={400}
+              className="rounded-3xl shadow-primary-foreground saturate-50 transition-all duration-700 ease-in-out hover:saturate-100"
+              draggable={false}
+            />
+          </div>
+        </div>
       </section>
       <section className="section-container" id="cards-section">
         <p className="text-30-semibold text-center">
@@ -93,11 +120,7 @@ async function Home({
             <Squirrel /> No posts found
           </p>
         ) : (
-          <StartupListClientWrapper
-            initialPosts={posts}
-            ulClass={ulClass} // ulClass might not be used by list view, but pass it anyway
-            viewType={cardView}
-          />
+          <StartupListClientWrapper initialPosts={posts} ulClass={ulClass} viewType={cardView} />
         )}
       </section>
     </>

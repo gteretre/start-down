@@ -40,6 +40,21 @@ const ViewClient = ({
     initialViews > LIVE_VIEW_MAX_THRESHOLD ? 0 : REFRESH_INTERVAL
   );
 
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer to track visibility
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const { toast } = useToast();
   const hasPostedRef = useRef(false);
   const [animate, setAnimate] = useState(false);
@@ -47,10 +62,11 @@ const ViewClient = ({
     fallbackData: { views: initialViews },
     revalidateOnFocus: true,
     revalidateOnMount: false,
-    refreshInterval: dynamicRefresh,
+    refreshInterval: isVisible ? dynamicRefresh : 0,
     refreshWhenHidden: false,
     refreshWhenOffline: false,
     dedupingInterval: REFRESH_INTERVAL,
+    isPaused: () => !isVisible,
   });
 
   // Update refresh interval if views cross threshold
@@ -116,7 +132,7 @@ const ViewClient = ({
 
   return (
     <Tooltip text={`${views} Views`}>
-      <div className="flex cursor-default items-center gap-1">
+      <div ref={containerRef} className="flex cursor-default items-center gap-1">
         <EyeIcon className="size-6 text-primary" />
         <span className={`text-16-medium flex gap-1 ${animate ? 'view-update-animate' : ''}`}>
           {formatNumber(views)}

@@ -6,7 +6,7 @@ import StartupCard from './StartupCard';
 import StartupCardSmall from './StartupCardSmall';
 import StartupCardList from './StartupCardList';
 
-const REFRESH_INTERVAL = 120000;
+const REFRESH_INTERVAL = 120_000;
 type ViewType = 'card' | 'small' | 'list';
 interface StartupListClientWrapperProps {
   initialPosts: Startup[];
@@ -30,10 +30,30 @@ const StartupListClientWrapper: React.FC<StartupListClientWrapperProps> = ({
   const [posts, setPosts] = useState<Startup[]>(initialPosts);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const postsRef = useRef(posts);
+  const containerRef = useRef<HTMLUListElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isTabActive, setIsTabActive] = useState(true);
 
   useEffect(() => {
     postsRef.current = posts;
   }, [posts]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const observer = new window.IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => setIsTabActive(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
 
   const CardComponent = cardComponents[viewType];
 
@@ -78,17 +98,15 @@ const StartupListClientWrapper: React.FC<StartupListClientWrapperProps> = ({
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current);
     }
-
-    if (posts.length > 0 && viewType !== 'list') {
+    if (posts.length > 0 && viewType !== 'list' && isVisible && isTabActive) {
       intervalIdRef.current = setInterval(fetchAndUpdateViews, REFRESH_INTERVAL);
     }
-
     return () => {
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
       }
     };
-  }, [fetchAndUpdateViews, posts.length, viewType]);
+  }, [fetchAndUpdateViews, posts.length, viewType, isVisible, isTabActive]);
 
   useEffect(() => {
     setPosts(initialPosts);
@@ -105,7 +123,7 @@ const StartupListClientWrapper: React.FC<StartupListClientWrapperProps> = ({
   }
 
   return (
-    <ul className={ulClass}>
+    <ul ref={containerRef} className={ulClass}>
       {posts.map((post) =>
         createElement(CardComponent as React.FC<{ post: Startup }>, {
           key: post._id.toString(),

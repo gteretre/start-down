@@ -19,7 +19,7 @@ function SearchForm({ query }: { query?: string }) {
     const rawQuery = formData.get('query')?.toString() || '';
     const searchQuery = sanitizeSearchQuery(rawQuery);
     if (searchQuery.trim()) {
-      router.push(`?query=${encodeURIComponent(searchQuery)}`);
+      router.push(`?query=${encodeURIComponent(searchQuery)}#cards-section`);
     } else {
       router.push('/');
     }

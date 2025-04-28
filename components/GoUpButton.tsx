@@ -29,7 +29,7 @@ const GoUpButton: React.FC = () => {
     <button
       aria-label="Go to top"
       onClick={scrollToTop}
-      className={`search-btn fixed bottom-6 right-6 z-50 rounded-full p-3 shadow-lg transition-opacity duration-500 ease-in-out ${visible ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'} scale-100`}
+      className={`search-btn fixed bottom-16 right-6 z-50 rounded-full p-3 shadow-lg transition-opacity duration-500 ease-in-out ${visible ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'} scale-100`}
     >
       <ArrowUpIcon />
     </button>

@@ -66,7 +66,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             </Link>
           </Tooltip>
           <div className="flex items-center gap-4">
-            <Link href={`/?query=${post.category}`}>
+            <Link href={`/?query=${post.category}#cards-section`}>
               <span className="card-category rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20 hover:bg-primary/20">
                 {post.category}
               </span>

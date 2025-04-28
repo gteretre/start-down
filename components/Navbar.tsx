@@ -22,7 +22,15 @@ const Navbar = async () => {
           <div id="navbar-text" className="flex items-center gap-2">
             <Tooltip text="Home" position="right">
               <Link href="/">
-                <Image id="logo" src="/logo.png" alt="logo" width={40} height={40} />
+                <span className="flex items-center gap-2">
+                  <Image id="logo" src="/logo.png" alt="logo" width={40} height={40} />
+                  <span
+                    className="pageName"
+                    style={{ fontFamily: 'Montserrat, sans-serif', letterSpacing: '-0.5px' }}
+                  >
+                    StartDown
+                  </span>
+                </span>
               </Link>
             </Tooltip>
             <Tooltip text="Toggle Dark Mode" position="right">

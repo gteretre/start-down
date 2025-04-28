@@ -22,58 +22,59 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <section className="w-full lg:w-1/3">
-          <div className="blueContainer my-10 mt-10 flex flex-col rounded-lg p-6 shadow-lg lg:sticky lg:top-8 lg:p-8">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                {profileOwner ? (
-                  <Link href="/settings/profile">
-                    <Tooltip text="Edit Profile Picture">
-                      <Image
-                        src={getAuthorImage(user)}
-                        alt={user.username + "'s avatar"}
-                        width={120}
-                        height={120}
-                        className="rounded-full object-cover ring-2 ring-ring"
-                      />
-                    </Tooltip>
-                  </Link>
-                ) : (
-                  <Image
-                    src={getAuthorImage(user)}
-                    alt={user.username + "'s avatar"}
-                    width={120}
-                    height={120}
-                    className="rounded-full object-cover ring-2 ring-ring"
-                  />
-                )}
-              </div>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 lg:flex-row lg:items-start lg:gap-12">
+        <aside className="flex w-full flex-col items-center rounded-3xl p-8 shadow-lg lg:sticky lg:top-8 lg:w-1/3">
+          <div className="flex flex-col items-center gap-4">
+            <h1 className="animated-heading mb-2 text-3xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg">
+              {profileOwner ? 'Your Profile' : `${user.name}'s Profile`}
+            </h1>
 
-              <div className="text-center">
-                <h3 className="text-2xl font-bold">{user.name}</h3>
-                <h4 className="text-gray-500">@{user.username}</h4>
-              </div>
-
-              {profileOwner && (
-                <Link
-                  className="flex items-center gap-2 text-blue-600 hover:underline"
-                  href="/settings/profile"
-                >
-                  <PenBoxIcon /> Edit Profile
+            <div className="relative">
+              {profileOwner ? (
+                <Link href="/settings/profile">
+                  <Tooltip text="Edit Profile Picture">
+                    <Image
+                      src={getAuthorImage(user)}
+                      alt={user.username + "'s avatar"}
+                      width={120}
+                      height={120}
+                      className="avatar"
+                    />
+                  </Tooltip>
                 </Link>
+              ) : (
+                <Image
+                  src={getAuthorImage(user)}
+                  alt={user.username + "'s avatar"}
+                  width={120}
+                  height={120}
+                  className="avatar"
+                />
               )}
             </div>
-
-            <p className="mt-4 text-center text-sm">{user.bio}</p>
-            <p className="mt-2 text-center text-sm text-gray-500">
-              On Start Down since {user.createdAt.toLocaleDateString()}
-            </p>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold">{user.name}</h3>
+              <h4 className="text-gray-500">@{user.username}</h4>
+            </div>
+            {profileOwner && (
+              <Link
+                className="flex items-center gap-2 text-blue-600 hover:underline"
+                href="/settings/profile"
+              >
+                <PenBoxIcon /> Edit Profile
+              </Link>
+            )}
           </div>
-        </section>
+          <p className="mb-2 text-xl font-medium text-muted-foreground">
+            {user.bio || 'No bio provided yet.'}
+          </p>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            On Start Down since {user.createdAt.toLocaleDateString()}
+          </p>
+        </aside>
 
-        <section className="w-full lg:w-2/3">
-          <div className="mx-4 mt-4 flex flex-col justify-center rounded-lg p-6 shadow-lg">
+        <section className="flex-1">
+          <div className="mx-auto flex flex-col rounded-3xl p-8 shadow-lg">
             <p className="mb-6 text-center text-2xl font-semibold">
               {profileOwner ? 'Your Startups' : `${user.name}'s Startups`}
             </p>

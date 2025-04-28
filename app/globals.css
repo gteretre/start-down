@@ -113,6 +113,12 @@
   body.disable-transitions {
     transition: none !important;
   }
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  .scroll-snap-align-start {
+    scroll-snap-align: start;
+  }
 }
 
 /* =========================
@@ -140,11 +146,19 @@
   #footer .font-semibold {
     @apply text-lg;
   }
-  .blueContainer {
-    @apply mx-6 mt-12 flex flex-col justify-center rounded-lg bg-opacity-90 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 text-center text-xl text-gray-800 shadow-lg ring-1 ring-ring transition-all duration-300 md:mx-12 lg:mx-24;
-    user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
+  .pageName {
+    @apply hidden max-w-[120px] select-none overflow-hidden text-ellipsis whitespace-nowrap bg-gradient-to-r from-blue-600 via-purple-500 to-pink-600 bg-clip-text text-base font-semibold tracking-tight text-transparent shadow-sm hover:saturate-200 sm:inline md:max-w-[160px] md:text-lg;
+    transition:
+      letter-spacing 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      text-shadow 0.3s;
+  }
+  .pageName:hover {
+    letter-spacing: 0.08em;
+    filter: brightness(1.2) saturate(1.5) drop-shadow(0 2px 12px #a78bfa);
+    text-shadow:
+      0 2px 16px #a78bfa55,
+      0 1px 4px #ec489955;
   }
   .dark .blueContainer {
     @apply bg-gradient-to-r from-blue-700 via-blue-800 to-blue-950 text-gray-200;
@@ -287,13 +301,16 @@
     @apply active:ring-gray-700 active:ring-offset-gray-700;
   }
   .form-input {
-    @apply w-full max-w-md rounded-3xl bg-secondary px-5 py-3 ring-2 ring-ring;
+    @apply w-full max-w-md rounded-3xl bg-secondary px-5 py-3 pr-16 ring-2 ring-ring transition-all duration-200 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-700;
   }
   .form-input:active {
     @apply ring-2;
   }
   .form-label {
-    @apply block w-full max-w-md px-5 py-1 font-montserrat text-[1.1rem] font-bold;
+    @apply mb-2 flex w-full max-w-md items-center gap-2 px-5 py-1 font-montserrat text-[1.1rem] text-lg font-semibold;
+  }
+  .info-icon {
+    @apply inline h-4 w-4 cursor-pointer text-muted-foreground;
   }
   .search-form {
     @apply mt-10 flex items-center justify-center rounded-3xl bg-secondary ring-1 ring-ring;
@@ -333,6 +350,15 @@
   }
   .card-base {
     @apply rounded-xl bg-card ring-1 ring-border transition-all duration-200 ease-in-out;
+  }
+  .clear-btn {
+    @apply absolute right-2 z-10 rounded px-2 py-1 text-xs text-muted-foreground hover:text-red-500 focus:outline-none;
+  }
+  .clear-btn-top-2 {
+    @apply top-2;
+  }
+  .clear-btn-center-y {
+    @apply top-1/2 -translate-y-1/2;
   }
 }
 
@@ -473,11 +499,4 @@
         0 0 0 0 #ffe066;
     }
   }
-}
-
-.scroll-snap-x {
-  scroll-snap-type: x mandatory;
-}
-.scroll-snap-align-start {
-  scroll-snap-align: start;
 }

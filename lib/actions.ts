@@ -3,6 +3,34 @@ import { auth } from '@/lib/auth';
 import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
 import { createStartup } from '@/lib/mutations';
+
+// Forbidden project names (case-insensitive)
+const forbiddenNames = [
+  'admin',
+  'test',
+  'null',
+  'undefined',
+  'root',
+  'system',
+  'moderator',
+  'support',
+  'help',
+  'owner',
+  'create',
+  'new',
+  'add',
+  'update',
+  'delete',
+  'remove',
+  'edit',
+  'manage',
+  'control',
+  'settings',
+  'config',
+  'configuration',
+  'setup',
+];
+
 export const createPitch = async (state, form: FormData, pitch: string) => {
   const session = await auth();
   if (!session) {
@@ -22,10 +50,18 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
     });
   }
 
+  // Check for forbidden project names
+  if (forbiddenNames.includes((title as string).toLowerCase().trim())) {
+    return parseServerActionResponse({
+      error: 'This project name is forbidden.',
+      status: 'ERROR',
+    });
+  }
+
   // Check if a startup with the same slug exists
   const checkSlugExists = async (slug: string) => {
     const db = await import('./mongodb').then((m) => m.getDb());
-    const existing = await (await db).collection('startups').findOne({ slug });
+    const existing = await db.collection('startups').findOne({ slug });
     return !!existing;
   };
 
