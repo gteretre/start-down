@@ -47,9 +47,9 @@ async function Home({
           <h1 className="animated-heading mb-2 text-left text-5xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg md:text-6xl">
             Bring Light to Your Misery
           </h1>
-          <p className="mb-2 whitespace-normal break-words text-left text-xl font-medium text-muted-foreground md:text-2xl">
+          <h3 className="mb-2 text-left text-xl font-medium text-muted-foreground md:text-2xl">
             {subtext}
-          </p>
+          </h3>
           <div className="mt-2 w-full max-w-md">
             <SearchForm query={query} />
           </div>

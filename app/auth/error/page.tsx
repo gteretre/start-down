@@ -20,7 +20,7 @@ export default function AuthErrorPage() {
         <p className="mb-8 text-lg text-gray-500">
           Sorry, you have reached this page by accident or the error is unknown.
         </p>
-        <Link href="/" className="search-btn rounded-full px-6 py-2">
+        <Link href="/" className="rounded-full px-6 py-2">
           Go Home
         </Link>
       </main>
@@ -31,7 +31,7 @@ export default function AuthErrorPage() {
     <main className="flex min-h-[60vh] flex-col items-center justify-center p-8">
       <h1 className="mb-4 text-4xl font-bold text-primary">Authentication Error</h1>
       <div className="mb-8 text-red-600">{message}</div>
-      <Link href="/" className="search-btn rounded-full px-6 py-2">
+      <Link href="/" className="rounded-full px-6 py-2">
         Go Home
       </Link>
     </main>

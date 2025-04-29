@@ -9,7 +9,7 @@ export default function GeneralErrorPage() {
           Sorry, an unexpected error occurred. Please try again later or contact support if the
           problem persists.
         </p>
-        <Link href="/" className="search-btn rounded-full px-6 py-2">
+        <Link href="/" className="rounded-full px-6 py-2">
           Go Home
         </Link>
       </main>

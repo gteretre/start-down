@@ -8,7 +8,7 @@ export default function UserNotFound() {
         <p className="mb-8 text-lg text-gray-500">
           Sorry, the user you are looking for does not exist or has been deleted.
         </p>
-        <Link href="/" className="search-btn rounded-full px-6 py-2">
+        <Link href="/" className="rounded-full px-6 py-2">
           Go Home
         </Link>
       </main>

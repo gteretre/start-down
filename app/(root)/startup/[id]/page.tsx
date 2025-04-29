@@ -1,17 +1,16 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import markdownit from 'markdown-it';
-const md = markdownit({ html: true });
 
 import { getStartupBySlug } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
-import ShareButton from '@/components/ui/ShareButton';
+import ShareButton from '@/components/ShareButton';
 import ViewClient from '@/components/ViewClient';
 import Tooltip from '@/components/Tooltip';
 import FeaturedStartups from '@/components/FeaturedStartups';
 import { auth } from '@/lib/auth';
 import type { Startup } from '@/lib/models';
+import MDRender from '@/mike-mardown/src/rendermd';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: slug } = await params;
@@ -24,7 +23,6 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
 
-  const parsedContent = md.render(post.pitch);
   return (
     <>
       <section className="mb-8 bg-card p-6 px-10 shadow-sm md:px-20 lg:px-60">
@@ -67,9 +65,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
           </Tooltip>
           <div className="flex items-center gap-4">
             <Link href={`/?query=${post.category}#cards-section`}>
-              <span className="card-category rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20 hover:bg-primary/20">
-                {post.category}
-              </span>
+              <span className="tag">{post.category}</span>
             </Link>
             <ShareButton title={post.title} text={post.description} url={'/startup/' + post.slug} />
           </div>
@@ -77,7 +73,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
       </section>
 
       <section>
-        <div className="mx-6 my-6 flex flex-col items-center justify-center md:mx-20 md:my-12 lg:mx-32">
+        <div className="mx-6 my-6 flex flex-col items-center justify-center md:mx-12 md:my-12 lg:mx-32 xl:mx-44">
           <Image
             src={getStartupImage(post)}
             width={600}
@@ -86,14 +82,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             className="startup-image mb-8"
           />
           <div className="articleBox">
-            {parsedContent ? (
-              <div
-                className="max-w-[600px] justify-center"
-                dangerouslySetInnerHTML={{ __html: parsedContent }}
-              />
-            ) : (
-              <p>Something went wrong...</p>
-            )}
+            {post.pitch ? <MDRender markdown={post.pitch} /> : <p>Something went wrong...</p>}
           </div>
         </div>
       </section>

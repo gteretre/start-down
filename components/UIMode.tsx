@@ -46,7 +46,7 @@ function UIMode() {
 
   return (
     <button
-      className="btn-pure group flex items-center justify-between px-2 py-1 ring-1 ring-foreHeader"
+      className="btn-pure group flex items-center justify-between rounded-3xl px-2 py-1 ring-1 ring-foreHeader"
       onClick={toggleMode}
     >
       <div

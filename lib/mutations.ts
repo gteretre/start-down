@@ -2,7 +2,6 @@ import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
 import { Author, Startup } from './models';
 
-// Startup related functions
 export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>) {
   const db = await getDb();
   if (!db) {
@@ -26,14 +25,11 @@ export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>)
     createdAt: new Date(),
     views: 0,
   };
-
   const result = await db.collection('startups').insertOne(startupDoc);
 
   if (!result || !result.insertedId) {
     throw new Error('Failed to insert startup into database');
   }
-
-  // Return the created startup with its new ID
   return {
     _id: result.insertedId.toString(),
     ...startup,
@@ -72,4 +68,8 @@ export async function createAuthor(author: Omit<Author, '_id'>) {
     _id: result.insertedId.toString(),
     ...authorData,
   };
+}
+
+export async function updateAuthor() {
+  return true;
 }

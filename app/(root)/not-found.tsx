@@ -8,7 +8,7 @@ export default function NotFound() {
         <p className="mb-8 text-lg text-gray-500">
           Sorry, the page you are looking for does not exist or has been moved.
         </p>
-        <Link href="/" className="search-btn rounded-full px-6 py-2">
+        <Link href="/" className="rounded-full px-6 py-2">
           Go Home
         </Link>
       </main>
