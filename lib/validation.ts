@@ -56,11 +56,12 @@ export function validateForm(values: {
     } catch {
       errors.link = 'Link must be a valid URL.';
     }
-
-    if (!values.pitch || values.pitch.length < 100 || values.pitch.length > 10000) {
-      errors.pitch = 'Pitch must be between 100 and 10000 characters.';
-    }
-
-    return errors;
   }
+
+  // Pitch validation should always run
+  if (!values.pitch || values.pitch.length < 100 || values.pitch.length > 10000) {
+    errors.pitch = 'Pitch must be between 100 and 10000 characters.';
+  }
+
+  return errors;
 }

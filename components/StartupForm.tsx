@@ -13,6 +13,13 @@ import Tooltip from './Tooltip';
 import { Info } from 'lucide-react';
 import { allowedImageDomains } from '@/lib/allowedDomains';
 
+type FormState = {
+  error: string;
+  status: 'INITIAL' | 'SUCCESS' | 'ERROR';
+  _id?: string;
+  slug?: string;
+};
+
 const officialCategories = [
   'Tech',
   'Health',
@@ -50,23 +57,27 @@ function isAllowedImageUrl(url: string): boolean {
   }
 }
 
+const initialFormValues = {
+  title: '',
+  description: '',
+  category: '',
+  link: '',
+  pitch: '',
+};
+
 function StartupForm() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const [formValues, setFormValues] = React.useState({
-    title: '',
-    description: '',
-    category: '',
-    link: '',
-    pitch: '',
-  });
+  const [formValues, setFormValues] = React.useState(initialFormValues);
   const { pitch } = formValues;
   const { toast } = useToast();
   const router = useRouter();
 
   const [categoryInput, setCategoryInput] = React.useState('');
   const [showCategoryOptions, setShowCategoryOptions] = React.useState(false);
-  const filteredCategories = officialCategories.filter((cat) =>
-    cat.toLowerCase().includes(categoryInput.toLowerCase())
+  const filteredCategories = React.useMemo(
+    () =>
+      officialCategories.filter((cat) => cat.toLowerCase().includes(categoryInput.toLowerCase())),
+    [categoryInput]
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -77,22 +88,14 @@ function StartupForm() {
   const handlePitchChange = (value: string | undefined) => {
     setFormValues((prev) => ({ ...prev, pitch: value || '' }));
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleFormSubmit = async (prevState: any) => {
-    // Example: You can also get values from FormData if needed
-    // const titleFromFormData = formData.get('title');
-    // console.log('FormData title:', titleFromFormData);
-    // (prevState, formData: FormData)
 
-    // Use values from our state instead of directly from formData
-    const currentValues = {
-      title: formValues.title,
-      description: formValues.description,
-      category: formValues.category,
-      link: formValues.link,
-      pitch: formValues.pitch,
-    };
+  const clearField = (field: keyof typeof formValues) => {
+    setFormValues((prev) => ({ ...prev, [field]: '' }));
+    if (field === 'category') setCategoryInput('');
+  };
 
+  const handleFormSubmit = async (prevState: FormState): Promise<FormState> => {
+    const currentValues = { ...formValues };
     const fieldErrors = validateForm(currentValues) || {};
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
@@ -103,28 +106,18 @@ function StartupForm() {
       });
       return { ...prevState, error: '', status: 'ERROR' };
     }
-
     try {
       const validatedFormData = new FormData();
-      validatedFormData.append('title', currentValues.title);
-      validatedFormData.append('description', currentValues.description);
-      validatedFormData.append('category', currentValues.category);
-      validatedFormData.append('link', currentValues.link);
+      Object.entries(currentValues).forEach(([key, value]) => {
+        if (key !== 'pitch') validatedFormData.append(key, value);
+      });
       const result = await createPitch(prevState, validatedFormData, currentValues.pitch);
-
       if (result && result.status === 'SUCCESS' && result._id) {
         toast({
           title: 'Success',
           description: 'Congratulations! Your new startup has been created!',
         });
-        setFormValues({
-          title: '',
-          description: '',
-          category: '',
-          link: '',
-          pitch: '',
-        });
-
+        setFormValues(initialFormValues);
         setTimeout(() => {
           router.push(`/startup/${result.slug}`);
         }, 1000);
@@ -141,7 +134,6 @@ function StartupForm() {
           variant: 'destructive',
         });
       }
-
       return result;
     } catch (error) {
       console.error('Error creating pitch:', error);
@@ -150,11 +142,7 @@ function StartupForm() {
         description: 'Please try again later.',
         variant: 'destructive',
       });
-      return {
-        ...prevState,
-        error: '',
-        status: 'ERROR',
-      };
+      return { ...prevState, error: '', status: 'ERROR' };
     }
   };
 
@@ -188,7 +176,7 @@ function StartupForm() {
               <button
                 type="button"
                 className="clear-btn clear-btn-center-y"
-                onClick={() => setFormValues((prev) => ({ ...prev, title: '' }))}
+                onClick={() => clearField('title')}
                 tabIndex={-1}
               >
                 Clear
@@ -218,7 +206,7 @@ function StartupForm() {
               <button
                 type="button"
                 className="clear-btn clear-btn-top-2"
-                onClick={() => setFormValues((prev) => ({ ...prev, description: '' }))}
+                onClick={() => clearField('description')}
                 tabIndex={-1}
               >
                 Clear
@@ -275,10 +263,7 @@ function StartupForm() {
               <button
                 type="button"
                 className="clear-btn clear-btn-center-y"
-                onClick={() => {
-                  setFormValues((prev) => ({ ...prev, category: '' }));
-                  setCategoryInput('');
-                }}
+                onClick={() => clearField('category')}
                 tabIndex={-1}
               >
                 Clear
@@ -310,7 +295,7 @@ function StartupForm() {
               <button
                 type="button"
                 className="clear-btn clear-btn-center-y"
-                onClick={() => setFormValues((prev) => ({ ...prev, link: '' }))}
+                onClick={() => clearField('link')}
                 tabIndex={-1}
               >
                 Clear

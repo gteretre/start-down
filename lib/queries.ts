@@ -1,16 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
 
-// Add query constants to maintain backward compatibility with existing code
-export const STARTUPS_QUERY = 'startups';
-export const STARTUP_BY_ID = 'startup.byId';
-export const STARTUPS_BY_AUTHOR_QUERY = 'startups.byAuthor';
-export const AUTHOR_BY_ID_QUERY = 'author.byId';
-export const AUTHOR_BY_EMAIL_QUERY = 'author.byEmail';
-export const AUTHOR_BY_USERNAME_QUERY = 'author.byUsername';
-export const STARTUP_VIEWS_QUERY = 'startup.views';
-export const PLAYLIST_BY_SLUG_QUERY = 'playlist.bySlug';
-
 type RawAuthor = {
   _id: string | ObjectId;
   id?: string;
@@ -76,7 +66,6 @@ export async function getStartups(search?: string, sort?: string) {
   let sortObj: Record<string, 1 | -1> = { createdAt: -1 };
 
   if (search) {
-    // Find authors matching name or username
     const authorMatches = await db
       .collection('authors')
       .find({
@@ -122,13 +111,10 @@ export async function getStartups(search?: string, sort?: string) {
   }
 
   const startups = await db.collection('startups').find(query).sort(sortObj).toArray();
-
-  // Get all unique author IDs from startups
   const allAuthorIds = [...new Set(startups.map((startup) => startup.author?.toString()))]
     .filter(Boolean)
     .map((id) => new ObjectId(id));
 
-  // Fetch all authors in one query
   const authors = allAuthorIds.length
     ? await db
         .collection('authors')
@@ -136,9 +122,13 @@ export async function getStartups(search?: string, sort?: string) {
         .toArray()
     : [];
 
-  // Map author data to each startup
   return startups
-    .filter((startup) => !!startup.author) // Only include startups with an author field
+    .filter((startup) => {
+      const authorObj = authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
+      );
+      return !!authorObj;
+    })
     .map((startup) => {
       const authorObj = authors.find(
         (author) => author._id.toString() === startup.author?.toString()
@@ -149,12 +139,9 @@ export async function getStartups(search?: string, sort?: string) {
 
 export async function getStartupsByAuthor(username: string) {
   const db = await getDb();
-
-  // First find the author
   const author = await db.collection('authors').findOne({ username });
   if (!author) return [];
 
-  // Then find startups by that author
   const startups = await db
     .collection('startups')
     .find({ author: new ObjectId(author._id) })
@@ -171,7 +158,6 @@ export async function getStartupById(id: string) {
   const startup = await db.collection('startups').findOne({ _id: new ObjectId(id) });
 
   if (startup) {
-    // Fetch the author information
     const author = await db
       .collection('authors')
       .findOne({ _id: new ObjectId(startup.author.toString()) });
@@ -189,7 +175,7 @@ export async function getStartupBySlug(slug: string): Promise<import('./models')
   if (!raw) return null;
   const author = await db.collection('authors').findOne({ _id: raw.author });
   if (!author) return null;
-  return mapStartup(raw, author);
+  return mapStartup({ ...raw, author } as RawStartup, author as RawAuthor);
 }
 
 export async function getStartupViews(id: string) {
@@ -212,13 +198,10 @@ export async function getStartupViews(id: string) {
 export async function getAuthorById(id: string): Promise<import('./models').Author | null> {
   const db = await getDb();
   try {
-    // Try to find by 'id' (OAuth provider ID)
     let author = await db.collection('authors').findOne({ id });
-    // If not found, try by MongoDB _id
     if (!author && ObjectId.isValid(id)) {
       author = await db.collection('authors').findOne({ _id: new ObjectId(id) });
     }
-    // Use mapAuthor to ensure correct type
     return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
     console.error('Error in getAuthorById:', error);
@@ -232,7 +215,6 @@ export async function getAuthorByEmail(email: string): Promise<import('./models'
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ email });
-    // Use mapAuthor to ensure correct type
     return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
     console.error('Error in getAuthorByEmail:', error);
@@ -248,7 +230,6 @@ export async function getAuthorByUsername(
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ username });
-    // Use mapAuthor to ensure correct type
     return author ? mapAuthor(author as RawAuthor) : null;
   } catch (error) {
     console.error('Error in getAuthorByUsername:', error);

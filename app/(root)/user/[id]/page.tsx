@@ -12,13 +12,13 @@ import { StartupCardSkeleton } from '@/components/StartupCard';
 import { getAuthorImage } from '@/lib/utils';
 import type { Author } from '@/lib/models';
 
-const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id: username } = await params;
+const Page = async ({ params }: { params: { id: string } }) => {
+  const username = params.id;
   const session = await auth();
   const fetchedUser = await getAuthorByUsername(username);
   if (!fetchedUser) return notFound();
   const user: Author = fetchedUser;
-  const profileOwner = session?.user.username === user.username;
+  const profileOwner = !!session?.user && session.user.username === user.username;
 
   return (
     <>

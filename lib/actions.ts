@@ -4,7 +4,6 @@ import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
 import { createStartup } from '@/lib/mutations';
 
-// Forbidden project names (case-insensitive)
 const forbiddenNames = [
   'admin',
   'test',
@@ -31,46 +30,44 @@ const forbiddenNames = [
   'setup',
 ];
 
-export const createPitch = async (state, form: FormData, pitch: string) => {
-  const session = await auth();
-  if (!session) {
-    return parseServerActionResponse({
-      error: 'Not signed in',
-      status: 'ERROR',
-    });
-  }
-
-  const formEntries = Array.from(form.entries());
-  const formData = Object.fromEntries(formEntries);
-  const { title, description, category, link } = formData;
-  if (!title || !description || !category || !pitch) {
-    return parseServerActionResponse({
-      error: 'Missing required fields',
-      status: 'ERROR',
-    });
-  }
-
-  // Check for forbidden project names
-  if (forbiddenNames.includes((title as string).toLowerCase().trim())) {
-    return parseServerActionResponse({
-      error: 'This project name is forbidden.',
-      status: 'ERROR',
-    });
-  }
-
-  // Check if a startup with the same slug exists
-  const checkSlugExists = async (slug: string) => {
-    const db = await import('./mongodb').then((m) => m.getDb());
-    const existing = await db.collection('startups').findOne({ slug });
-    return !!existing;
-  };
-
-  const slug = await slugify(title as string, checkSlugExists);
-
+export const createPitch = async (state: unknown, form: FormData, pitch: string) => {
   try {
+    const session = await auth();
+    if (!session) {
+      return parseServerActionResponse({
+        error: 'You must be signed in to submit a startup.',
+        status: 'ERROR',
+      });
+    }
+
+    const formEntries = Array.from(form.entries());
+    const formData = Object.fromEntries(formEntries);
+    const { title, description, category, link } = formData;
+    if (!title || !description || !category || !pitch) {
+      return parseServerActionResponse({
+        error: 'Please fill in all required fields.',
+        status: 'ERROR',
+      });
+    }
+
+    if (forbiddenNames.includes((title as string).toLowerCase().trim())) {
+      return parseServerActionResponse({
+        error: 'This project name is not allowed. Please choose another name.',
+        status: 'ERROR',
+      });
+    }
+
+    const checkSlugExists = async (slug: string) => {
+      const db = await import('./mongodb').then((m) => m.getDb());
+      const existing = await db.collection('startups').findOne({ slug });
+      return !!existing;
+    };
+
+    const slug = await slugify(title as string, checkSlugExists);
+
     if (!session.user || !('username' in session.user) || !session.user.username) {
       return parseServerActionResponse({
-        error: 'User session invalid',
+        error: 'Your user session is invalid. Please sign in again.',
         status: 'ERROR',
       });
     }
@@ -78,7 +75,7 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
 
     if (!author) {
       return parseServerActionResponse({
-        error: 'Author not found',
+        error: 'Could not find your user profile. Please contact support.',
         status: 'ERROR',
       });
     }
@@ -98,7 +95,7 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
 
     if (!result || !result._id) {
       return parseServerActionResponse({
-        error: 'Failed to create startup',
+        error: 'Failed to create your startup. Please try again later.',
         status: 'ERROR',
       });
     }
@@ -109,8 +106,17 @@ export const createPitch = async (state, form: FormData, pitch: string) => {
       status: 'SUCCESS',
     });
   } catch (error) {
+    console.error('Error in createPitch:', error);
+    let message = 'An unexpected error occurred. Please try again.';
+    if (error instanceof Error && error.message) {
+      if (error.message.includes('database')) {
+        message = 'A server error occurred. Please try again later.';
+      } else if (error.message.includes('author ID format')) {
+        message = 'There was a problem with your account. Please contact support.';
+      }
+    }
     return parseServerActionResponse({
-      error: typeof error === 'object' ? JSON.stringify(error) : String(error),
+      error: message,
       status: 'ERROR',
     });
   }

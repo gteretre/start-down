@@ -5,7 +5,6 @@ import { LanguagesIcon } from 'lucide-react';
 
 const GOOGLE_SCRIPT_ID = 'google-translate-script';
 
-// TypeScript declarations for Google Translate globals
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare global {
   interface Window {

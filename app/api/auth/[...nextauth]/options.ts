@@ -1,15 +1,19 @@
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 import AzureADProvider from 'next-auth/providers/azure-ad';
+import { Session } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
+
 import { getAuthorById, getAuthorByEmail, getAuthorByUsername } from '@/lib/queries';
 import { createAuthor } from '@/lib/mutations';
 import type { Author } from '@/lib/models';
-import type { JWT } from 'next-auth/jwt';
 
 function getEnvVar(name: string): string {
   const value = process.env[name];
-  if (!value)
-    throw new Error(`Environment variable "${name}" is missing. Please check your .env.local.`);
+  if (!value) {
+    console.error(`Environment variable "${name}" is missing. Please check your .env.local.`);
+    throw new Error('A server configuration error occurred. Please contact support.');
+  }
   return value;
 }
 
@@ -63,19 +67,6 @@ type ProviderUser = {
 };
 
 type ProviderProfile = Record<string, unknown>;
-
-type SessionUser = {
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-  role?: string;
-  username?: string;
-};
-
-type Session = {
-  user?: SessionUser;
-  [key: string]: unknown;
-};
 
 export const options = {
   providers: [

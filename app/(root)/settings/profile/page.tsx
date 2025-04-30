@@ -1,6 +1,5 @@
 import { auth } from '@/lib/auth';
 import { notFound } from 'next/navigation';
-// import "@/app/(root)/settings/profile/stars.css"; // Import the CSS file
 
 const Page = async () => {
   const session = await auth();

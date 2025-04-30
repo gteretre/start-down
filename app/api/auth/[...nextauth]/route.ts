@@ -1,5 +1,6 @@
-import NextAuth from 'next-auth';
+import NextAuth from 'next-auth/next';
 import { options } from './options';
+// @ts-expect-error next-auth
 
 const handler = NextAuth(options);
 

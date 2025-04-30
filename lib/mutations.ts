@@ -2,72 +2,100 @@ import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
 import { Author, Startup } from './models';
 
-export async function createStartup(startup: Omit<Startup, '_id' | 'createdAt'>) {
-  const db = await getDb();
-  if (!db) {
-    throw new Error('Database connection failed');
-  }
-  if (!startup.title || !startup.description || !startup.author) {
-    throw new Error('Missing required fields for startup');
-  }
-
-  let authorObjectId;
+export async function createStartup(
+  startup: Omit<Startup, '_id' | 'createdAt' | 'author'> & { author: string }
+) {
   try {
-    authorObjectId =
-      typeof startup.author === 'string' ? new ObjectId(startup.author) : startup.author;
+    const db = await getDb();
+    if (!db) {
+      console.error('Database connection failed');
+      throw new Error('A server error occurred. Please try again later.');
+    }
+    if (!startup.title || !startup.description || !startup.author) {
+      console.error('Missing required fields for startup:', startup);
+      throw new Error('Some required fields are missing. Please check your input.');
+    }
+
+    let authorObjectId;
+    try {
+      authorObjectId = new ObjectId(startup.author);
+    } catch (error) {
+      console.error('Invalid author ID format:', error);
+      throw new Error('There was a problem with your account. Please contact support.');
+    }
+
+    const startupDoc = {
+      ...startup,
+      author: authorObjectId,
+      createdAt: new Date(),
+      views: 0,
+    };
+    const result = await db.collection('startups').insertOne(startupDoc);
+
+    if (!result || !result.insertedId) {
+      console.error('Failed to insert startup into database:', startupDoc);
+      throw new Error('Failed to create the startup. Please try again later.');
+    }
+    return {
+      _id: result.insertedId.toString(),
+      ...startup,
+      createdAt: new Date(),
+      views: 0,
+    };
   } catch (error) {
-    throw new Error('Invalid author ID format: ' + error.message);
+    console.error('Error in createStartup:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
   }
-
-  const startupDoc = {
-    ...startup,
-    author: authorObjectId,
-    createdAt: new Date(),
-    views: 0,
-  };
-  const result = await db.collection('startups').insertOne(startupDoc);
-
-  if (!result || !result.insertedId) {
-    throw new Error('Failed to insert startup into database');
-  }
-  return {
-    _id: result.insertedId.toString(),
-    ...startup,
-    createdAt: new Date(),
-    views: 0,
-  };
 }
 
 export async function updateStartupViews(id: string) {
-  const db = await getDb();
   try {
+    const db = await getDb();
     const result = await db
       .collection('startups')
       .updateOne({ _id: typeof id === 'string' ? new ObjectId(id) : id }, { $inc: { views: 1 } });
 
+    if (result.modifiedCount === 0) {
+      console.warn('No startup found to update views for id:', id);
+    }
     return result.modifiedCount > 0;
   } catch (error) {
+    console.error('Error updating startup views:', error);
     throw new Error(
-      `Error updating startup views: ${error instanceof Error ? error.message : String(error)}`
+      error instanceof Error ? error.message : 'Could not update views. Please try again.'
     );
   }
 }
 
 export async function createAuthor(author: Omit<Author, '_id'>) {
-  const db = await getDb();
-  if (!author.provider) {
-    throw new Error('Provider is required for author');
-  }
-  const authorData = {
-    ...author,
-    createdAt: new Date(),
-  };
-  const result = await db.collection('authors').insertOne(authorData);
+  try {
+    const db = await getDb();
+    if (!author.provider) {
+      console.error('Provider is required for author:', author);
+      throw new Error('Provider is required for author.');
+    }
+    const authorData = {
+      ...author,
+      createdAt: new Date(),
+    };
+    const result = await db.collection('authors').insertOne(authorData);
 
-  return {
-    _id: result.insertedId.toString(),
-    ...authorData,
-  };
+    if (!result || !result.insertedId) {
+      console.error('Failed to insert author into database:', authorData);
+      throw new Error('Failed to create author. Please try again.');
+    }
+    return {
+      _id: result.insertedId.toString(),
+      ...authorData,
+    };
+  } catch (error) {
+    console.error('Error in createAuthor:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
+  }
 }
 
 export async function updateAuthor() {

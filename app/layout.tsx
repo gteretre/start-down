@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-// import "easymde/dist/easymde.min.css";
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>;
 
 const geistSans = localFont({
