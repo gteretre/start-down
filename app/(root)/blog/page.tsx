@@ -2,7 +2,7 @@
 function Page() {
   return (
     <>
-      <div className="blueContainer">
+      <div className="">
         <div className="textBox">We will have a blog in the future</div>
       </div>
       <div className="m-20 flex justify-center">

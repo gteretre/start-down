@@ -7,6 +7,13 @@ import type { JWT } from 'next-auth/jwt';
 import { getAuthorById, getAuthorByEmail, getAuthorByUsername } from '@/lib/queries';
 import { createAuthor } from '@/lib/mutations';
 import type { Author } from '@/lib/models';
+import {
+  sanitizeEmail,
+  sanitizeUsername,
+  sanitizeName,
+  sanitizeImage,
+  sanitizeBio,
+} from '@/lib/validation';
 
 function getEnvVar(name: string): string {
   const value = process.env[name];
@@ -15,45 +22,6 @@ function getEnvVar(name: string): string {
     throw new Error('A server configuration error occurred. Please contact support.');
   }
   return value;
-}
-
-function sanitizeEmail(email: string | null | undefined): string {
-  if (!email) return '';
-  // Basic email validation
-  const trimmed = email.trim().toLowerCase();
-  const emailRegex = /^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/;
-  return emailRegex.test(trimmed) ? trimmed : '';
-}
-
-function sanitizeUsername(username: string | null | undefined): string {
-  return (
-    username
-      ?.trim()
-      .replace(/[^a-zA-Z0-9_]/g, '')
-      .slice(0, 32) || ''
-  );
-}
-
-function sanitizeName(name: string | null | undefined): string {
-  return (
-    name
-      ?.trim()
-      // Allow all unicode letters, numbers, spaces, _ and -
-      .replace(/[^\p{L}\p{N} _-]/gu, '')
-      .slice(0, 64) || ''
-  );
-}
-
-function sanitizeImage(image: string | null | undefined): string {
-  if (!image || typeof image !== 'string') return '/logo.png';
-  if (image.startsWith('http') || image.startsWith('/')) return image;
-  return '/logo.png';
-}
-
-function sanitizeBio(bio: string | null | undefined): string {
-  if (!bio || typeof bio !== 'string') return '';
-  // Allow all unicode, remove < and >, limit to 300 chars
-  return bio.trim().replace(/[<>]/g, '').slice(0, 300);
 }
 
 type ProviderUser = {
@@ -140,7 +108,6 @@ export const options = {
       } catch (err) {
         console.error('Error in getAuthorById:', err);
       }
-      // Always check by email if not found by id
       if (!dbUser) {
         try {
           dbUser = await getAuthorByEmail(email);

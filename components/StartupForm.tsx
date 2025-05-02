@@ -12,6 +12,7 @@ import { createPitch } from '@/lib/actions';
 import Tooltip from './Tooltip';
 import { Info } from 'lucide-react';
 import { allowedImageDomains } from '@/lib/allowedDomains';
+import ImagePreview from '@/components/ImagePreview';
 
 type FormState = {
   error: string;
@@ -150,6 +151,13 @@ function StartupForm() {
     error: '',
     status: 'INITIAL',
   });
+
+  // Disable submit if any required field is empty (image is optional)
+  const isFormIncomplete =
+    !formValues.title.trim() ||
+    !formValues.description.trim() ||
+    !formValues.category.trim() ||
+    !formValues.pitch.trim();
 
   return (
     <form action={formAction} className="relative mx-auto max-w-3xl items-center">
@@ -304,13 +312,7 @@ function StartupForm() {
           </div>
           <div className="mt-2 flex h-40 w-full items-center justify-center rounded border bg-muted/10">
             {formValues.link && isAllowedImageUrl(formValues.link) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={formValues.link}
-                alt="Startup preview"
-                className="pointer-events-none max-h-full max-w-full select-none rounded object-contain shadow"
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
+              <ImagePreview src={formValues.link} alt="Startup preview" />
             ) : (
               <span className="pointer-events-none select-none text-sm text-muted-foreground">
                 {formValues.link ? 'Image preview: Invalid/disallowed URL' : 'Image preview area'}
@@ -356,11 +358,11 @@ function StartupForm() {
           {errors.pitch && <p className="mt-1 text-sm font-medium text-red-500">{errors.pitch}</p>}
         </div>
       </div>
-      <div className="mt-12 flex justify-center border-t border-muted pt-8">
+      <div className="mt-12 flex flex-col items-center justify-center border-t border-muted pt-8">
         <button
           type="submit"
           className="flex min-w-[220px] transform items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-purple-600 to-blue-500 px-12 py-6 text-xl font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-purple-700 hover:to-blue-600 hover:shadow-2xl hover:shadow-purple-300/30 dark:from-purple-800 dark:to-blue-700 dark:hover:from-purple-900 dark:hover:to-blue-800 dark:hover:shadow-purple-900/30"
-          disabled={isPending}
+          disabled={isPending || isFormIncomplete}
         >
           {isPending ? (
             <>
@@ -374,6 +376,13 @@ function StartupForm() {
             </>
           )}
         </button>
+        {(isPending || isFormIncomplete) && (
+          <p className="mt-2 text-sm text-gray-500">
+            {isPending
+              ? 'Please wait while your pitch is being submitted...'
+              : 'Please fill in all required fields to submit.'}
+          </p>
+        )}
       </div>
     </form>
   );

@@ -163,16 +163,6 @@
       0 2px 16px #a78bfa55,
       0 1px 4px #ec489955;
   }
-  .dark .blueContainer {
-    @apply bg-gradient-to-r from-blue-700 via-blue-800 to-blue-950 text-gray-200;
-    /* Add a visible shadow for blueContainer in dark mode */
-    box-shadow:
-      0 4px 24px 0 rgba(0, 0, 0, 0.7),
-      0 1.5px 8px 0 rgba(80, 180, 255, 0.1);
-  }
-  .blueContainer h1 {
-    @apply mb-4 text-4xl font-bold;
-  }
   .textBox {
     @apply rounded-lg bg-blue-300 px-8 py-8 ring-1 ring-ring md:px-12 lg:px-20 lg:py-8;
   }
@@ -354,6 +344,46 @@
   }
   .clear-btn-center-y {
     @apply top-1/2 -translate-y-1/2;
+  }
+  .shadow {
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.12),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.08);
+  }
+  .dark .shadow {
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.7),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.12);
+  }
+  .shadow-sm {
+    box-shadow:
+      0 1.5px 4px 0 rgba(80, 180, 255, 0.08),
+      0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  }
+  .shadow-md {
+    box-shadow:
+      0 2px 8px 0 rgba(80, 180, 255, 0.1),
+      0 2px 8px 0 rgba(0, 0, 0, 0.1);
+  }
+  .shadow-lg {
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.12),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.08);
+  }
+  .dark .shadow-sm {
+    box-shadow:
+      0 1.5px 4px 0 rgba(0, 0, 0, 0.45),
+      0 1px 2px 0 rgba(80, 180, 255, 0.12);
+  }
+  .dark .shadow-md {
+    box-shadow:
+      0 2px 8px 0 rgba(0, 0, 0, 0.55),
+      0 2px 8px 0 rgba(80, 180, 255, 0.14);
+  }
+  .dark .shadow-lg {
+    box-shadow:
+      0 4px 24px 0 rgba(0, 0, 0, 0.7),
+      0 1.5px 8px 0 rgba(80, 180, 255, 0.12);
   }
 }
 

@@ -3,6 +3,9 @@ import { auth } from '@/lib/auth';
 import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
 import { createStartup } from '@/lib/mutations';
+import { sanitizeName, sanitizeUsername, sanitizeImage, sanitizeBio } from './validation';
+import { getDb } from './mongodb';
+import { ObjectId } from 'mongodb';
 
 const forbiddenNames = [
   'admin',
@@ -121,3 +124,41 @@ export const createPitch = async (state: unknown, form: FormData, pitch: string)
     });
   }
 };
+
+export async function updateProfile(form: {
+  name: string;
+  username: string;
+  image: string;
+  bio: string;
+}) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { error: 'Not authenticated' };
+    }
+    const db = await getDb();
+    const currentUser = await getAuthorByUsername(session.user.username);
+    if (!currentUser) {
+      return { error: 'User not found' };
+    }
+    const name = sanitizeName(form.name);
+    const username = sanitizeUsername(form.username);
+    const image = sanitizeImage(form.image);
+    const bio = sanitizeBio(form.bio);
+    if (username !== currentUser.username) {
+      const existing = await db.collection('authors').findOne({ username });
+      if (existing && existing._id.toString() !== currentUser._id) {
+        return { error: 'Username already taken' };
+      }
+    }
+    console.log('old bio:', currentUser.bio);
+    console.log('new bio:', bio);
+    await db
+      .collection('authors')
+      .updateOne({ _id: new ObjectId(currentUser._id) }, { $set: { name, username, image, bio } });
+    return { error: '' };
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return { error: 'Failed to update profile' };
+  }
+}

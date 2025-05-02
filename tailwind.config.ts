@@ -58,6 +58,11 @@ export default {
         },
       },
       boxShadow: {
+        sm: '0 1.5px 4px 0 rgba(80, 180, 255, 0.08), 0 1px 2px 0 rgba(0,0,0,0.08)',
+        md: '0 2px 8px 0 rgba(80, 180, 255, 0.10), 0 2px 8px 0 rgba(0,0,0,0.10)',
+        lg: '0 4px 24px 0 rgba(0, 0, 0, 0.12), 0 1.5px 8px 0 rgba(80, 180, 255, 0.08)',
+        DEFAULT: '0 4px 24px 0 rgba(0, 0, 0, 0.12), 0 1.5px 8px 0 rgba(80, 180, 255, 0.08)',
+        dark: '0 4px 24px 0 rgba(0, 0, 0, 0.7), 0 1.5px 8px 0 rgba(80, 180, 255, 0.12)',
         header: '0 1px 2px rgba(0, 0, 0, 0.05)',
         logoHover: '0 4px 8px rgba(0, 0, 0, 0.2)',
         neon: "0 0 5px theme('colors.purple.200'), 0 0 20px theme('colors.purple.700')",

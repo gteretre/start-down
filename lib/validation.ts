@@ -65,3 +65,43 @@ export function validateForm(values: {
 
   return errors;
 }
+
+// User data validation functions
+export function sanitizeEmail(email: string | null | undefined): string {
+  if (!email) return '';
+  // Basic email validation
+  const trimmed = email.trim().toLowerCase();
+  const emailRegex = /^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(trimmed) ? trimmed : '';
+}
+
+export function sanitizeUsername(username: string | null | undefined): string {
+  return (
+    username
+      ?.trim()
+      .replace(/[^a-zA-Z0-9_]/g, '')
+      .slice(0, 32) || ''
+  );
+}
+
+export function sanitizeName(name: string | null | undefined): string {
+  return (
+    name
+      ?.trim()
+      // Allow all unicode letters, numbers, spaces, _ and -
+      .replace(/[^\p{L}\p{N} _-]/gu, '')
+      .slice(0, 64) || ''
+  );
+}
+
+export function sanitizeImage(image: string | null | undefined): string {
+  if (!image || typeof image !== 'string') return '/logo.png';
+  if (image.startsWith('http') || image.startsWith('/')) return image;
+  return '/logo.png';
+}
+
+export function sanitizeBio(bio: string | null | undefined): string {
+  if (!bio || typeof bio !== 'string') return '';
+  // Allow all unicode, remove < and >, limit to 300 chars
+  return bio.trim().replace(/[<>]/g, '').slice(0, 300);
+}

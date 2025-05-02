@@ -9,11 +9,10 @@ import Tooltip from '@/components/Tooltip';
 import { PenBoxIcon } from 'lucide-react';
 import UserStartups from '@/components/UserStartups';
 import { StartupCardSkeleton } from '@/components/StartupCard';
-import { getAuthorImage } from '@/lib/utils';
 import type { Author } from '@/lib/models';
 
-const Page = async ({ params }: { params: { id: string } }) => {
-  const username = params.id;
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id: username } = await params; //! it has to stay like that also keep the Promise
   const session = await auth();
   const fetchedUser = await getAuthorByUsername(username);
   if (!fetchedUser) return notFound();
@@ -23,7 +22,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
   return (
     <>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 lg:flex-row lg:items-start lg:gap-12">
-        <aside className="flex w-full flex-col items-center rounded-3xl p-8 shadow-lg lg:sticky lg:top-8 lg:w-1/3">
+        <aside className="flex w-full flex-col items-center rounded-3xl bg-card p-8 shadow-lg lg:sticky lg:top-8 lg:w-1/3">
           <div className="flex flex-col items-center gap-4">
             <h1 className="animated-heading mb-2 text-3xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg">
               {profileOwner ? 'Your Profile' : `${user.name}'s Profile`}
@@ -34,7 +33,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
                 <Link href="/settings/profile">
                   <Tooltip text="Edit Profile Picture">
                     <Image
-                      src={getAuthorImage(user)}
+                      src={user.image || '/logo.png'}
                       alt={user.username + "'s avatar"}
                       width={120}
                       height={120}
@@ -44,7 +43,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
                 </Link>
               ) : (
                 <Image
-                  src={getAuthorImage(user)}
+                  src={user.image || '/logo.png'}
                   alt={user.username + "'s avatar"}
                   width={120}
                   height={120}
@@ -74,7 +73,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
         </aside>
 
         <section className="flex-1">
-          <div className="mx-auto flex flex-col rounded-3xl p-8 shadow-lg">
+          <div className="mx-auto flex flex-col rounded-3xl p-8">
             <p className="mb-6 text-center text-2xl font-semibold">
               {profileOwner ? 'Your Startups' : `${user.name}'s Startups`}
             </p>
