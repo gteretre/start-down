@@ -23,3 +23,15 @@ export interface Startup {
   image?: string;
   pitch: string;
 }
+
+export interface Comment {
+  _id: string;
+  author: Author;
+  createdAt: Date;
+  upvotes: number;
+  title: string;
+  text: string;
+  startupId: string;
+  parentId?: string;
+  editedAt?: Date;
+}

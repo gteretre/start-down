@@ -27,6 +27,18 @@ type RawStartup = {
   pitch?: string;
 };
 
+type RawComment = {
+  _id: string | ObjectId;
+  author: string | ObjectId;
+  createdAt?: Date | string;
+  upvotes?: number;
+  title?: string;
+  text?: string;
+  startupId: string;
+  parentId?: string;
+  editedAt?: Date | string;
+};
+
 function mapAuthor(raw: RawAuthor): import('./models').Author {
   return {
     _id: raw._id?.toString() || '',
@@ -237,4 +249,40 @@ export async function getAuthorByUsername(
       `Error in getAuthorByUsername: ${error instanceof Error ? error.message : String(error)}`
     );
   }
+}
+
+export async function getCommentsByStartupId(
+  startupId: string
+): Promise<import('./models').Comment[]> {
+  const db = await getDb();
+  const commentsRaw = await db
+    .collection('comments')
+    .find({ startupId })
+    .sort({ createdAt: 1 })
+    .toArray();
+  const authorIds = [...new Set(commentsRaw.map((c) => c.author?.toString()))].filter(Boolean);
+  const authors = authorIds.length
+    ? await db
+        .collection('authors')
+        .find({ _id: { $in: authorIds.map((id) => new ObjectId(id)) } })
+        .toArray()
+    : [];
+  function mapComment(raw: RawComment, authorObj: RawAuthor): import('./models').Comment {
+    return {
+      _id: raw._id?.toString() || '',
+      author: authorObj ? mapAuthor(authorObj) : null,
+      createdAt:
+        raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
+      upvotes: typeof raw.upvotes === 'number' ? raw.upvotes : 0,
+      title: raw.title || '',
+      text: raw.text || '',
+      startupId: raw.startupId || '',
+      parentId: raw.parentId || undefined,
+      editedAt: raw.editedAt ? new Date(raw.editedAt) : undefined,
+    };
+  }
+  return commentsRaw.map((comment) => {
+    const authorObj = authors.find((a) => a._id.toString() === comment.author?.toString());
+    return mapComment(comment as RawComment, authorObj as RawAuthor);
+  });
 }

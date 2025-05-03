@@ -11,6 +11,7 @@ import FeaturedStartups from '@/components/FeaturedStartups';
 import { auth } from '@/lib/auth';
 import type { Startup } from '@/lib/models';
 import MDRender from '@/mike-mardown/src/rendermd';
+import CommentSection from '@/components/CommentSection';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: slug } = await params;
@@ -45,7 +46,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         </h1>
         <p className="mb-5 text-base text-muted-foreground md:text-lg">{post.description}</p>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Tooltip text={post.author.bio || 'Author bio'}>
+          <Tooltip text={(post.author.bio || 'Author bio').substring(0, 80)}>
             <Link
               className="flex items-center gap-3 transition-opacity hover:opacity-80"
               href={`/user/${post.author.username}`}
@@ -100,7 +101,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
       <section>
         <div className="mb-8 p-6 px-10 md:px-20 lg:px-60">
           <h2 className="text-24-medium">Comments</h2>
-          <p>Comments will be available soon</p>
+          <CommentSection startupId={post._id} user={session?.user} />
         </div>
       </section>
     </>

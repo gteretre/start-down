@@ -125,6 +125,88 @@ export const createPitch = async (state: unknown, form: FormData, pitch: string)
   }
 };
 
+export const createComment = async (startupId: string, text: string) => {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { error: 'You must be signed in to comment.' };
+    }
+    if (!text || !startupId) {
+      return { error: 'Missing comment text or startup ID.' };
+    }
+    const db = await getDb();
+    const author = await getAuthorByUsername(session.user.username);
+    if (!author) {
+      return { error: 'Could not find your user profile.' };
+    }
+    const comment = {
+      author: new ObjectId(author._id),
+      createdAt: new Date(),
+      upvotes: 0,
+      text,
+      startupId,
+    };
+    const result = await db.collection('comments').insertOne(comment);
+    if (!result.insertedId) {
+      return { error: 'Failed to create comment.' };
+    }
+    return {
+      comment: {
+        ...comment,
+        _id: result.insertedId.toString(),
+        author: author,
+      },
+      error: '',
+    };
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    return { error: 'Failed to create comment.' };
+  }
+};
+
+export const upvoteComment = async (commentId: string) => {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { success: false, error: 'You must be signed in to upvote.' };
+    }
+    const db = await getDb();
+    const comment = await db.collection('comments').findOne({ _id: new ObjectId(commentId) });
+    if (!comment) {
+      return { success: false, error: 'Comment not found.' };
+    }
+    const userUpvotes = comment.userUpvotes || [];
+    const hasUpvoted = userUpvotes.includes(session.user.username);
+    let updateResult;
+    if (hasUpvoted) {
+      // Remove upvote
+      updateResult = await db.collection('comments').updateOne(
+        { _id: new ObjectId(commentId) },
+        {
+          $inc: { upvotes: -1 },
+          $pull: { userUpvotes: session.user.username },
+        }
+      );
+    } else {
+      // Add upvote
+      updateResult = await db.collection('comments').updateOne(
+        { _id: new ObjectId(commentId) },
+        {
+          $inc: { upvotes: 1 },
+          $addToSet: { userUpvotes: session.user.username },
+        }
+      );
+    }
+    if (updateResult.modifiedCount === 0) {
+      return { success: false, error: 'Failed to update upvote.' };
+    }
+    return { success: true, toggled: !hasUpvoted };
+  } catch (error) {
+    console.error('Error in upvoteComment:', error);
+    return { success: false, error: 'An error occurred while upvoting.' };
+  }
+};
+
 export async function updateProfile(form: {
   name: string;
   username: string;
