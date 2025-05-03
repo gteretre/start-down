@@ -1,4 +1,6 @@
 'use client';
+import { useRouter } from 'next/navigation';
+
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { updateProfile } from '@/lib/actions';
@@ -21,8 +23,8 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
-  // Track original values for undo
   const original = {
     name: user.name || '',
     username: user.username || '',
@@ -30,7 +32,6 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     bio: user.bio || '',
   };
 
-  // Check if any field has changed
   const isUnchanged =
     form.name === original.name &&
     form.username === original.username &&
@@ -71,17 +72,17 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     if (res?.error) {
       setStatus(res.error);
       toast({ title: 'Profile update failed', description: res.error, variant: 'destructive' });
-    } else {
-      setStatus('Profile updated!');
-      toast({ title: 'Profile updated', description: 'Your profile was updated successfully.' });
-    }
-    if (!res?.error && form.username !== user.username) {
+    } else if (form.username !== user.username) {
       setStatus('Username updated. Please log in again.');
       toast({
         title: 'Username changed',
         description: 'You will be logged out to refresh your session.',
       });
-      setTimeout(() => signOut({ callbackUrl: '/' }), 2000);
+      signOut({ callbackUrl: '/' });
+    } else {
+      setStatus('Profile updated!');
+      toast({ title: 'Profile updated', description: 'Your profile was updated successfully.' });
+      router.push(`/user/${user.username}`);
     }
   };
 

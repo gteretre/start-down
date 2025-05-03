@@ -385,6 +385,12 @@
       0 4px 24px 0 rgba(0, 0, 0, 0.7),
       0 1.5px 8px 0 rgba(80, 180, 255, 0.12);
   }
+  .google-translate-widget #google_translate_element select {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 /* =========================

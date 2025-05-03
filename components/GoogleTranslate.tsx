@@ -30,7 +30,8 @@ export default function GoogleTranslateToggle() {
 
     const script = document.createElement('script');
     script.id = GOOGLE_SCRIPT_ID;
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.src =
+      'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
     script.async = true;
     script.onerror = () => {
       setError('Google Translate could not be loaded (offline?)');
@@ -59,18 +60,6 @@ export default function GoogleTranslateToggle() {
           { pageLanguage: 'en', layout: translate.TranslateElement.InlineLayout.VERTICAL },
           'google_translate_element'
         );
-        // Inject custom styles for the widget
-        const style = document.createElement('style');
-        style.innerHTML = `
-          #google_translate_element select {
-            background: hsl(var(--background));
-            color: hsl(var(--foreground));
-            border-radius: 0.5rem;
-            padding: 0.25rem 0.5rem;
-          }
-         
-        `;
-        document.head.appendChild(style);
 
         // Hide selector after language selection
         const observer = new MutationObserver(() => {
@@ -111,7 +100,7 @@ export default function GoogleTranslateToggle() {
   }, [enabled]);
 
   return (
-    <div className="relative flex items-center" style={{ marginLeft: 16 }}>
+    <div className="google-translate-widget relative flex items-center" style={{ marginLeft: 16 }}>
       <div className="nav-element">
         <Tooltip text={enabled ? 'Disable Translation' : 'Enable Translation'} position="right">
           <button

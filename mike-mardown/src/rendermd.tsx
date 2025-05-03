@@ -1,103 +1,138 @@
 import React from 'react';
 
-// Only support #, ##, ### as headers, - and 1. as lists, and inline formatting
-function simpleMarkdownToHtml(md: string): string {
+function parseInline(text: string): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let key = 0;
+  // Regex for **bold**, *italic*, __underline__, `code`
+  const regex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(__([^_]+)__)|(`([^`]+)`)/g;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      result.push(text.slice(lastIndex, match.index));
+    }
+    if (match[1]) {
+      result.push(<strong key={key++}>{match[2]}</strong>);
+    } else if (match[3]) {
+      result.push(<em key={key++}>{match[4]}</em>);
+    } else if (match[5]) {
+      result.push(<u key={key++}>{match[6]}</u>);
+    } else if (match[7]) {
+      result.push(<code key={key++}>{match[8]}</code>);
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    result.push(text.slice(lastIndex));
+  }
+  return result;
+}
+
+function parseMarkdown(md: string): React.ReactNode[] {
   const lines = md.split(/\r?\n/);
-  let html = '';
+  const elements: React.ReactNode[] = [];
+  let listItems: React.ReactNode[] = [];
   let inUl = false;
   let inOl = false;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Inline formatting: bold, italic, underline, code
-    const htmlLine = line
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // bold
-      .replace(/\*(.+?)\*/g, '<em>$1</em>') // italic
-      .replace(/__(.+?)__/g, '<u>$1</u>') // underline
-      .replace(/`([^`]+)`/g, '<code>$1</code>'); // inline code
     if (/^### (.*)/.test(line)) {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
-      html += `<h3>${htmlLine.replace(/^### /, '')}</h3>`;
+      elements.push(<h3 key={i}>{parseInline(line.replace(/^### /, ''))}</h3>);
     } else if (/^## (.*)/.test(line)) {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
-      html += `<h2>${htmlLine.replace(/^## /, '')}</h2>`;
+      elements.push(<h2 key={i}>{parseInline(line.replace(/^## /, ''))}</h2>);
     } else if (/^# (.*)/.test(line)) {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
-      html += `<h1>${htmlLine.replace(/^# /, '')}</h1>`;
+      elements.push(<h1 key={i}>{parseInline(line.replace(/^# /, ''))}</h1>);
     } else if (/^> (.*)/.test(line)) {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
-      html += `<blockquote>${htmlLine.replace(/^> /, '')}</blockquote>`;
+      elements.push(<blockquote key={i}>{parseInline(line.replace(/^> /, ''))}</blockquote>);
     } else if (/^- (.*)/.test(line)) {
       if (!inUl) {
-        html += '<ul>';
+        if (inOl) {
+          elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+          listItems = [];
+          inOl = false;
+        }
         inUl = true;
       }
-      if (inOl) {
-        html += '</ol>';
-        inOl = false;
-      }
-      html += `<li>${htmlLine.replace(/^- /, '')}</li>`;
+      listItems.push(<li key={i}>{parseInline(line.replace(/^- /, ''))}</li>);
     } else if (/^1\. (.*)/.test(line)) {
       if (!inOl) {
-        html += '<ol>';
+        if (inUl) {
+          elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+          listItems = [];
+          inUl = false;
+        }
         inOl = true;
       }
-      if (inUl) {
-        html += '</ul>';
-        inUl = false;
-      }
-      html += `<li>${htmlLine.replace(/^1\. /, '')}</li>`;
+      listItems.push(<li key={i}>{parseInline(line.replace(/^1\. /, ''))}</li>);
     } else if (line.trim() === '') {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
     } else {
       if (inUl) {
-        html += '</ul>';
+        elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
+        listItems = [];
         inUl = false;
       }
       if (inOl) {
-        html += '</ol>';
+        elements.push(<ol key={`ol-${i}`}>{listItems}</ol>);
+        listItems = [];
         inOl = false;
       }
-      html += `<p>${htmlLine}</p>`;
+      elements.push(<p key={i}>{parseInline(line)}</p>);
     }
   }
-  if (inUl) html += '</ul>';
-  if (inOl) html += '</ol>';
-  return html;
+  if (inUl) elements.push(<ul key="ul-end">{listItems}</ul>);
+  if (inOl) elements.push(<ol key="ol-end">{listItems}</ol>);
+  return elements;
 }
 
 type MDRenderProps = {
@@ -105,11 +140,9 @@ type MDRenderProps = {
 };
 
 const MDRender: React.FC<MDRenderProps> = ({ markdown }) => (
-  <div
-    className="mdrender"
-    dangerouslySetInnerHTML={{ __html: simpleMarkdownToHtml(markdown) }}
-    style={{ fontFamily: 'inherit', fontSize: 16, lineHeight: 1.7 }}
-  />
+  <div className="mdrender" style={{ fontFamily: 'inherit', fontSize: 16, lineHeight: 1.7 }}>
+    {parseMarkdown(markdown)}
+  </div>
 );
 
 export default MDRender;

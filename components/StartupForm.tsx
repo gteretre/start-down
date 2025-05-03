@@ -121,7 +121,7 @@ function StartupForm() {
         setFormValues(initialFormValues);
         setTimeout(() => {
           router.push(`/startup/${result.slug}`);
-        }, 1000);
+        }, 500);
       } else if (result && result.error) {
         toast({
           title: 'Submission Error',
