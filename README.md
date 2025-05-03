@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/7dc02235-8bca-4520-9924-b1a7e1980b2d" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
+![1](https://github.com/user-attachments/assets/25e7517a-5943-44a2-8168-9ae894907627)<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e591165-4fa8-4999-a54d-d18780f2ce25" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
 </p>
 
 <h1 align="center">🚀 StartDown <span style="font-size:1.2em;">✨</span></h1>
@@ -16,6 +16,10 @@ StartDown is a playful web platform built with Next.js and React, designed for s
 - 🧩 Modular, reusable React components
 - 👨‍💻 Developer-friendly codebase and structure
 
+![1](https://github.com/user-attachments/assets/c487fb68-7956-4346-96b2-e489f7578be2)
+
+<img src="https://github.com/user-attachments/assets/693cf2ee-55ee-497c-bde0-782f4c433eb0" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
+
 ## 🛠️ Tech Stack
 
 - [Next.js](https://nextjs.org/) (App Router, SSR, API routes)
@@ -27,6 +31,7 @@ StartDown is a playful web platform built with Next.js and React, designed for s
 - [Lucide React](https://lucide.dev/) (icons)
 
 ## 🗂️ Project Structure
+![1](https://github.com/user-attachments/assets/c80a9ac8-26c2-473a-9b77-72760afa7a04)
 
 - `app/` — Main application code (routing, pages, layouts, API endpoints)
   - `(root)/` — Home page and main entry point
@@ -94,6 +99,8 @@ docker run -p 3000:3000 --env-file [.env.local](http://_vscodecontentref_/0) sta
 Contributions, bug reports, and feature suggestions are welcome! Please open an issue or submit a pull request.
 
 ## 💡 About
+
+<img src="https://github.com/user-attachments/assets/d354ed3d-ec0f-4574-b80a-20e27d9dda05" alt="StartDown Main Page" width="600" style="border-radius: 12px; box-shadow: 0 4px 24px #0002; margin-bottom: 1em;" />
 
 In the world of tech, everyone's chasing that mythical "unicorn" — the billion-dollar startup idea. So, I thought, why not have a little fun with it? StartDown is my tongue-in-cheek tribute to those wild ideas that might just be brilliant... or totally bonkers. It’s a space where people can throw their craziest concepts into the void (or the internet) and maybe, just maybe, get some feedback. It's also part of my portfolio. A functional joke with real code behind it.
 
