@@ -25,7 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       cache.set(id, { views, ts: Date.now() });
       return res.status(200).json({ views });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to fetch views: ' + error.message });
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message: string }).message
+          : String(error);
+      return res.status(500).json({ error: 'Failed to fetch views: ' + message });
     }
   } else if (req.method === 'POST') {
     try {
@@ -34,7 +38,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       cache.set(id, { views, ts: Date.now() });
       return res.status(200).json({ views });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to update views: ' + error.message });
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message: string }).message
+          : String(error);
+      return res.status(500).json({ error: 'Failed to update views: ' + message });
     }
   } else {
     return res.status(405).end();

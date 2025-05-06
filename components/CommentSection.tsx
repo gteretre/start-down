@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { SendHorizontalIcon } from 'lucide-react';
 
 import { createComment, upvoteComment } from '@/lib/actions';
+import { Comment } from '@/lib/models';
 
 export default function CommentSection({
   startupId,
@@ -29,8 +30,8 @@ export default function CommentSection({
       .then((res) => res.json())
       .then((data) => {
         setComments((prev) => {
-          const ids = new Set(prev.map((c) => c._id));
-          return [...prev, ...data.comments.filter((c) => !ids.has(c._id))];
+          const ids = new Set(prev.map((c: Comment) => c._id));
+          return [...prev, ...data.comments.filter((c: Comment) => !ids.has(c._id))];
         });
         setHasMore(data.hasMore);
         setLoading(false);
@@ -51,12 +52,12 @@ export default function CommentSection({
     const result = await upvoteComment(commentId);
     if (result && result.success) {
       setComments((prev) =>
-        prev.map((c) => {
+        prev.map((c: Comment) => {
           if (c._id !== commentId) return c;
           let userUpvotes = c.userUpvotes || [];
           let upvotes = c.upvotes;
           if (user?.username && userUpvotes.includes(user.username)) {
-            userUpvotes = userUpvotes.filter((u) => u !== user.username);
+            userUpvotes = userUpvotes.filter((u: string) => u !== user.username);
             upvotes = upvotes - 1;
           } else if (user?.username) {
             userUpvotes = [...userUpvotes, user.username];
@@ -74,8 +75,13 @@ export default function CommentSection({
     if (result && result.comment) {
       setComments((prev) => {
         // Prevent duplicate on submit
-        if (prev.some((c) => c._id === result.comment._id)) return prev;
-        return [result.comment, ...prev];
+        if (prev.some((c: Comment) => c._id === result.comment._id)) return prev;
+        // Ensure userUpvotes is present
+        const commentWithUpvotes: Comment = {
+          userUpvotes: [],
+          ...result.comment,
+        };
+        return [commentWithUpvotes, ...prev];
       });
       setNewComment('');
       setIsTyping(false);
@@ -129,7 +135,7 @@ export default function CommentSection({
         {comments.map((comment) => {
           const hasUpvoted = !!(user?.username && comment.userUpvotes?.includes(user.username));
           return (
-            <div key={comment._id} className="flex flex-col gap-2 rounded-lg shadow-sm">
+            <div key={comment._id} className="flex flex-col gap-2 rounded-lg">
               <div className="flex items-center gap-3">
                 {comment.author?.image ? (
                   <Image
@@ -147,7 +153,7 @@ export default function CommentSection({
                 <div className="space-x-2">
                   <span className="text-md font-semibold text-foreground">
                     @{comment.author?.username || 'Anonymous'}
-                    {user.username === comment.author?.username ? ' (You)' : ''}
+                    {user?.username === comment.author?.username ? ' (You)' : ''}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {new Date(comment.createdAt).toLocaleString()}

@@ -32,11 +32,24 @@ type RawComment = {
   author: string | ObjectId;
   createdAt?: Date | string;
   upvotes?: number;
-  title?: string;
   text?: string;
   startupId: string;
   parentId?: string;
   editedAt?: Date | string;
+  userUpvotes?: string[];
+};
+
+const DELETED_AUTHOR = {
+  _id: 'deleted',
+  id: 'deleted',
+  name: 'Deleted User',
+  username: 'deleted',
+  email: '',
+  createdAt: new Date(0),
+  image: '',
+  bio: '',
+  role: '',
+  provider: 'deleted',
 };
 
 function mapAuthor(raw: RawAuthor): import('./models').Author {
@@ -270,11 +283,11 @@ export async function getCommentsByStartupId(
   function mapComment(raw: RawComment, authorObj: RawAuthor): import('./models').Comment {
     return {
       _id: raw._id?.toString() || '',
-      author: authorObj ? mapAuthor(authorObj) : null,
+      author: authorObj ? mapAuthor(authorObj) : DELETED_AUTHOR,
       createdAt:
         raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
       upvotes: typeof raw.upvotes === 'number' ? raw.upvotes : 0,
-      title: raw.title || '',
+      userUpvotes: Array.isArray(raw.userUpvotes) ? raw.userUpvotes : [],
       text: raw.text || '',
       startupId: raw.startupId || '',
       parentId: raw.parentId || undefined,

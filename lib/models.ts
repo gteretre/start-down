@@ -29,7 +29,7 @@ export interface Comment {
   author: Author;
   createdAt: Date;
   upvotes: number;
-  title: string;
+  userUpvotes: string[];
   text: string;
   startupId: string;
   parentId?: string;

@@ -33,6 +33,16 @@ const forbiddenNames = [
   'setup',
 ];
 
+interface CommentDoc {
+  _id: ObjectId;
+  author: ObjectId;
+  createdAt: Date;
+  upvotes: number;
+  text: string;
+  startupId: string;
+  userUpvotes: string[];
+}
+
 export const createPitch = async (state: unknown, form: FormData, pitch: string) => {
   try {
     const session = await auth();
@@ -179,8 +189,8 @@ export const upvoteComment = async (commentId: string) => {
     const hasUpvoted = userUpvotes.includes(session.user.username);
     let updateResult;
     if (hasUpvoted) {
-      // Remove upvote
-      updateResult = await db.collection('comments').updateOne(
+      const commentCollection = db.collection<CommentDoc>('comments');
+      updateResult = await commentCollection.updateOne(
         { _id: new ObjectId(commentId) },
         {
           $inc: { upvotes: -1 },
