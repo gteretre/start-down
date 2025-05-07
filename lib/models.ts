@@ -35,3 +35,11 @@ export interface Comment {
   parentId?: string;
   editedAt?: Date;
 }
+
+export interface ToastType {
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  [key: string]: unknown;
+}

@@ -1,14 +1,17 @@
 'use client';
 import React, { useEffect } from 'react';
 
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
+
 const Adds = () => {
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.adsbygoogle) {
-      try {
-        window.adsbygoogle.push({});
-      } catch {
-        // ignore
-      }
+    if (typeof window !== 'undefined') {
+      window.adsbygoogle = window.adsbygoogle || [];
+      window.adsbygoogle.push({});
     }
   }, []);
 

@@ -14,12 +14,10 @@ interface StartupListClientWrapperProps {
   viewType: ViewType;
 }
 
-const cardComponents: {
-  [key in ViewType]: React.FC<{ post: Startup } | { posts: Startup[] }>;
-} = {
-  card: StartupCard,
-  small: StartupCardSmall,
-  list: StartupCardList,
+const cardComponents = {
+  card: StartupCard as React.FC<{ post: Startup }>,
+  small: StartupCardSmall as React.FC<{ post: Startup }>,
+  list: StartupCardList as React.FC<{ posts: Startup[] }>,
 };
 
 const StartupListClientWrapper: React.FC<StartupListClientWrapperProps> = ({

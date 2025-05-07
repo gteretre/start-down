@@ -1,11 +1,9 @@
 import React from 'react';
-import { getDb } from '@/lib/mongodb';
+import { getFeaturedStartups } from '@/lib/queries';
 
 import StartupCard from './StartupCard';
 
 const FeaturedStartups = async () => {
-  const db = await getDb();
-
   const slugs = [
     'quantum-procrastination',
     'ai-powered-cat-translator',
@@ -15,47 +13,17 @@ const FeaturedStartups = async () => {
     'forgetting-floss-a-dental-reminder-app',
   ];
 
-  const editorPosts = await db
-    .collection('startups')
-    .aggregate([
-      {
-        $match: { slug: { $in: slugs } },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
-      {
-        $lookup: {
-          from: 'authors',
-          localField: 'author',
-          foreignField: '_id',
-          as: 'authorDetails',
-        },
-      },
-      {
-        $unwind: '$authorDetails',
-      },
-    ])
-    .toArray();
+  const startups = await getFeaturedStartups(slugs);
 
-  return editorPosts?.length > 0 ? (
+  return startups.length > 0 ? (
     <div className="mx-auto w-full">
-      <p className="text-30-semibold px-4">Featured Startups ({editorPosts.length})</p>
+      <p className="text-30-semibold px-4">Featured Startups ({startups.length})</p>
       <ul
         className="scroll-snap-x flex w-full gap-4 overflow-x-auto px-0 py-8"
         style={{ scrollSnapType: 'x mandatory' }}
       >
-        {editorPosts.map((post, index: number) => (
-          <StartupCard
-            post={{
-              ...post,
-              _id: post._id.toString(),
-              author: post.authorDetails,
-            }}
-            key={index}
-            className="scroll-snap-align-start min-w-[300px] flex-1"
-            style={{ scrollSnapAlign: 'start' }}
-          />
+        {startups.map((post) => (
+          <StartupCard post={post} key={post._id} />
         ))}
       </ul>
     </div>

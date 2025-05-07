@@ -15,6 +15,10 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement;
 };
 
+type State = {
+  toasts: ToasterToast[];
+};
+
 let count = 0;
 
 function genId() {
@@ -75,8 +79,6 @@ export const reducer = (state: State, action: Action): State => {
     case 'DISMISS_TOAST': {
       const { toastId } = action;
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId);
       } else {
@@ -108,6 +110,8 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
       };
+    default:
+      return state;
   }
 };
 
@@ -140,7 +144,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
+      onOpenChange: (open: boolean) => {
         if (!open) dismiss();
       },
     },
@@ -164,7 +168,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+  }, []);
 
   return {
     ...state,

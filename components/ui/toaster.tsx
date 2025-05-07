@@ -1,6 +1,7 @@
 'use client';
 
 import { useToast } from '@/hooks/use-toast';
+import { ToastType } from '@/lib/models';
 import {
   Toast,
   ToastClose,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/toast';
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts } = useToast() as { toasts: ToastType[] };
 
   return (
     <ToastProvider>

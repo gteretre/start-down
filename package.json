@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky",
-    "test": "jest"
+    "test": "jest",
+    "tstest": "npx tsc --noEmit"
   },
   "packageManager": "npm@10.5.2",
   "overrides": {

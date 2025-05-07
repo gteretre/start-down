@@ -299,3 +299,26 @@ export async function getCommentsByStartupId(
     return mapComment(comment as RawComment, authorObj as RawAuthor);
   });
 }
+
+type AggregatedStartup = RawStartup & { authorDetails: RawAuthor };
+
+export async function getFeaturedStartups(slugs: string[]): Promise<import('./models').Startup[]> {
+  const db = await getDb();
+  const editorPosts = (await db
+    .collection('startups')
+    .aggregate([
+      { $match: { slug: { $in: slugs } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'authors',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'authorDetails',
+        },
+      },
+      { $unwind: '$authorDetails' },
+    ])
+    .toArray()) as AggregatedStartup[];
+  return editorPosts.map((post) => mapStartup(post, post.authorDetails));
+}
