@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { SquarePenIcon } from 'lucide-react';
 
 import { getStartupBySlug } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
@@ -31,12 +32,20 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
           <Tooltip text={`Created: ${formatDateAgo(createdAtStr)}`}>
             <span className="cursor-default">{formatDate(createdAtStr)}</span>
           </Tooltip>
-          <ViewClient
-            id={post._id}
-            initialViews={post.views}
-            incrementOnMount={true}
-            isLoggedIn={!!session}
-          />
+          <div className="flex items-center gap-5">
+            {session?.user?.username === post.author.username && (
+              <Link className="btn-normal gap-1" href={`/startup/${post.slug}/edit`}>
+                <SquarePenIcon size={16} /> Edit
+              </Link>
+            )}
+
+            <ViewClient
+              id={post._id}
+              initialViews={post.views}
+              incrementOnMount={true}
+              isLoggedIn={!!session}
+            />
+          </div>
         </div>
         <h1
           className="mb-3 text-3xl font-bold leading-tight text-foreground md:text-4xl"

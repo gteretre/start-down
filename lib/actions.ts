@@ -274,3 +274,89 @@ export async function updateProfile(form: {
     return { error: 'Failed to update profile' };
   }
 }
+
+export async function updateStartup(
+  id: string,
+  form: {
+    description: string;
+    category: string;
+    link: string;
+    pitch: string;
+  }
+) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { status: 'ERROR', error: 'Not authenticated' };
+    }
+    const db = await getDb();
+    const startup = await db.collection('startups').findOne({ _id: new ObjectId(id) });
+    if (!startup) {
+      return { status: 'ERROR', error: 'Startup not found' };
+    }
+    // Only the author can update
+    const author = await getAuthorByUsername(session.user.username);
+    if (!author || String(startup.author) !== String(author._id)) {
+      return { status: 'ERROR', error: 'You are not authorized to update this startup.' };
+    }
+    // Sanitize and validate fields (title and slug are not updatable)
+    const description = (form.description || '').trim();
+    const category = (form.category || '').trim();
+    const image = (form.link || '').trim();
+    const pitch = (form.pitch || '').trim();
+    if (!description || !category || !pitch) {
+      return { status: 'ERROR', error: 'All fields except image are required.' };
+    }
+    // Optionally, add more validation here
+    const updateResult = await db.collection('startups').updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          description,
+          category,
+          image,
+          pitch,
+        },
+      }
+    );
+    if (updateResult.modifiedCount !== 1) {
+      return { status: 'ERROR', error: 'Failed to update startup.' };
+    }
+    return { status: 'SUCCESS' };
+  } catch (error) {
+    console.error('Error updating startup:', error);
+    return { status: 'ERROR', error: 'Failed to update startup.' };
+  }
+}
+
+export async function deleteStartup(id: string) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { success: false, message: 'Not authenticated.' };
+    }
+    const db = await getDb();
+    const startup = await db.collection('startups').findOne({ _id: new ObjectId(id) });
+    if (!startup) {
+      return { success: false, message: 'Startup not found.' };
+    }
+    const author = await getAuthorByUsername(session.user.username);
+    if (!author || String(startup.author) !== String(author._id)) {
+      return { success: false, message: 'You are not authorized to delete this startup.' };
+    }
+    await db.collection('comments').deleteMany({ startupId: id });
+    const result = await db.collection('startups').deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 0) {
+      console.warn('No startup found to delete with id:', id);
+      return { success: false, message: 'Startup not found.' };
+    }
+    return { success: true, message: 'Startup and associated comments deleted successfully.' };
+  } catch (error) {
+    console.error('Error in deleteStartup:', error);
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
+    };
+  }
+}
