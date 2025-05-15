@@ -25,7 +25,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         <aside className="flex w-full flex-col items-center rounded-3xl bg-card p-8 shadow-lg lg:sticky lg:top-8 lg:w-1/3">
           <div className="flex flex-col items-center gap-4">
             <h1 className="animated-heading mb-2 text-3xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg">
-              {profileOwner ? 'Your Profile' : `${user.name}'s Profile`}
+              {profileOwner ? 'Your Profile' : `User Profile`}
             </h1>
 
             <div className="relative">

@@ -10,6 +10,9 @@ import { ObjectId } from 'mongodb';
 const forbiddenNames = [
   'admin',
   'test',
+  'test1',
+  'test2',
+  'test_creation',
   'null',
   'undefined',
   'root',
@@ -31,6 +34,8 @@ const forbiddenNames = [
   'config',
   'configuration',
   'setup',
+  'demo',
+  'example',
 ];
 
 interface CommentDoc {
@@ -243,12 +248,27 @@ export async function updateProfile(form: {
         return { error: 'Username already taken' };
       }
     }
-    console.log('old bio:', currentUser.bio);
-    console.log('new bio:', bio);
-    await db
+    const updateResult = await db
       .collection('authors')
       .updateOne({ _id: new ObjectId(currentUser._id) }, { $set: { name, username, image, bio } });
-    return { error: '' };
+    if (updateResult.modifiedCount !== 1) {
+      return { error: 'Failed to update profile' };
+    }
+    const updatedUser = await db
+      .collection('authors')
+      .findOne({ _id: new ObjectId(currentUser._id) });
+    if (!updatedUser) {
+      return { error: 'Failed to fetch updated user' };
+    }
+    return {
+      status: 'SUCCESS',
+      user: {
+        name: updatedUser.name,
+        username: updatedUser.username,
+        bio: updatedUser.bio,
+        image: updatedUser.image,
+      },
+    };
   } catch (error) {
     console.error('Error updating profile:', error);
     return { error: 'Failed to update profile' };

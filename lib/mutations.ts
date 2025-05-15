@@ -98,6 +98,36 @@ export async function createAuthor(author: Omit<Author, '_id'>) {
   }
 }
 
-export async function updateAuthor() {
-  return true;
+export async function deleteUser(username: string) {
+  try {
+    const db = await getDb();
+    const result = await db.collection('authors').deleteOne({ username });
+    if (result.deletedCount === 0) {
+      console.warn('No user found to delete with username:', username);
+      return { success: false, message: 'User not found.' };
+    }
+    return { success: true, message: 'User deleted successfully.' };
+  } catch (error) {
+    console.error('Error in deleteUser:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
+  }
+}
+
+export async function deleteStartup(id: string) {
+  try {
+    const db = await getDb();
+    const result = await db.collection('startups').deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 0) {
+      console.warn('No startup found to delete with id:', id);
+      return { success: false, message: 'Startup not found.' };
+    }
+    return { success: true, message: 'Startup deleted successfully.' };
+  } catch (error) {
+    console.error('Error in deleteStartup:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
+  }
 }

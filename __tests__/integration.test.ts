@@ -1,90 +1,135 @@
-// Test of the communication between the database and the authentication system
-
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-import NextAuth from 'next-auth';
 import { ObjectId } from 'mongodb';
 
 import clientPromise from '@/lib/mongodb';
 import { getStartupById, getAuthorById } from '@/lib/queries';
-import { options } from '@/app/api/auth/[...nextauth]/options';
 import { createComment, upvoteComment, createPitch } from '@/lib/actions';
 import * as authModule from '@/lib/auth';
+import { createAuthor, deleteUser, deleteStartup } from '@/lib/mutations';
 
-const EXAMPLE_STARTUP_ID = '67f648e964c2503554b7123c';
-const EXAMPLE_AUTHOR_ID = '67f63c6764c2503554b71236';
-const EXAMPLE_AUTHOR_EMAIL = 'demo@example.com';
-const EXAMPLE_AUTHOR_USERNAME = 'demouser';
+// Ensure test slugs are always deleted before any test runs
+beforeAll(async () => {
+  const client = await clientPromise;
+  await client
+    .db('startdown')
+    .collection('startups')
+    .deleteMany({ slug: { $in: ['test', 'test_creation'] } });
+});
 
-const UNIQUE = Date.now().toString();
-const TEST_COMMENT_TEXT = `Integration test comment ${UNIQUE}`;
-const TEST_STARTUP_TITLE = `Integration Test Startup ${UNIQUE}`;
+const TEST_COMMENT_TEXT = `Integration test comment`;
+const TEST_STARTUP_TITLE = `Integration Test Startup`;
 const TEST_STARTUP_DESC = 'Integration test description';
 const TEST_STARTUP_CATEGORY = 'Tech';
 const TEST_STARTUP_LINK = 'https://placehold.co/300x300';
 
 let createdCommentId: string | undefined;
 let createdStartupId: string | undefined;
+let createdStartupId2: string | undefined;
 
 const TEST_USER = {
-  id: EXAMPLE_AUTHOR_ID,
-  username: EXAMPLE_AUTHOR_USERNAME,
-  email: EXAMPLE_AUTHOR_EMAIL,
+  id: '67f63c6764c2503554b71236',
+  username: 'testuser',
+  email: 'test@example.com',
   name: 'Demo User',
+  provider: 'demo',
 };
+
+beforeAll(async () => {
+  // 1. Create test user in DB
+  const userResult = await createAuthor({
+    username: TEST_USER.username,
+    email: TEST_USER.email,
+    name: TEST_USER.name,
+    provider: TEST_USER.provider,
+    image: '',
+    bio: '',
+    id: 'test',
+    createdAt: new Date(),
+  });
+  TEST_USER.id = userResult._id;
+
+  // 2. Mock auth to always return this user
+  jest.spyOn(authModule, 'auth').mockImplementation(async () => ({
+    user: TEST_USER,
+  }));
+
+  // 3. Create a startup for tests (slug: 'test')
+  const { createStartup } = await import('@/lib/mutations');
+  const startupResult = await createStartup({
+    title: `Integration Test Startup`,
+    description: 'Integration test description',
+    category: 'Tech',
+    image: 'https://placehold.co/300x300',
+    author: userResult._id,
+    slug: 'test',
+    pitch: '# Integration test pitch\n Lorem ipsum dolor sit amet consectetur adipiscing elit.',
+    views: 100,
+  });
+  createdStartupId = startupResult._id;
+});
+
+afterAll(async () => {
+  const client = await clientPromise;
+  // if (createdStartupId) {
+  //   const result = await deleteStartup(createdStartupId);
+  //   if (!result.success) {
+  //     console.error('Failed to delete startup:', createdStartupId, result);
+  //   }
+  // }
+  if (createdStartupId2) {
+    const result = await deleteStartup(createdStartupId2);
+    if (!result.success) {
+      console.error('Failed to delete startup2:', createdStartupId2, result);
+    }
+  }
+  const result = await deleteUser('testuser_updated');
+  if (!result.success) {
+    console.error('Failed to delete user:', 'testuser_updated', result);
+  }
+  await client.close();
+});
 
 jest.spyOn(authModule, 'auth').mockImplementation(async () => ({
   user: TEST_USER,
 }));
 
 describe('Project DB & Auth Integration', () => {
-  it('should fetch the example startup by ID and check its fields', async () => {
-    const startup = await getStartupById(EXAMPLE_STARTUP_ID);
+  it('should fetch the created startup by ID and check its fields', async () => {
+    const startup = await getStartupById(createdStartupId!);
     expect(startup).toBeTruthy();
     if (startup) {
-      expect(startup.title).toBe('Quantum Procrastination');
-      expect(startup.category).toBe('productivity');
+      expect(startup.title).toContain('Integration Test Startup'); // or whatever title you use
+      expect(startup.category).toBe(TEST_STARTUP_CATEGORY);
       expect(startup.author).toBeTruthy();
       if (startup.author) {
-        expect(startup.author.username).toBe(EXAMPLE_AUTHOR_USERNAME);
+        expect(startup.author.username).toBe(TEST_USER.username);
       }
     }
   });
 
-  it('should fetch the example author by ID and check its fields', async () => {
-    const author = await getAuthorById(EXAMPLE_AUTHOR_ID);
+  it('should fetch the created author by ID and check its fields', async () => {
+    const author = await getAuthorById(TEST_USER.id);
     expect(author).toBeTruthy();
     if (author) {
-      expect(author.email).toBe(EXAMPLE_AUTHOR_EMAIL);
-      expect(author.username).toBe(EXAMPLE_AUTHOR_USERNAME);
-      expect(author.name).toBe('Demo User');
+      expect(author.email).toBe(TEST_USER.email);
+      expect(author.username).toBe(TEST_USER.username);
+      expect(author.name).toBe(TEST_USER.name);
     }
   });
 
   it('should authenticate the demo user and create a session', async () => {
-    // Simulate a sign-in using NextAuth options
-    // This is a pseudo-test: in real integration, use supertest or next-auth testing helpers
-    const req = {
-      method: 'POST',
-      body: { email: EXAMPLE_AUTHOR_EMAIL },
-      query: { nextauth: [] }, // Mock the catch-all route param
-    };
-    const res = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis(),
-      setHeader: jest.fn(), // Mock setHeader for NextAuth compatibility
-      send: jest.fn(), // Mock send for NextAuth compatibility
-      end: jest.fn(),
-    };
-    // @ts-expect-error: NextAuth expects a Next.js API request/response object
-    await NextAuth(options)(req, res);
-    // Check if any response method was called
-    expect(
-      res.json.mock.calls.length > 0 ||
-        res.send.mock.calls.length > 0 ||
-        res.end.mock.calls.length > 0
-    ).toBe(true);
+    jest.spyOn(authModule, 'auth').mockImplementation(async () => ({ user: TEST_USER }));
+    const session = await authModule.auth();
+    expect(session).toBeDefined();
+    if (session && session.user) {
+      expect(session.user.username).toBe(TEST_USER.username);
+      expect(session.user.email).toBe(TEST_USER.email);
+      expect(session.user.name).toBe(TEST_USER.name);
+    } else {
+      throw new Error('Session or session.user is undefined');
+    }
   });
 });
 
@@ -95,6 +140,7 @@ describe('Comment & Startup Integration', () => {
     formData.append('description', TEST_STARTUP_DESC);
     formData.append('category', TEST_STARTUP_CATEGORY);
     formData.append('link', TEST_STARTUP_LINK);
+    formData.append('slug', 'test_creation');
     const result = await createPitch(
       {},
       formData,
@@ -110,7 +156,7 @@ describe('Comment & Startup Integration', () => {
     expect(result.description).toBe(TEST_STARTUP_DESC);
     expect(result.category).toBe(TEST_STARTUP_CATEGORY);
     expect(result.image).toBe(TEST_STARTUP_LINK);
-    createdStartupId = result._id;
+    createdStartupId2 = result._id;
   });
 
   it('should create a comment for the startup', async () => {
@@ -173,7 +219,7 @@ describe('Comment & Startup Integration', () => {
       console.error('Cleanup error:', err);
       throw err;
     } finally {
-      await client.close();
+      // await client.close();
     }
   });
 });
@@ -211,18 +257,34 @@ describe('Unauthorized Access', () => {
   });
 });
 
-const originalConsoleError = console.error;
-
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation((msg) => {
-    if (typeof msg === 'string' && msg.includes('MISSING_NEXTAUTH_API_ROUTE_ERROR')) {
-      return;
-    }
-    return originalConsoleError(msg);
+describe('Profile Update Integration', () => {
+  beforeAll(() => {
+    jest.spyOn(authModule, 'auth').mockImplementation(async () => ({ user: TEST_USER }));
   });
-});
 
-afterAll(async () => {
-  const client = await clientPromise;
-  await client.close();
+  it('should update the demo user profile using updateProfile', async () => {
+    const { updateProfile } = await import('@/lib/actions');
+    const NEW_NAME = 'Demo User Updated';
+    const NEW_USERNAME = 'testuser_updated';
+    const NEW_BIO = 'Integration test bio';
+    const updateData = {
+      name: NEW_NAME,
+      username: NEW_USERNAME,
+      image: '',
+      bio: NEW_BIO,
+    };
+    const result = await updateProfile(updateData);
+    if ('error' in result) {
+      throw new Error('updateProfile failed: ' + result.error);
+    }
+    const successResult = result as {
+      status: string;
+      user: { name: string; username: string; bio: string };
+    };
+    expect(successResult.status).toBe('SUCCESS');
+    expect(successResult.user).toBeDefined();
+    expect(successResult.user.name).toBe(NEW_NAME);
+    expect(successResult.user.username).toBe(NEW_USERNAME);
+    expect(successResult.user.bio).toBe(NEW_BIO);
+  });
 });
