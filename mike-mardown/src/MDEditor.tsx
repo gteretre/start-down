@@ -26,7 +26,15 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showPreview, setShowPreview] = React.useState(false);
 
-  // Helper to insert or wrap selection
+  React.useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+      textarea.style.minHeight = textarea.scrollHeight + 'px';
+    }
+  }, [value]);
+
   const insertMarkdown = (before: string, after: string = before) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -35,7 +43,6 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
     const selected = value.slice(start, end);
     const newValue = value.slice(0, start) + before + selected + after + value.slice(end);
     onChange(newValue);
-    // Restore selection
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(start + before.length, end + before.length + selected.length);
@@ -126,6 +133,8 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
     }
   };
 
+  const minHeight = textareaRef.current ? textareaRef.current.scrollHeight : undefined;
+
   return (
     <div className="w-full">
       <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -206,13 +215,15 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        rows={10}
+        rows={8}
         style={{
           width: '100%',
           fontFamily: 'monospace',
           fontSize: 14,
           padding: 12,
           borderRadius: 8,
+          overflow: 'hidden',
+          minHeight,
         }}
       />
       {showPreview && (

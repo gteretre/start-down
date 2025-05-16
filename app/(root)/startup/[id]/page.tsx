@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SquarePenIcon } from 'lucide-react';
 
-import { getStartupBySlug } from '@/lib/queries';
+import { getStartupBySlug, getFeaturedStartups } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
 import ShareButton from '@/components/ShareButton';
 import ViewClient from '@/components/ViewClient';
@@ -15,6 +15,15 @@ import MDRender from '@/mike-mardown/src/rendermd';
 import CommentSection from '@/components/CommentSection';
 import { ProfilePicture } from '@/components/ImageUtilities';
 
+const slugs = [
+  'quantum-procrastination',
+  'ai-powered-cat-translator',
+  'fomo-insurance',
+  'passive-aggressive-roommate-bot',
+  'sock-matcher-orphan-sock-dating-service',
+  'forgetting-floss-a-dental-reminder-app',
+];
+
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: slug } = await params;
   const session = await auth();
@@ -25,6 +34,8 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const post: Startup = fetchedPost;
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
+
+  const featuredStartups = await getFeaturedStartups(slugs);
 
   return (
     <>
@@ -101,7 +112,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
       <section className="">
         <div className="px-5">
           <div className="">
-            <FeaturedStartups />
+            <FeaturedStartups startups={featuredStartups} />
           </div>
         </div>
       </section>

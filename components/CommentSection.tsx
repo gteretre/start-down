@@ -99,12 +99,20 @@ export default function CommentSection({
             onChange={(e) => {
               setNewComment(e.target.value);
               setIsTyping(e.target.value.length > 0);
+              const textarea = e.target as HTMLTextAreaElement;
+              textarea.style.height = 'auto';
+              textarea.style.height = textarea.scrollHeight + 'px';
             }}
             placeholder="Write a comment..."
             required
-            rows={isTyping ? 4 : 1}
-            className={`form-input resize-none rounded-md bg-background p-2 text-base transition-all duration-200 focus:ring-2 focus:ring-primary ${isTyping ? 'min-h-[60px]' : 'min-h-[32px]'}`}
+            rows={isTyping ? 2 : 1}
+            className={`form-input min-h-[40px] resize-none rounded-md bg-background p-2 text-base transition-all duration-200 focus:ring-2 focus:ring-primary`}
             style={{ overflow: 'hidden' }}
+            ref={(el) => {
+              if (el && newComment === '') {
+                el.style.height = 'auto';
+              }
+            }}
           />
           {isTyping && (
             <div className="flex justify-end gap-2">
