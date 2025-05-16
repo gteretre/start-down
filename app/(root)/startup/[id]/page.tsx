@@ -13,6 +13,7 @@ import { auth } from '@/lib/auth';
 import type { Startup } from '@/lib/models';
 import MDRender from '@/mike-mardown/src/rendermd';
 import CommentSection from '@/components/CommentSection';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: slug } = await params;
@@ -60,12 +61,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
               className="flex items-center gap-3 transition-opacity hover:opacity-80"
               href={`/user/${post.author.username}`}
             >
-              <Image
+              <ProfilePicture
                 src={getAuthorImage(post.author)}
                 alt={post.author.name + 's avatar'}
                 width={40}
                 height={40}
-                className="avatar"
               />
               <div className="text-sm">
                 <p className="font-semibold text-foreground">{post.author.name}</p>

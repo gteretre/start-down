@@ -11,8 +11,7 @@ import { PlaneTakeoff } from 'lucide-react';
 import { createPitch } from '@/lib/actions';
 import Tooltip from './Tooltip';
 import { Info } from 'lucide-react';
-import { allowedImageDomains } from '@/lib/allowedDomains';
-import ImagePreview from '@/components/ImagePreview';
+import { ImagePreview } from '@/components/ImageUtilities';
 
 type FormState = {
   error: string;
@@ -40,23 +39,6 @@ const officialCategories = [
   'Sports',
   'Nonprofit',
 ];
-
-function isAllowedImageUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    const hostname = parsed.hostname;
-    return allowedImageDomains.some((domain) => {
-      if (typeof domain === 'string') {
-        return hostname === domain || hostname.endsWith('.' + domain);
-      } else if (domain instanceof RegExp) {
-        return domain.test(hostname);
-      }
-      return false;
-    });
-  } catch {
-    return false;
-  }
-}
 
 const initialFormValues = {
   title: '',
@@ -311,13 +293,7 @@ function StartupForm() {
             )}
           </div>
           <div className="mt-2 flex h-40 w-full items-center justify-center rounded border bg-muted/10">
-            {formValues.link && isAllowedImageUrl(formValues.link) ? (
-              <ImagePreview src={formValues.link} alt="Startup preview" />
-            ) : (
-              <span className="pointer-events-none select-none text-sm text-muted-foreground">
-                {formValues.link ? 'Image preview: Invalid/disallowed URL' : 'Image preview area'}
-              </span>
-            )}
+            <ImagePreview src={formValues.link} alt="Startup preview" />
           </div>
           <p className="mx-10 mt-2 text-xs text-muted-foreground">
             Allowed domains:{' '}

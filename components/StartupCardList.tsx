@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
+
 import { formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
-import View from './View';
+import View from '@/components/View';
 import type { Startup } from '@/lib/models';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 function StartupCardList({ posts }: { posts: Startup[] }) {
   return (
@@ -32,12 +34,11 @@ function StartupCardList({ posts }: { posts: Startup[] }) {
                   href={`/user/${post.author.username}`}
                   className="flex items-center gap-1 hover:underline"
                 >
-                  <Image
+                  <ProfilePicture
                     src={getAuthorImage(post.author)}
-                    alt="author image"
-                    width={16}
-                    height={16}
-                    className="avatar h-4 w-4"
+                    alt={`${post.author.username}'s avatar`}
+                    width={28}
+                    height={28}
                   />
                   <span className="text-xs">{post.author.name}</span>
                 </Link>

@@ -1,15 +1,15 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 import { auth } from '@/lib/auth';
 import { getAuthorByUsername } from '@/lib/queries';
-import Tooltip from '@/components/Tooltip';
 import { PenBoxIcon } from 'lucide-react';
 import UserStartups from '@/components/UserStartups';
 import { StartupCardSkeleton } from '@/components/StartupCard';
 import type { Author } from '@/lib/models';
+import { formatDate } from '@/lib/utils';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: username } = await params; //! it has to stay like that also keep the Promise
@@ -29,27 +29,13 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             </h1>
 
             <div className="relative">
-              {profileOwner ? (
-                <Link href="/settings/profile">
-                  <Tooltip text="Edit Profile Picture">
-                    <Image
-                      src={user.image || '/logo.png'}
-                      alt={user.username + "'s avatar"}
-                      width={120}
-                      height={120}
-                      className="avatar"
-                    />
-                  </Tooltip>
-                </Link>
-              ) : (
-                <Image
-                  src={user.image || '/logo.png'}
-                  alt={user.username + "'s avatar"}
-                  width={120}
-                  height={120}
-                  className="avatar"
-                />
-              )}
+              <ProfilePicture
+                src={user.image || '/logo.png'}
+                alt={user.username + "'s avatar"}
+                width={120}
+                height={120}
+                className="avatar"
+              />
             </div>
             <div className="text-center">
               <h3 className="text-2xl font-bold">{user.name}</h3>
@@ -68,7 +54,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
             {user.bio || 'No bio provided yet.'}
           </p>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            On Start Down since {user.createdAt.toLocaleDateString()}
+            On Start Down since {formatDate(user.createdAt)}
           </p>
         </aside>
 

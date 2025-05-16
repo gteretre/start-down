@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ThumbsUpIcon, HeartIcon } from 'lucide-react';
-import Image from 'next/image';
 import { SendHorizontalIcon } from 'lucide-react';
 
 import { createComment, upvoteComment } from '@/lib/actions';
 import { Comment } from '@/lib/models';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 export default function CommentSection({
   startupId,
@@ -138,7 +138,7 @@ export default function CommentSection({
             <div key={comment._id} className="flex flex-col gap-2 rounded-lg">
               <div className="flex items-center gap-3">
                 {comment.author?.image ? (
-                  <Image
+                  <ProfilePicture
                     src={comment.author.image}
                     alt={comment.author.username + ' avatar'}
                     className="h-8 w-8 rounded-full object-cover"

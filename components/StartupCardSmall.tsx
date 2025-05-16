@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Skeleton } from './ui/skeleton';
+
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
-import View from './View';
+import View from '@/components/View';
 import type { Startup } from '@/lib/models';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 function StartupCardSmall({ post }: { post: Startup }) {
   const createdAtStr =
@@ -29,12 +31,11 @@ function StartupCardSmall({ post }: { post: Startup }) {
           <View views={post.views} />
         </div>
         <Link href={`/user/${post.author.username}`} className="flex-shrink-0">
-          <Image
+          <ProfilePicture
             src={getAuthorImage(post.author)}
-            alt="profile picture"
-            width={16}
-            height={16}
-            className="avatar h-4 w-4"
+            alt={`${post.author.username}'s avatar`}
+            width={28}
+            height={28}
           />
         </Link>
       </div>

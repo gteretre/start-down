@@ -1,14 +1,14 @@
 'use client';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 import { signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { updateProfile } from '@/lib/actions';
 import type { Author } from '@/lib/models';
-import { allowedImageDomains } from '@/lib/allowedDomains';
 import { useToast } from '@/hooks/use-toast';
-import ImagePreview from './ImagePreview';
+import { ImagePreview, getSafeImageUrl, ProfilePicture } from '@/components/ImageUtilities';
+import { formatDate } from '@/lib/utils';
 
 interface ProfileFormProps {
   user: Author;
@@ -25,6 +25,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const [confirmedImage, setConfirmedImage] = useState<string>(user.image || '/logo.png');
 
   const original = {
     name: user.name || '',
@@ -38,23 +39,6 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     form.username === original.username &&
     form.image === original.image &&
     form.bio === original.bio;
-
-  function isAllowedImageUrl(url: string): boolean {
-    try {
-      const parsed = new URL(url);
-      const hostname = parsed.hostname;
-      return allowedImageDomains.some((domain) => {
-        if (typeof domain === 'string') {
-          return hostname === domain || hostname.endsWith('.' + domain);
-        } else if (domain instanceof RegExp) {
-          return domain.test(hostname);
-        }
-        return false;
-      });
-    } catch {
-      return false;
-    }
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -87,6 +71,18 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     }
   };
 
+  // Handler for preview image load status
+  const handlePreviewStatus = React.useCallback(
+    (status: string) => {
+      if (status === 'loaded') {
+        setConfirmedImage(form.image);
+      } else if (form.image !== confirmedImage) {
+        setConfirmedImage(user.image || '/logo.png');
+      }
+    },
+    [form.image, user.image, confirmedImage]
+  );
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 lg:flex-row lg:items-start lg:gap-12">
       <aside className="hidden w-full flex-col items-center rounded-3xl bg-card p-8 shadow-lg lg:sticky lg:top-8 lg:flex lg:w-1/3">
@@ -96,12 +92,11 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           </h1>
 
           <div className="relative">
-            <Image
-              src={form.image || user.image || '/logo.png'}
-              alt={form.username || user.username + "'s avatar"}
+            <ProfilePicture
+              src={getSafeImageUrl(confirmedImage, user.image || '/logo.png')}
+              alt={`${form.username || user.username}'s avatar`}
               width={120}
               height={120}
-              className="avatar"
             />
           </div>
           <div className="text-center">
@@ -113,7 +108,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
           {form.bio || user.bio || 'No bio provided yet.'}
         </p>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          On Start Down since {user.createdAt.toLocaleDateString()}
+          On Start Down since {formatDate(user.createdAt)}
         </p>
       </aside>
       <section>
@@ -208,13 +203,11 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   </button>
                 )}
                 <div className="mt-2 flex h-40 w-full items-center justify-center rounded border bg-muted/10">
-                  {form.image && isAllowedImageUrl(form.image) ? (
-                    <ImagePreview src={form.image} alt="Startup preview" />
-                  ) : (
-                    <span className="pointer-events-none select-none text-sm text-muted-foreground">
-                      {form.image ? 'Image preview: Invalid/disallowed URL' : 'Image preview area'}
-                    </span>
-                  )}
+                  <ImagePreview
+                    src={form.image}
+                    alt="Startup preview"
+                    onImageLoadStatusChange={handlePreviewStatus}
+                  />
                 </div>
                 <p className="mx-10 mt-2 text-xs text-muted-foreground">
                   Allowed domains:{' '}
@@ -255,7 +248,15 @@ export default function ProfileForm({ user }: ProfileFormProps) {
               )}
             </div>
           </div>
-          <div className="mt-12 flex justify-center border-t border-muted pt-8">
+          <div className="mt-12 flex justify-center gap-4 border-t border-muted pt-8">
+            <button
+              type="button"
+              className="btn-normal bg-gray-600 text-white ring-1 ring-ring hover:bg-gray-500"
+              disabled={loading}
+              onClick={() => router.push(`/user/${user.username}`)}
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className={`btn-normal text-white ring-1 ring-ring hover:bg-green-600 ${loading || isUnchanged ? 'cursor-not-allowed bg-gray-700' : 'bg-green-700'}`}
@@ -267,7 +268,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   Updating...
                 </>
               ) : (
-                <>Update</>
+                <>Update Profile</>
               )}
             </button>
           </div>

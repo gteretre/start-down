@@ -7,8 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import MDEditor from '../mike-mardown/src/MDEditor';
 import Tooltip from './Tooltip';
 import { Info } from 'lucide-react';
-import { allowedImageDomains } from '@/lib/allowedDomains';
-import ImagePreview from '@/components/ImagePreview';
+import { ImagePreview } from '@/components/ImageUtilities';
 import { updateStartup, deleteStartup } from '@/lib/actions';
 import { Startup } from '@/lib/models';
 import Confirmation from '@/components/Confirmation';
@@ -32,23 +31,6 @@ const officialCategories = [
   'Sports',
   'Nonprofit',
 ];
-
-function isAllowedImageUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    const hostname = parsed.hostname;
-    return allowedImageDomains.some((domain) => {
-      if (typeof domain === 'string') {
-        return hostname === domain || hostname.endsWith('.' + domain);
-      } else if (domain instanceof RegExp) {
-        return domain.test(hostname);
-      }
-      return false;
-    });
-  } catch {
-    return false;
-  }
-}
 
 function StartupUpdateForm({ startup }: { startup: Startup }) {
   // Use 'image' as the field for the startup image, fallback to 'link' for backward compatibility
@@ -293,13 +275,7 @@ function StartupUpdateForm({ startup }: { startup: Startup }) {
                   onChange={handleInputChange}
                 />
                 <div className="mt-2 flex h-40 w-full items-center justify-center rounded border bg-muted/10">
-                  {form.image && isAllowedImageUrl(form.image) ? (
-                    <ImagePreview src={form.image} alt="Startup preview" />
-                  ) : (
-                    <span className="pointer-events-none select-none text-sm text-muted-foreground">
-                      {form.image ? 'Image preview: Invalid/disallowed URL' : 'Image preview area'}
-                    </span>
-                  )}
+                  <ImagePreview src={form.image} alt="Startup preview" />
                 </div>
                 <p className="mx-10 mt-2 text-xs text-muted-foreground">
                   Allowed domains:{' '}
@@ -360,15 +336,15 @@ function StartupUpdateForm({ startup }: { startup: Startup }) {
           <div className="mt-12 flex justify-center gap-4 border-t border-muted pt-8">
             <button
               type="button"
-              className="btn-danger bg-red-700 text-white ring-1 ring-ring hover:bg-red-600"
+              className="btn-normal bg-red-700 text-white ring-1 ring-ring hover:bg-red-600"
               disabled={isPending}
               onClick={() => setShowConfirm(true)}
             >
-              Delete
+              Delete Startup
             </button>
             <button
               type="button"
-              className="btn-normal bg-gray-500 text-white ring-1 ring-ring hover:bg-gray-400"
+              className="btn-normal bg-gray-600 text-white ring-1 ring-ring hover:bg-gray-500"
               disabled={isPending}
               onClick={() => router.push(`/startup/${startup.slug}`)}
             >
