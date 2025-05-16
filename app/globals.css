@@ -451,25 +451,29 @@
   }
 
   .typewriter {
-    @apply flex flex-col items-center justify-center;
-  }
-  .typewriter p {
-    @apply mx-auto overflow-hidden whitespace-nowrap border-r border-current font-mono;
+    @apply mx-auto overflow-hidden whitespace-nowrap border-r-2 border-current font-mono;
+    width: 0;
     animation:
-      typing 3s steps(22) forwards,
-      blink 1s step-end infinite;
+      typing 3s steps(30, end) forwards,
+      blink 0.7s step-end infinite;
   }
+
   @keyframes typing {
     from {
-      width: 0%;
+      width: 0;
     }
     to {
       width: 100%;
     }
   }
+
   @keyframes blink {
-    50% {
+    0%,
+    100% {
       border-color: transparent;
+    }
+    50% {
+      border-color: currentColor;
     }
   }
 
@@ -481,54 +485,6 @@
     to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }
-
-  @keyframes shadow-orbit {
-    0% {
-      box-shadow:
-        0 0 24px 0 rgba(0, 0, 0, 0.12),
-        0 0 0 0 #ffe066;
-    }
-    12% {
-      box-shadow:
-        8px 0 24px 0 rgba(0, 0, 0, 0.14),
-        8px 0 0 0 #ffe066;
-    }
-    25% {
-      box-shadow:
-        0 8px 24px 0 rgba(0, 0, 0, 0.16),
-        0 8px 0 0 #ffe066;
-    }
-    37% {
-      box-shadow:
-        -8px 0 24px 0 rgba(0, 0, 0, 0.14),
-        -8px 0 0 0 #ffe066;
-    }
-    50% {
-      box-shadow:
-        0 -8px 24px 0 rgba(0, 0, 0, 0.12),
-        0 -8px 0 0 #ffe066;
-    }
-    62% {
-      box-shadow:
-        8px 0 24px 0 rgba(0, 0, 0, 0.14),
-        8px 0 0 0 #ffe066;
-    }
-    75% {
-      box-shadow:
-        0 8px 24px 0 rgba(0, 0, 0, 0.16),
-        0 8px 0 0 #ffe066;
-    }
-    87% {
-      box-shadow:
-        -8px 0 24px 0 rgba(0, 0, 0, 0.14),
-        -8px 0 0 0 #ffe066;
-    }
-    100% {
-      box-shadow:
-        0 0 24px 0 rgba(0, 0, 0, 0.12),
-        0 0 0 0 #ffe066;
     }
   }
 

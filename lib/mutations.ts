@@ -29,6 +29,7 @@ export async function createStartup(
       author: authorObjectId,
       createdAt: new Date(),
       views: 0,
+      likes: 0,
     };
     const result = await db.collection('startups').insertOne(startupDoc);
 

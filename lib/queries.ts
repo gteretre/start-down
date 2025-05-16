@@ -1,43 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
-
-type RawAuthor = {
-  _id: string | ObjectId;
-  id?: string;
-  name?: string;
-  username?: string;
-  email?: string;
-  createdAt?: Date | string;
-  image?: string;
-  bio?: string;
-  role?: string;
-  provider: string;
-};
-
-type RawStartup = {
-  _id: string | ObjectId;
-  title?: string;
-  slug?: string;
-  createdAt?: Date | string;
-  author: RawAuthor;
-  views?: number;
-  description?: string;
-  category?: string;
-  image?: string;
-  pitch?: string;
-};
-
-type RawComment = {
-  _id: string | ObjectId;
-  author: string | ObjectId;
-  createdAt?: Date | string;
-  upvotes?: number;
-  text?: string;
-  startupId: string;
-  parentId?: string;
-  editedAt?: Date | string;
-  userUpvotes?: string[];
-};
+import type { RawAuthor, RawStartup, RawComment } from './models';
 
 const DELETED_AUTHOR = {
   _id: 'deleted',
@@ -81,6 +44,7 @@ function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('./models').S
     category: raw.category || '',
     image: raw.image || '',
     pitch: raw.pitch || '',
+    likes: typeof raw.likes === 'number' ? raw.likes : 0,
   };
 }
 
@@ -204,6 +168,7 @@ export async function getStartupBySlug(slug: string): Promise<import('./models')
 }
 
 export async function getStartupViews(id: string) {
+  // !!! This function should be replaced with getStartupStats(id) !!!
   const db = await getDb();
   try {
     const startup = await db
@@ -216,6 +181,26 @@ export async function getStartupViews(id: string) {
   } catch (error) {
     throw new Error(
       `Error fetching startup views: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function getStartupStats(id: string) {
+  const db = await getDb();
+  try {
+    const startup = await db
+      .collection('startups')
+      .findOne(
+        { _id: typeof id === 'string' ? new ObjectId(id) : id },
+        { projection: { views: 1, likes: 1 } }
+      );
+    return {
+      views: startup?.views || 0,
+      likes: startup?.likes || 0,
+    };
+  } catch (err) {
+    throw new Error(
+      `Error fetching startup stats: ${err instanceof Error ? err.message : String(err)}`
     );
   }
 }
@@ -321,4 +306,54 @@ export async function getFeaturedStartups(slugs: string[]): Promise<import('./mo
     ])
     .toArray()) as AggregatedStartup[];
   return editorPosts.map((post) => mapStartup(post, post.authorDetails));
+}
+
+export async function getUserLikedStartup(startupId: string, username: string): Promise<boolean> {
+  const db = await getDb();
+  const author = await db.collection('authors').findOne({ username });
+  if (!author || !author._id) return false;
+  const userObjectId = new ObjectId(author._id);
+  const startup = await db.collection('startups').findOne(
+    {
+      _id: new ObjectId(startupId),
+      userLikes: { $elemMatch: { $eq: userObjectId } },
+    },
+    { projection: { _id: 1 } }
+  );
+  return !!startup;
+}
+
+export async function getStartupsLikedByUser(username: string) {
+  const db = await getDb();
+  const author = await db.collection('authors').findOne({ username });
+  if (!author || !author._id) return [];
+  const userObjectId = new ObjectId(author._id);
+  const startups = await db
+    .collection('startups')
+    .find({ userLikes: userObjectId })
+    .sort({ createdAt: -1 })
+    .toArray();
+  // Fetch all authors for mapping
+  const allAuthorIds = [...new Set(startups.map((startup) => startup.author?.toString()))]
+    .filter(Boolean)
+    .map((id) => new ObjectId(id));
+  const authors = allAuthorIds.length
+    ? await db
+        .collection('authors')
+        .find({ _id: { $in: allAuthorIds } })
+        .toArray()
+    : [];
+  return startups
+    .filter((startup) => {
+      const authorObj = authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
+      );
+      return !!authorObj;
+    })
+    .map((startup) => {
+      const authorObj = authors.find(
+        (author) => author._id.toString() === startup.author?.toString()
+      );
+      return mapStartup(startup as RawStartup, authorObj as RawAuthor);
+    });
 }

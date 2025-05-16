@@ -3,8 +3,8 @@ dotenv.config({ path: '.env.local' });
 
 import { createMocks } from 'node-mocks-http';
 
-import handler from '@/pages/api/startup/[id]/views';
-import { getStartupViews } from '@/lib/queries';
+import handler from '@/pages/api/startup/[id]/stats';
+import { getStartupStats } from '@/lib/queries';
 import { updateStartupViews } from '@/lib/mutations';
 import clientPromise from '@/lib/mongodb';
 
@@ -15,7 +15,7 @@ jest.mock('@/lib/mongodb', () => ({
   default: Promise.resolve({ close: jest.fn() }),
 }));
 
-describe('/api/startup/[id]/views API', () => {
+describe('/api/startup/[id]/stats API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -27,22 +27,24 @@ describe('/api/startup/[id]/views API', () => {
     expect(res._getJSONData().error).toMatch(/Invalid id/);
   });
 
-  it('GET returns views for valid id', async () => {
-    (getStartupViews as jest.Mock).mockResolvedValue(42);
+  it('GET returns views and likes for valid id', async () => {
+    (getStartupStats as jest.Mock).mockResolvedValue({ views: 42, likes: 7 });
     const { req, res } = createMocks({ method: 'GET', query: { id: 'abc' } });
     await handler(req, res);
     expect(res._getStatusCode()).toBe(200);
     expect(res._getJSONData().views).toBe(42);
+    expect(res._getJSONData().likes).toBe(7);
   });
 
-  it('POST updates and returns views for valid id', async () => {
+  it('POST updates and returns views and likes for valid id', async () => {
     (updateStartupViews as jest.Mock).mockResolvedValue(undefined);
-    (getStartupViews as jest.Mock).mockResolvedValue(99);
+    (getStartupStats as jest.Mock).mockResolvedValue({ views: 99, likes: 12 });
     const { req, res } = createMocks({ method: 'POST', query: { id: 'abc' } });
     await handler(req, res);
     expect(updateStartupViews).toHaveBeenCalledWith('abc');
     expect(res._getStatusCode()).toBe(200);
     expect(res._getJSONData().views).toBe(99);
+    expect(res._getJSONData().likes).toBe(12);
   });
 
   it('returns 405 for unsupported method', async () => {
@@ -52,19 +54,19 @@ describe('/api/startup/[id]/views API', () => {
   });
 
   it('GET returns 500 on error', async () => {
-    (getStartupViews as jest.Mock).mockRejectedValue(new Error('fail'));
-    const { req, res } = createMocks({ method: 'GET', query: { id: 'error-id' } }); // use a unique id
+    (getStartupStats as jest.Mock).mockRejectedValue(new Error('fail'));
+    const { req, res } = createMocks({ method: 'GET', query: { id: 'error-id' } });
     await handler(req, res);
     expect(res._getStatusCode()).toBe(500);
-    expect(res._getJSONData().error).toMatch(/Failed to fetch views/);
+    expect(res._getJSONData().error).toMatch(/Failed to fetch stats/);
   });
 
   it('POST returns 500 on error', async () => {
     (updateStartupViews as jest.Mock).mockRejectedValue(new Error('fail'));
-    const { req, res } = createMocks({ method: 'POST', query: { id: 'error-id-2' } }); // use another unique id
+    const { req, res } = createMocks({ method: 'POST', query: { id: 'error-id-2' } });
     await handler(req, res);
     expect(res._getStatusCode()).toBe(500);
-    expect(res._getJSONData().error).toMatch(/Failed to update views/);
+    expect(res._getJSONData().error).toMatch(/Failed to update stats/);
   });
 });
 

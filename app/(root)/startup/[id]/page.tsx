@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { SquarePenIcon } from 'lucide-react';
 
-import { getStartupBySlug, getFeaturedStartups } from '@/lib/queries';
+import { getStartupBySlug, getFeaturedStartups, getUserLikedStartup } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
 import ShareButton from '@/components/ShareButton';
 import ViewClient from '@/components/ViewClient';
@@ -14,6 +14,7 @@ import type { Startup } from '@/lib/models';
 import MDRender from '@/mike-mardown/src/rendermd';
 import CommentSection from '@/components/CommentSection';
 import { ProfilePicture } from '@/components/ImageUtilities';
+import LikeButton from '@/components/LikeButton';
 
 const slugs = [
   'quantum-procrastination',
@@ -37,6 +38,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   const featuredStartups = await getFeaturedStartups(slugs);
 
+  const initialLiked =
+    session?.user && post.likes && session.user.username
+      ? await getUserLikedStartup(post._id, session.user.username)
+      : false;
+
   return (
     <>
       <section className="mb-8 bg-card p-6 px-10 shadow-sm md:px-20 lg:px-60">
@@ -50,6 +56,13 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                 <SquarePenIcon size={16} /> Edit
               </Link>
             )}
+            <LikeButton
+              startupId={post._id}
+              initialLiked={initialLiked}
+              initialLikes={post.likes}
+              username={session?.user?.username}
+              authorUsername={post.author.username}
+            />
 
             <ViewClient
               id={post._id}

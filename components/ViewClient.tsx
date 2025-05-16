@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EyeIcon } from 'lucide-react';
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-const REFRESH_INTERVAL = 10000;
+const REFRESH_INTERVAL = 10_000;
 const LIVE_VIEW_MAX_THRESHOLD = 100_000;
 
 function getVisitorId() {
@@ -35,7 +35,6 @@ const ViewClient = ({
   incrementOnMount = false,
   isLoggedIn = false,
 }: ViewClientProps) => {
-  // Determine refresh interval based on views
   const [dynamicRefresh, setDynamicRefresh] = useState(
     initialViews > LIVE_VIEW_MAX_THRESHOLD ? 0 : REFRESH_INTERVAL
   );
@@ -43,7 +42,6 @@ const ViewClient = ({
   const [isVisible, setIsVisible] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer to track visibility
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
@@ -58,7 +56,7 @@ const ViewClient = ({
   const { toast } = useToast();
   const hasPostedRef = useRef(false);
   const [animate, setAnimate] = useState(false);
-  const { data, mutate } = useSWR(id ? `/api/startup/${id}/views` : null, fetcher, {
+  const { data, mutate } = useSWR(id ? `/api/startup/${id}/stats` : null, fetcher, {
     fallbackData: { views: initialViews },
     revalidateOnFocus: true,
     revalidateOnMount: false,
@@ -97,7 +95,7 @@ const ViewClient = ({
     if (!lastViewed || now - Number(lastViewed) > TWENTY_FOUR_HOURS) {
       localStorage.setItem(storageKey, now.toString());
       hasPostedRef.current = true;
-      fetch(`/api/startup/${id}/views`, {
+      fetch(`/api/startup/${id}/stats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitorId }),

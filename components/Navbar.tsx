@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Pencil, User } from 'lucide-react';
+import { LibraryIcon, Pencil, User } from 'lucide-react';
 
 import Tooltip from './Tooltip';
 import UIMode from '@/components/UIMode';
@@ -46,6 +46,11 @@ const Navbar = async () => {
                     <span>
                       <Pencil />
                     </span>
+                  </Link>
+                </Tooltip>
+                <Tooltip text="Library" position="left">
+                  <Link href="/library">
+                    <LibraryIcon />
                   </Link>
                 </Tooltip>
                 <SignOutButton />

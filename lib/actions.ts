@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { parseServerActionResponse, slugify } from './utils';
 import { getAuthorByUsername } from '@/lib/queries';
 import { createStartup } from '@/lib/mutations';
+import type { RawStartup } from '@/lib/models';
 import { sanitizeName, sanitizeUsername, sanitizeImage, sanitizeBio } from './validation';
 import { getDb } from './mongodb';
 import { ObjectId } from 'mongodb';
@@ -107,6 +108,7 @@ export const createPitch = async (state: unknown, form: FormData, pitch: string)
       author: author._id,
       pitch,
       views: 0,
+      likes: 0,
     };
 
     const result = await createStartup(startup);
@@ -358,5 +360,48 @@ export async function deleteStartup(id: string) {
       message:
         error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
     };
+  }
+}
+
+export async function toggleLikeStartup(id: string, username: string) {
+  try {
+    const db = await getDb();
+    const author = await db.collection('authors').findOne({ username });
+    if (!author || !author._id) {
+      throw new Error('User not found');
+    }
+    const userObjectId = new ObjectId(author._id);
+    const startup = await db.collection('startups').findOne({ _id: new ObjectId(id) });
+    if (!startup) {
+      return { success: false, message: 'Startup not found.' };
+    }
+    const hasLiked =
+      Array.isArray(startup.userLikes) &&
+      startup.userLikes.some((u: ObjectId) => u.toString() === userObjectId.toString());
+    let updateResult;
+    if (hasLiked) {
+      updateResult = await db
+        .collection<RawStartup>('startups')
+        .updateOne(
+          { _id: new ObjectId(id) },
+          { $pull: { userLikes: userObjectId }, $inc: { likes: -1 } }
+        );
+    } else {
+      updateResult = await db
+        .collection('startups')
+        .updateOne(
+          { _id: new ObjectId(id), userLikes: { $ne: userObjectId } },
+          { $addToSet: { userLikes: userObjectId }, $inc: { likes: 1 } }
+        );
+    }
+    if (updateResult.modifiedCount === 0) {
+      return { success: false, message: 'Failed to update like.' };
+    }
+    return { success: true, toggled: !hasLiked };
+  } catch (error) {
+    console.error('Error in toggleLikeStartup:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
   }
 }
