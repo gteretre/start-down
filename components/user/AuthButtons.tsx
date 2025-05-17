@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Unplug } from 'lucide-react';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 import { signIn, signOut } from 'next-auth/react';
 
 export function SignInButtons() {

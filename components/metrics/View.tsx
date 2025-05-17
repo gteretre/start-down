@@ -1,6 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/utils';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 import { EyeIcon } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
 

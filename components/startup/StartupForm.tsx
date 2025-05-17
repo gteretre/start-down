@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 
 import { validateForm } from '@/lib/validation';
 import { Textarea } from '@/components/ui/textarea';
-import MDEditor from '../mike-mardown/src/MDEditor';
+import MDEditor from '@/mike-mardown/src/MDEditor';
 import { PlaneTakeoff } from 'lucide-react';
 import { createPitch } from '@/lib/actions';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 import { Info } from 'lucide-react';
 import { ImagePreview } from '@/components/ImageUtilities';
 

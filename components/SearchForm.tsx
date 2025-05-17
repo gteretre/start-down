@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useRef, useState } from 'react';
 
 import { XIcon, SearchIcon } from 'lucide-react';
-import Tooltip from './Tooltip';
+import Tooltip from './common/Tooltip';
 
 const sanitizeSearchQuery = (query: string): string => {
   return query.replace(/[.*+?^${}()|[\]\\]/g, '');

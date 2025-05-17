@@ -5,16 +5,16 @@ import { SquarePenIcon } from 'lucide-react';
 
 import { getStartupBySlug, getFeaturedStartups, getUserLikedStartup } from '@/lib/queries';
 import { formatDate, formatDateAgo, getAuthorImage, getStartupImage } from '@/lib/utils';
-import ShareButton from '@/components/ShareButton';
-import ViewClient from '@/components/ViewClient';
-import Tooltip from '@/components/Tooltip';
-import FeaturedStartups from '@/components/FeaturedStartups';
+import ShareButton from '@/components/common/ShareButton';
+import ViewClient from '@/components/metrics/ViewClient';
+import Tooltip from '@/components/common/Tooltip';
+import FeaturedStartups from '@/components/startup/FeaturedStartups';
 import { auth } from '@/lib/auth';
 import type { Startup } from '@/lib/models';
 import MDRender from '@/mike-mardown/src/rendermd';
-import CommentSection from '@/components/CommentSection';
+import CommentSection from '@/components/metrics/CommentSection';
 import { ProfilePicture } from '@/components/ImageUtilities';
-import LikeButton from '@/components/LikeButton';
+import LikeButton from '@/components/metrics/LikeButton';
 
 const slugs = [
   'quantum-procrastination',

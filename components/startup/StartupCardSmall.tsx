@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
-import View from '@/components/View';
+import View from '@/components/metrics/View';
 import type { Startup } from '@/lib/models';
 import { ProfilePicture } from '@/components/ImageUtilities';
 

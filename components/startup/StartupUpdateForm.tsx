@@ -4,13 +4,13 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { validateForm } from '@/lib/validation';
 import { Textarea } from '@/components/ui/textarea';
-import MDEditor from '../mike-mardown/src/MDEditor';
-import Tooltip from './Tooltip';
+import MDEditor from '@/mike-mardown/src/MDEditor';
+import Tooltip from '@/components/common/Tooltip';
 import { Info } from 'lucide-react';
 import { ImagePreview } from '@/components/ImageUtilities';
 import { updateStartup, deleteStartup } from '@/lib/actions';
 import { Startup } from '@/lib/models';
-import Confirmation from '@/components/Confirmation';
+import Confirmation from '@/components/common/Confirmation';
 
 const officialCategories = [
   'Tech',

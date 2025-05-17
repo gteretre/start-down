@@ -4,7 +4,7 @@ import { Squirrel } from 'lucide-react';
 import SearchForm from '@/components/SearchForm';
 import { getStartups } from '@/lib/queries';
 import type { Startup } from '@/lib/models';
-import StartupListClientWrapper from '@/components/StartupListClientWrapper'; // Import the wrapper
+import StartupListClientWrapper from '@/components/startup/StartupListClientWrapper'; // Import the wrapper
 
 const viewOptions = {
   card: {

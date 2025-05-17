@@ -1,6 +1,6 @@
-import Footer from '@/components/Footer';
-import GoUpButton from '@/components/GoUpButton';
-import Navbar from '@/components/Navbar';
+import Footer from '@/components/layout/Footer';
+import GoUpButton from '@/components/common/GoUpButton';
+import Navbar from '@/components/layout/Navbar';
 import { Toaster } from '@/components/ui/toaster';
 
 export default function Layout({ children }: Readonly<{ children: React.ReactNode }>) {

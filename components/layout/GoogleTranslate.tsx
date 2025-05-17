@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 import { LanguagesIcon } from 'lucide-react';
 
 const GOOGLE_SCRIPT_ID = 'google-translate-script';

@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
-import Ping from '@/components/Ping';
+import Ping from '@/components/common/Ping';
 import { formatNumber } from '@/lib/utils';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { EyeIcon } from 'lucide-react';
 

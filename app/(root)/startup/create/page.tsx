@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { auth } from '@/lib/auth';
-import StartupForm from '@/components/StartupForm';
+import StartupForm from '@/components/startup/StartupForm';
 
 const Page = async () => {
   const session = await auth();

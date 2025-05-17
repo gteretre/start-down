@@ -66,6 +66,7 @@ beforeAll(async () => {
     slug: 'test',
     pitch: '# Integration test pitch\n Lorem ipsum dolor sit amet consectetur adipiscing elit.',
     views: 100,
+    likes: 0,
   });
   createdStartupId = startupResult._id;
 });

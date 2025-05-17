@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getStartupBySlug } from '@/lib/queries';
 import { auth } from '@/lib/auth';
 import type { Startup } from '@/lib/models';
-import StartupUpdateForm from '@/components/StartupUpdateForm';
+import StartupUpdateForm from '@/components/startup/StartupUpdateForm';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id: slug } = await params;

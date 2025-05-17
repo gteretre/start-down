@@ -1,5 +1,5 @@
 import React from 'react';
-import StartupCard from '@/components/StartupCard';
+import StartupCard from '@/components/startup/StartupCard';
 import type { Startup } from '@/lib/models';
 import { Squirrel } from 'lucide-react';
 import { getStartupsByAuthor } from '@/lib/queries';

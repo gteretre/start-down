@@ -3,10 +3,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LibraryIcon, Pencil, User } from 'lucide-react';
 
-import Tooltip from './Tooltip';
-import UIMode from '@/components/UIMode';
-import GoogleTranslateToggle from './GoogleTranslate';
-import { SignInButtons, SignOutButton } from './AuthButtons';
+import Tooltip from '@/components/common/Tooltip';
+import UIMode from '@/components/layout/UIMode';
+import GoogleTranslateToggle from '@/components/layout/GoogleTranslate';
+import { SignInButtons, SignOutButton } from '../user/AuthButtons';
 import { auth } from '@/lib/auth';
 
 const Navbar = async () => {

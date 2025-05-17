@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { auth } from '@/lib/auth';
-import { StartupCardSkeleton } from '@/components/StartupCard';
-import UserStartups from '@/components/UserStartups';
-import StartupCardList from '@/components/StartupCardList';
+import { StartupCardSkeleton } from '@/components/startup/StartupCard';
+import UserStartups from '@/components/startup/UserStartups';
+import StartupCardList from '@/components/startup/StartupCardList';
 import { getStartupsLikedByUser } from '@/lib/queries';
 
 const Page = async () => {

@@ -4,7 +4,7 @@ import { HeartIcon } from 'lucide-react';
 import useSWR from 'swr';
 
 import { toggleLikeStartup } from '@/lib/actions';
-import Tooltip from './Tooltip';
+import Tooltip from '@/components/common/Tooltip';
 
 interface LikeButtonProps {
   startupId: string;

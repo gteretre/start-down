@@ -2,11 +2,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
-import View from '@/components/View';
-import Tooltip from './Tooltip';
-import { Skeleton } from './ui/skeleton';
+import View from '@/components/metrics/View';
+import Tooltip from '../common/Tooltip';
+import { Skeleton } from '../ui/skeleton';
 import type { Startup } from '@/lib/models';
-import { ProfilePicture } from './ImageUtilities';
+import { ProfilePicture } from '../ImageUtilities';
 
 const StartupCard: React.FC<{ post: Startup }> = ({ post }) => {
   const createdAtStr =

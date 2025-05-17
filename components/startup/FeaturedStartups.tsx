@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import StartupCard from './StartupCard';
+import StartupCard from '@/components/startup/StartupCard';
 import type { Startup } from '@/lib/models';
 import { ArrowRightIcon, ArrowLeftIcon } from 'lucide-react';
 

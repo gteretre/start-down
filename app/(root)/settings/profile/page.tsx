@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { getAuthorByUsername } from '@/lib/queries';
 import { auth } from '@/lib/auth';
-import ProfileForm from '@/components/ProfileForm';
+import ProfileForm from '@/components/user/ProfileForm';
 import './stars.css';
 
 const Page = async () => {
