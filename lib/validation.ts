@@ -19,7 +19,7 @@ export function validateForm(values: {
   title: string;
   description: string;
   category: string;
-  link: string;
+  image: string;
   pitch: string;
 }) {
   const errors: Record<string, string> = {};
@@ -45,16 +45,16 @@ export function validateForm(values: {
       'Category can only contain letters (including accents), numbers, spaces, dashes, and underscores.';
   }
 
-  if (values.link) {
+  if (values.image) {
     try {
-      const url = new URL(values.link);
+      const url = new URL(values.image);
       if (!/^https?:/.test(url.protocol)) {
-        errors.link = 'Link must be a valid URL.';
-      } else if (!isAllowedDomain(values.link)) {
-        errors.link = 'Image domain is not allowed.';
+        errors.image = 'Link must be a valid URL.';
+      } else if (!isAllowedDomain(values.image)) {
+        errors.image = 'Image domain is not allowed.';
       }
     } catch {
-      errors.link = 'Link must be a valid URL.';
+      errors.image = 'Link must be a valid URL.';
     }
   }
 

@@ -22,7 +22,7 @@ const Page = async () => {
       </section>
       {session && (
         <section className="py-8">
-          <StartupForm />
+          <StartupForm mode="create" />
         </section>
       )}
     </>
