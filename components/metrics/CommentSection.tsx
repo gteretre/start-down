@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ThumbsUpIcon, HeartIcon } from 'lucide-react';
-import { SendHorizontalIcon } from 'lucide-react';
+import { ThumbsUpIcon, HeartIcon, SendHorizontalIcon } from 'lucide-react';
 
 import { createComment, upvoteComment } from '@/lib/actions';
 import { Comment } from '@/lib/models';
@@ -54,16 +53,9 @@ export default function CommentSection({
       setComments((prev) =>
         prev.map((c: Comment) => {
           if (c._id !== commentId) return c;
-          let userUpvotes = c.userUpvotes || [];
-          let upvotes = c.upvotes;
-          if (user?.username && userUpvotes.includes(user.username)) {
-            userUpvotes = userUpvotes.filter((u: string) => u !== user.username);
-            upvotes = upvotes - 1;
-          } else if (user?.username) {
-            userUpvotes = [...userUpvotes, user.username];
-            upvotes = upvotes + 1;
-          }
-          return { ...c, userUpvotes, upvotes };
+          const hasUpvoted = !c.hasUpvoted;
+          const upvotes = hasUpvoted ? c.upvotes + 1 : c.upvotes - 1;
+          return { ...c, hasUpvoted, upvotes };
         })
       );
     }
@@ -74,14 +66,8 @@ export default function CommentSection({
     const result = await createComment(startupId, newComment);
     if (result && result.comment) {
       setComments((prev) => {
-        // Prevent duplicate on submit
         if (prev.some((c: Comment) => c._id === result.comment._id)) return prev;
-        // Ensure userUpvotes is present
-        const commentWithUpvotes: Comment = {
-          userUpvotes: [],
-          ...result.comment,
-        };
-        return [commentWithUpvotes, ...prev];
+        return [{ ...result.comment, hasUpvoted: false }, ...prev];
       });
       setNewComment('');
       setIsTyping(false);
@@ -141,7 +127,7 @@ export default function CommentSection({
 
       <div className="space-y-4">
         {comments.map((comment) => {
-          const hasUpvoted = !!(user?.username && comment.userUpvotes?.includes(user.username));
+          const hasUpvoted = comment.hasUpvoted;
           return (
             <div key={comment._id} className="flex flex-col gap-2 rounded-lg">
               <div className="flex items-center gap-3">

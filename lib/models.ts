@@ -1,5 +1,14 @@
 import { ObjectId } from 'mongodb';
 
+// Models safe for client-side usage
+
+export interface PublicAuthor {
+  username: string;
+  image?: string;
+}
+
+// Models
+
 export interface Author {
   _id: string;
   id: string;
@@ -30,15 +39,17 @@ export interface Startup {
 
 export interface Comment {
   _id: string;
-  author: Author;
+  author: PublicAuthor;
   createdAt: Date;
   upvotes: number;
-  userUpvotes: string[];
+  hasUpvoted: boolean;
   text: string;
   startupId: string;
   parentId?: string;
   editedAt?: Date;
 }
+
+// Raw models for MongoDB
 
 export type RawAuthor = {
   _id: string | ObjectId;
@@ -79,6 +90,8 @@ export type RawComment = {
   editedAt?: Date | string;
   userUpvotes?: string[];
 };
+
+// Other models
 
 export interface ToastType {
   id: string;

@@ -39,16 +39,6 @@ const forbiddenNames = [
   'example',
 ];
 
-interface CommentDoc {
-  _id: ObjectId;
-  author: ObjectId;
-  createdAt: Date;
-  upvotes: number;
-  text: string;
-  startupId: string;
-  userUpvotes: string[];
-}
-
 export const createPitch = async (state: unknown, form: FormData, pitch: string) => {
   try {
     const session = await auth();
@@ -188,29 +178,31 @@ export const upvoteComment = async (commentId: string) => {
       return { success: false, error: 'You must be signed in to upvote.' };
     }
     const db = await getDb();
+    const author = await getAuthorByUsername(session.user.username);
+    if (!author || !author._id) {
+      return { success: false, error: 'User not found.' };
+    }
+    const userObjectId = new ObjectId(author._id);
     const comment = await db.collection('comments').findOne({ _id: new ObjectId(commentId) });
     if (!comment) {
       return { success: false, error: 'Comment not found.' };
     }
-    const userUpvotes = comment.userUpvotes || [];
-    const hasUpvoted = userUpvotes.includes(session.user.username);
+    const userUpvotes = Array.isArray(comment.userUpvotes)
+      ? comment.userUpvotes.map((id: ObjectId | string) => id.toString())
+      : [];
+    const hasUpvoted = userUpvotes.includes(userObjectId.toString());
     let updateResult;
     if (hasUpvoted) {
-      const commentCollection = db.collection<CommentDoc>('comments');
-      updateResult = await commentCollection.updateOne(
-        { _id: new ObjectId(commentId) },
-        {
-          $inc: { upvotes: -1 },
-          $pull: { userUpvotes: session.user.username },
-        }
-      );
+      updateResult = await db.collection('comments').updateOne({ _id: new ObjectId(commentId) }, {
+        $inc: { upvotes: -1 },
+        $pull: { userUpvotes: { $in: [userObjectId, userObjectId.toString()] } },
+      } as unknown as import('mongodb').UpdateFilter<import('mongodb').Document>);
     } else {
-      // Add upvote
       updateResult = await db.collection('comments').updateOne(
-        { _id: new ObjectId(commentId) },
+        { _id: new ObjectId(commentId), userUpvotes: { $ne: userObjectId } },
         {
           $inc: { upvotes: 1 },
-          $addToSet: { userUpvotes: session.user.username },
+          $addToSet: { userUpvotes: userObjectId },
         }
       );
     }

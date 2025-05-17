@@ -1,21 +1,8 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
-import type { RawAuthor, RawStartup, RawComment } from './models';
+import type { RawAuthor, RawStartup, RawComment } from '@/lib/models';
 
-const DELETED_AUTHOR = {
-  _id: 'deleted',
-  id: 'deleted',
-  name: 'Deleted User',
-  username: 'deleted',
-  email: '',
-  createdAt: new Date(0),
-  image: '',
-  bio: '',
-  role: '',
-  provider: 'deleted',
-};
-
-function mapAuthor(raw: RawAuthor): import('./models').Author {
+function mapAuthor(raw: RawAuthor): import('@/lib/models').Author {
   return {
     _id: raw._id?.toString() || '',
     id: raw.id || '',
@@ -31,7 +18,7 @@ function mapAuthor(raw: RawAuthor): import('./models').Author {
   };
 }
 
-function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('./models').Startup {
+function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('@/lib/models').Startup {
   return {
     _id: raw._id?.toString() || '',
     title: raw.title || '',
@@ -158,7 +145,9 @@ export async function getStartupById(id: string) {
   return null;
 }
 
-export async function getStartupBySlug(slug: string): Promise<import('./models').Startup | null> {
+export async function getStartupBySlug(
+  slug: string
+): Promise<import('@/lib/models').Startup | null> {
   const db = await getDb();
   const raw = await db.collection('startups').findOne({ slug });
   if (!raw) return null;
@@ -205,7 +194,7 @@ export async function getStartupStats(id: string) {
   }
 }
 
-export async function getAuthorById(id: string): Promise<import('./models').Author | null> {
+export async function getAuthorById(id: string): Promise<import('@/lib/models').Author | null> {
   const db = await getDb();
   try {
     let author = await db.collection('authors').findOne({ id });
@@ -221,7 +210,9 @@ export async function getAuthorById(id: string): Promise<import('./models').Auth
   }
 }
 
-export async function getAuthorByEmail(email: string): Promise<import('./models').Author | null> {
+export async function getAuthorByEmail(
+  email: string
+): Promise<import('@/lib/models').Author | null> {
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ email });
@@ -236,7 +227,7 @@ export async function getAuthorByEmail(email: string): Promise<import('./models'
 
 export async function getAuthorByUsername(
   username: string
-): Promise<import('./models').Author | null> {
+): Promise<import('@/lib/models').Author | null> {
   const db = await getDb();
   try {
     const author = await db.collection('authors').findOne({ username });
@@ -250,44 +241,71 @@ export async function getAuthorByUsername(
 }
 
 export async function getCommentsByStartupId(
-  startupId: string
-): Promise<import('./models').Comment[]> {
+  startupId: string,
+  currentUsername?: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<{ comments: import('@/lib/models').Comment[]; hasMore: boolean }> {
   const db = await getDb();
+  const MAX_LIMIT = 20;
+  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, limit));
+  const skip = (Math.max(1, page) - 1) * safeLimit;
   const commentsRaw = await db
     .collection('comments')
     .find({ startupId })
     .sort({ createdAt: 1 })
+    .skip(skip)
+    .limit(safeLimit + 1)
     .toArray();
-  const authorIds = [...new Set(commentsRaw.map((c) => c.author?.toString()))].filter(Boolean);
+  const hasMore = commentsRaw.length > safeLimit;
+  const commentsToReturn = hasMore ? commentsRaw.slice(0, safeLimit) : commentsRaw;
+  const authorIds = [...new Set(commentsToReturn.map((c) => c.author?.toString()))].filter(Boolean);
   const authors = authorIds.length
     ? await db
         .collection('authors')
         .find({ _id: { $in: authorIds.map((id) => new ObjectId(id)) } })
         .toArray()
     : [];
-  function mapComment(raw: RawComment, authorObj: RawAuthor): import('./models').Comment {
+  let currentUserId: string | null = null;
+  if (currentUsername) {
+    const user = await db.collection('authors').findOne({ username: currentUsername });
+    if (user && user._id) currentUserId = user._id.toString();
+  }
+  function mapComment(raw: RawComment, authorObj: RawAuthor): import('@/lib/models').Comment {
+    const userUpvotes = Array.isArray(raw.userUpvotes)
+      ? raw.userUpvotes.map((id) => id.toString())
+      : [];
+    const hasUpvoted = !!(currentUserId && userUpvotes.includes(currentUserId));
     return {
       _id: raw._id?.toString() || '',
-      author: authorObj ? mapAuthor(authorObj) : DELETED_AUTHOR,
+      author: {
+        username: authorObj?.username || 'deleted',
+        image: authorObj?.image || '',
+      },
       createdAt:
         raw.createdAt instanceof Date ? raw.createdAt : new Date(raw.createdAt ?? Date.now()),
       upvotes: typeof raw.upvotes === 'number' ? raw.upvotes : 0,
-      userUpvotes: Array.isArray(raw.userUpvotes) ? raw.userUpvotes : [],
+      hasUpvoted,
       text: raw.text || '',
       startupId: raw.startupId || '',
       parentId: raw.parentId || undefined,
       editedAt: raw.editedAt ? new Date(raw.editedAt) : undefined,
     };
   }
-  return commentsRaw.map((comment) => {
-    const authorObj = authors.find((a) => a._id.toString() === comment.author?.toString());
-    return mapComment(comment as RawComment, authorObj as RawAuthor);
-  });
+  return {
+    comments: commentsToReturn.map((comment) => {
+      const authorObj = authors.find((a) => a._id.toString() === comment.author?.toString());
+      return mapComment(comment as RawComment, authorObj as RawAuthor);
+    }),
+    hasMore,
+  };
 }
 
 type AggregatedStartup = RawStartup & { authorDetails: RawAuthor };
 
-export async function getFeaturedStartups(slugs: string[]): Promise<import('./models').Startup[]> {
+export async function getFeaturedStartups(
+  slugs: string[]
+): Promise<import('@/lib/models').Startup[]> {
   const db = await getDb();
   const editorPosts = (await db
     .collection('startups')
