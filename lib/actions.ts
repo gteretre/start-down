@@ -431,3 +431,16 @@ export async function toggleLikeStartup(id: string, username: string) {
     );
   }
 }
+
+export async function hasViewedInWindow(startupId: string, username: string, windowMs: number) {
+  const author = await getAuthorByUsername(username);
+  if (!author || !author._id) return null;
+  const db = await getDb();
+  const record = await db.collection('startup_views').findOne({
+    startupId: new ObjectId(startupId),
+    visitorId: new ObjectId(author._id),
+  });
+  if (!record) return false;
+  const now = Date.now();
+  return record.lastViewed && now - new Date(record.lastViewed).getTime() < windowMs;
+}

@@ -5,6 +5,12 @@ import clientPromise from '@/lib/mongodb';
 
 function createRequest(body?: Record<string, unknown>) {
   return {
+    headers: {
+      get: (key: string) => {
+        if (key.toLowerCase() === 'x-forwarded-for') return '127.0.0.1';
+        return undefined;
+      },
+    },
     json: async () => body,
   } as unknown as Request;
 }
@@ -25,8 +31,6 @@ describe('POST /api/startup/views/batch', () => {
     const data = await res.json();
     expect(data.error).toBe('Invalid or empty IDs array');
   });
-
-  // You can mock getDb and test a valid case if needed
 });
 
 afterAll(async () => {

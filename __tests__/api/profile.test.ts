@@ -16,6 +16,10 @@ jest.mock('@/lib/queries', () => ({
   __esModule: true,
   getAuthorByUsername: jest.fn(),
 }));
+jest.mock('@/api-middleware/rateLimits', () => ({
+  __esModule: true,
+  rateLimit: jest.fn(() => ({ limited: false })),
+}));
 
 const TEST_USER = {
   _id: '507f1f77bcf86cd799439011',

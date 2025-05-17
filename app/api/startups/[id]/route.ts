@@ -5,8 +5,13 @@ import { auth } from '@/lib/auth';
 import { getAuthorByUsername } from '@/lib/queries';
 import { ObjectId } from 'mongodb';
 import { validateForm } from '@/lib/validation';
+import { rateLimit } from '@/api-middleware/rateLimits';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const { limited } = rateLimit(req, { windowMs: 60_000 * 20, max: 10 });
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   try {
     const session = await auth();
     if (!session?.user?.username) {
@@ -54,12 +59,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
     return NextResponse.json({ status: 'SUCCESS' });
   } catch (error) {
-    console.error('Error updating startup:', error);
+    if (error instanceof Error) {
+      console.error('[Startup PATCH] Error:', error.message, error.stack);
+    } else {
+      console.error('[Startup PATCH] Unknown error:', error);
+    }
     return NextResponse.json({ error: 'Failed to update startup.' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const { limited } = rateLimit(req, { windowMs: 60_000, max: 2 });
+  if (limited) {
+    return NextResponse.json({ success: false, message: 'Too many requests' }, { status: 429 });
+  }
   try {
     const session = await auth();
     if (!session?.user?.username) {
@@ -91,7 +104,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error deleting startup:', error);
+    if (error instanceof Error) {
+      console.error('[Startup DELETE] Error:', error.message, error.stack);
+    } else {
+      console.error('[Startup DELETE] Unknown error:', error);
+    }
     return NextResponse.json(
       { success: false, message: 'An unexpected error occurred. Please try again.' },
       { status: 500 }

@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
+
+import { rateLimit } from '@/api-middleware/rateLimits';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-// Simple in-memory cache for batch views
 const cache = new Map<string, { views: number; ts: number }>();
-const CACHE_TTL = 60 * 1000;
+const CACHE_TTL = 60_000 * 2;
 
 export async function POST(request: Request) {
+  const { limited } = rateLimit(request, { windowMs: 60_000 * 2, max: 10 });
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
   try {
     const db = await getDb();
     const { ids } = (await request.json()) as { ids?: string[] };
@@ -53,7 +58,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ views: viewsMap });
   } catch (error) {
-    console.error('Error fetching batch views:', error);
+    if (error instanceof Error) {
+      console.error('[Batch Views] Error:', error.message, error.stack);
+    } else {
+      console.error('[Batch Views] Unknown error:', error);
+    }
     return NextResponse.json(
       { error: 'Internal Server Error fetching batch views' },
       { status: 500 }

@@ -88,10 +88,27 @@ const ViewClient = ({
       return;
     }
     const visitorId = getVisitorId();
-    const storageKey = `viewed_${id}_${visitorId}`;
+    let userKey = visitorId;
+    if (typeof window !== 'undefined') {
+      const userData = window.localStorage.getItem('user');
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user && user.id) {
+            userKey = user.id;
+          } else if (user && user._id) {
+            userKey = user._id;
+          } else if (user && user.username) {
+            userKey = user.username;
+          }
+        } catch (e) {
+          console.error('Error parsing user data from localStorage:', e);
+        }
+      }
+    }
+    const storageKey = `viewed_${id}_${userKey}`;
     const lastViewed = localStorage.getItem(storageKey);
     const now = Date.now();
-
     if (!lastViewed || now - Number(lastViewed) > TWENTY_FOUR_HOURS) {
       localStorage.setItem(storageKey, now.toString());
       hasPostedRef.current = true;
@@ -104,6 +121,8 @@ const ViewClient = ({
           if (res.ok) {
             const updatedData = await res.json();
             mutate(updatedData, false);
+          } else if (res.status === 429) {
+            console.info('View already counted in the last 24 hours');
           } else {
             console.error('Error posting view:', res.statusText);
           }

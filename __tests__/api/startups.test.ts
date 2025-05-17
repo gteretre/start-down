@@ -11,6 +11,11 @@ jest.mock('@/lib/mongodb', () => ({
   getDb: jest.fn(),
 }));
 
+jest.mock('@/api-middleware/rateLimits', () => ({
+  __esModule: true,
+  rateLimit: jest.fn(() => ({ limited: false })),
+}));
+
 const TEST_ID = '507f1f77bcf86cd799439011';
 const TEST_USER = { username: 'testuser' };
 

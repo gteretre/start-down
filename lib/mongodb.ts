@@ -33,7 +33,6 @@ if (process.env.NODE_ENV === 'development') {
     global._mongoClientPromise = client
       .connect()
       .then((connectedClient) => {
-        console.log('MongoDB connected successfully (development)');
         return connectedClient;
       })
       .catch((err) => {

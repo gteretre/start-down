@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { getAuthorByUsername } from '@/lib/queries';
 import { slugify } from '@/lib/utils';
 import { validateForm } from '@/lib/validation';
+import { rateLimit } from '@/api-middleware/rateLimits';
 
 const forbiddenNames = [
   'admin',
@@ -39,6 +40,11 @@ const forbiddenNames = [
 ];
 
 export async function POST(req: NextRequest) {
+  const { limited } = rateLimit(req, { windowMs: 60_000 * 20, max: 2 });
+  if (limited) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const session = await auth();
     if (!session?.user?.username) {
@@ -89,11 +95,13 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'errInfo' in error) {
       console.error(
-        'Error creating startup:',
+        '[Startup POST] Error:',
         JSON.stringify((error as { errInfo: unknown }).errInfo, null, 2)
       );
+    } else if (error instanceof Error) {
+      console.error('[Startup POST] Error:', error.message, error.stack);
     } else {
-      console.error('Error creating startup:', error);
+      console.error('[Startup POST] Unknown error:', error);
     }
     return NextResponse.json({ error: 'Failed to create startup.' }, { status: 500 });
   }

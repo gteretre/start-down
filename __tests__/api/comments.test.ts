@@ -8,6 +8,7 @@ import * as dbModule from '@/lib/mongodb';
 import { getCommentsByStartupId } from '@/lib/queries';
 import clientPromise from '@/lib/mongodb';
 import { NextRequest } from 'next/server';
+import { rateLimit } from '@/api-middleware/rateLimits';
 
 jest.mock('@/lib/queries');
 jest.mock('@/lib/mongodb', () => ({
@@ -20,6 +21,10 @@ jest.mock('mongodb', () => ({
     return id;
   },
 }));
+jest.mock('@/api-middleware/rateLimits', () => ({
+  __esModule: true,
+  rateLimit: jest.fn(() => ({ limited: false })),
+}));
 
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -28,6 +33,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   jest.spyOn(authModule, 'auth').mockResolvedValue({ user: { username: 'test' } });
+  (rateLimit as jest.Mock).mockReturnValue({ limited: false });
 });
 
 afterAll(() => {

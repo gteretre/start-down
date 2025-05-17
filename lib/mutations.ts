@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
 import { Author, Startup } from './models';
+import { getAuthorByUsername } from './queries';
 
 export async function createStartup(
   startup: Omit<Startup, '_id' | 'createdAt' | 'author'> & { author: string }
@@ -131,4 +132,17 @@ export async function deleteStartup(id: string) {
       error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
     );
   }
+}
+
+export async function upsertViewTimestamp(startupId: string, username: string) {
+  const author = await getAuthorByUsername(username);
+  if (!author || !author._id) return null;
+  const db = await getDb();
+  await db
+    .collection('startup_views')
+    .updateOne(
+      { startupId: new ObjectId(startupId), visitorId: new ObjectId(author._id) },
+      { $set: { lastViewed: new Date() } },
+      { upsert: true }
+    );
 }
