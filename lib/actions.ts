@@ -261,6 +261,15 @@ export async function updateProfile(form: {
     const username = sanitizeUsername(form.username);
     const image = sanitizeImage(form.image);
     const bio = sanitizeBio(form.bio);
+    if (forbiddenNames.includes(username.toLowerCase().trim())) {
+      return { error: 'This username is not allowed. Please choose another username.' };
+    }
+    if (username.length < 6 || username.length > 50) {
+      return { error: 'Username must be between 6 and 50 characters.' };
+    }
+    if (bio.length > 500) {
+      return { error: 'Bio must be at most 500 characters.' };
+    }
     if (username !== currentUser.username) {
       const existing = await db.collection('authors').findOne({ username });
       if (existing && existing._id.toString() !== currentUser._id) {

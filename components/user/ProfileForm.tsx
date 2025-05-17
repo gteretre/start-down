@@ -1,10 +1,9 @@
 'use client';
 import React from 'react';
-import { useRouter } from 'next/navigation';
-
-import { signOut } from 'next-auth/react';
 import { useState } from 'react';
-import { updateProfile } from '@/lib/actions';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+
 import type { Author } from '@/lib/models';
 import { useToast } from '@/hooks/use-toast';
 import { ImagePreview, getSafeImageUrl, ProfilePicture } from '@/components/ImageUtilities';
@@ -52,22 +51,38 @@ export default function ProfileForm({ user }: ProfileFormProps) {
     e.preventDefault();
     setLoading(true);
     setStatus('');
-    const res = await updateProfile(form);
-    setLoading(false);
-    if (res?.error) {
-      setStatus(res.error);
-      toast({ title: 'Profile update failed', description: res.error, variant: 'destructive' });
-    } else if (form.username !== user.username) {
-      setStatus('Username updated. Please log in again.');
-      toast({
-        title: 'Username changed',
-        description: 'You will be logged out to refresh your session.',
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
-      signOut({ callbackUrl: '/' });
-    } else {
-      setStatus('Profile updated!');
-      toast({ title: 'Profile updated', description: 'Your profile was updated successfully.' });
-      router.push(`/user/${user.username}`);
+      const data = await res.json();
+      setLoading(false);
+      if (data?.error) {
+        setStatus(data.error);
+        toast({ title: 'Profile update failed', description: data.error, variant: 'destructive' });
+      } else if (form.username !== user.username) {
+        setStatus('Username updated. Please log in again.');
+        toast({
+          title: 'Username changed',
+          description: 'You will be logged out to refresh your session.',
+        });
+        signOut({ callbackUrl: '/' });
+      } else {
+        setStatus('Profile updated!');
+        toast({ title: 'Profile updated', description: 'Your profile was updated successfully.' });
+        router.push(`/user/${user.username}`);
+      }
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setStatus('Failed to update profile.');
+      toast({
+        title: 'Profile update failed',
+        description: 'Failed to update profile.',
+        variant: 'destructive',
+      });
     }
   };
 
