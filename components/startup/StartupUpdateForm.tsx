@@ -33,7 +33,6 @@ const officialCategories = [
 ];
 
 function StartupUpdateForm({ startup }: { startup: Startup }) {
-  // Use 'image' as the field for the startup image, fallback to 'link' for backward compatibility
   const [form, setForm] = React.useState({
     title: startup.title,
     description: startup.description,

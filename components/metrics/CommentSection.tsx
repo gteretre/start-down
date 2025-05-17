@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ThumbsUpIcon, HeartIcon, SendHorizontalIcon } from 'lucide-react';
+import { ThumbsUpIcon, HeartIcon, SendHorizontalIcon, XIcon } from 'lucide-react';
 
 import { createComment, upvoteComment } from '@/lib/actions';
 import { Comment } from '@/lib/models';
 import { ProfilePicture } from '@/components/ImageUtilities';
+import Tooltip from '@/components/common/Tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CommentSection({
   startupId,
@@ -22,6 +24,7 @@ export default function CommentSection({
   const [isTyping, setIsTyping] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setLoading(true);
@@ -72,7 +75,11 @@ export default function CommentSection({
       setNewComment('');
       setIsTyping(false);
     } else if (result && result.error) {
-      alert(result.error);
+      toast({
+        title: 'Error',
+        description: 'Failed to post comment',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -128,6 +135,7 @@ export default function CommentSection({
       <div className="space-y-4">
         {comments.map((comment) => {
           const hasUpvoted = comment.hasUpvoted;
+          const isAuthor = user?.username && comment.author?.username === user.username;
           return (
             <div key={comment._id} className="flex flex-col gap-2 rounded-lg">
               <div className="flex items-center gap-3">
@@ -154,6 +162,35 @@ export default function CommentSection({
                   </span>
                 </div>
                 <div className="flex-1" />
+                {isAuthor && (
+                  <Tooltip text="Delete comment">
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`/api/comments/${comment._id}`, {
+                          method: 'DELETE',
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          toast({
+                            title: 'Success',
+                            description: 'Comment deleted successfully',
+                          });
+                          setComments((prev) => prev.filter((c) => c._id !== comment._id));
+                        } else {
+                          toast({
+                            title: 'Error',
+                            description: data.error || 'Failed to delete comment',
+                            variant: 'destructive',
+                          });
+                        }
+                      }}
+                      title="Delete comment"
+                      className="btn-normal hover:text-red-500"
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </button>
+                  </Tooltip>
+                )}
                 <button
                   onClick={() => handleUpvote(comment._id)}
                   className={`flex items-center gap-1 rounded px-2 py-1 text-xs transition ${hasUpvoted ? 'bg-primary/10 text-primary' : 'hover:bg-primary/10'}`}

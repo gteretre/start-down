@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
+import { mergeCssClasses, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
 import View from '@/components/metrics/View';
 import Tooltip from '../common/Tooltip';
 import { Skeleton } from '../ui/skeleton';
@@ -75,7 +75,7 @@ export const StartupCardSkeleton = () => {
   return (
     <>
       {[0, 1, 2, 3, 4].map((index: number) => (
-        <li key={cn('skeleton-card', index)} className="startup-card space-y-3 p-4">
+        <li key={mergeCssClasses('skeleton-card', index)} className="startup-card space-y-3 p-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-8 w-8 rounded-full" />

@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type { Author, Startup } from './models'; // Import types
 
-export function cn(...inputs: ClassValue[]) {
+export function mergeCssClasses(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 

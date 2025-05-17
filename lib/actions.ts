@@ -171,6 +171,30 @@ export const createComment = async (startupId: string, text: string) => {
   }
 };
 
+export const deleteComment = async (commentId: string) => {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { success: false, error: 'You must be signed in to delete a comment.' };
+    }
+    const db = await getDb();
+    const author = await getAuthorByUsername(session.user.username);
+    if (!author) {
+      return { success: false, error: 'Could not find your user profile.' };
+    }
+    const result = await db
+      .collection('comments')
+      .deleteOne({ _id: new ObjectId(commentId), author: author._id });
+    if (result.deletedCount === 0) {
+      return { success: false, error: 'Failed to delete comment.' };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    return { success: false, error: 'Failed to delete comment.' };
+  }
+};
+
 export const upvoteComment = async (commentId: string) => {
   try {
     const session = await auth();

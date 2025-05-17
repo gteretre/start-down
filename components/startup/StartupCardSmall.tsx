@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
+import { mergeCssClasses, formatDate, getAuthorImage, getStartupImage } from '@/lib/utils';
 import View from '@/components/metrics/View';
 import type { Startup } from '@/lib/models';
 import { ProfilePicture } from '@/components/ImageUtilities';
@@ -54,7 +54,10 @@ export const StartupCardSmallSkeleton = () => {
   return (
     <>
       {[0, 1, 2, 3, 4].map((index: number) => (
-        <li key={cn('skeleton-small', index)} className="startup-card-small space-y-1.5 p-2">
+        <li
+          key={mergeCssClasses('skeleton-small', index)}
+          className="startup-card-small space-y-1.5 p-2"
+        >
           <Skeleton className="aspect-[16/10] w-full rounded-md" />
           <div className="flex items-center justify-between px-0.5">
             <Skeleton className="h-3 w-1/2" />
