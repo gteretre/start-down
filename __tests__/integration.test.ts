@@ -9,7 +9,6 @@ import { createComment, upvoteComment, createPitch } from '@/lib/actions';
 import * as authModule from '@/lib/auth';
 import { createAuthor, deleteUser, deleteStartup } from '@/lib/mutations';
 
-// Ensure test slugs are always deleted before any test runs
 beforeAll(async () => {
   const client = await clientPromise;
   await client
@@ -73,6 +72,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const client = await clientPromise;
+  // ? We may want to delete the startup created in the beforeAll
+  // but it should be already deleted
   // if (createdStartupId) {
   //   const result = await deleteStartup(createdStartupId);
   //   if (!result.success) {
@@ -169,9 +170,9 @@ describe('Comment & Startup Integration', () => {
     }
     expect(result.comment).toBeTruthy();
     expect(result.comment.text).toBe(TEST_COMMENT_TEXT);
-    expect(result.comment.startupId).toBe(createdStartupId);
+    expect(result.comment.startupId.toString()).toBe(createdStartupId!.toString());
     expect(result.comment.author).toBeTruthy();
-    createdCommentId = result.comment._id;
+    createdCommentId = result.comment._id.toString();
   });
 
   it('should upvote the created comment', async () => {

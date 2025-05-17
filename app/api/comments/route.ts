@@ -1,5 +1,9 @@
-import { getCommentsByStartupId } from '@/lib/queries';
+import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
+
+import { getDb } from '@/lib/mongodb';
 import { auth } from '@/lib/auth';
+import { getCommentsByStartupId } from '@/lib/queries';
 
 const MAX_LIMIT = 20;
 
@@ -29,4 +33,42 @@ export async function GET(req: Request) {
     console.error('Error fetching comments:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch comments' }), { status: 500 });
   }
+}
+
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.username) {
+    return NextResponse.json({ error: 'You must be signed in.' }, { status: 401 });
+  }
+  const db = await getDb();
+  const { startupId, text } = await req.json();
+  if (!startupId || !text) {
+    return NextResponse.json({ error: 'Missing startupId or text.' }, { status: 400 });
+  }
+  const author = await db.collection('authors').findOne({ username: session.user.username });
+  if (!author) {
+    return NextResponse.json({ error: 'User not found.' }, { status: 404 });
+  }
+  const comment = {
+    startupId: new ObjectId(startupId),
+    text,
+    author: author._id,
+    createdAt: new Date(),
+    upvotes: 0,
+    userUpvotes: [],
+  };
+  const result = await db.collection('comments').insertOne(comment);
+  if (!result.insertedId) {
+    return NextResponse.json({ error: 'Failed to create comment.' }, { status: 500 });
+  }
+  return NextResponse.json(
+    {
+      comment: {
+        ...comment,
+        _id: result.insertedId,
+        author: { username: author.username, image: author.image },
+      },
+    },
+    { status: 201 }
+  );
 }

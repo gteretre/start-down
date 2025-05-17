@@ -151,7 +151,8 @@ export const createComment = async (startupId: string, text: string) => {
       createdAt: new Date(),
       upvotes: 0,
       text,
-      startupId,
+      startupId: new ObjectId(startupId),
+      userUpvotes: [],
     };
     const result = await db.collection('comments').insertOne(comment);
     if (!result.insertedId) {

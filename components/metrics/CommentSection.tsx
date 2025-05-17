@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ThumbsUpIcon, HeartIcon, SendHorizontalIcon, XIcon } from 'lucide-react';
 
-import { createComment, upvoteComment } from '@/lib/actions';
 import { Comment } from '@/lib/models';
 import { ProfilePicture } from '@/components/ImageUtilities';
 import Tooltip from '@/components/common/Tooltip';
@@ -51,7 +50,11 @@ export default function CommentSection({
   }, [hasMore, loading]);
 
   const handleUpvote = async (commentId: string) => {
-    const result = await upvoteComment(commentId);
+    const res = await fetch(`/api/comments/${commentId}/upvote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const result = await res.json();
     if (result && result.success) {
       setComments((prev) =>
         prev.map((c: Comment) => {
@@ -66,12 +69,18 @@ export default function CommentSection({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await createComment(startupId, newComment);
+    const res = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ startupId, text: newComment }),
+    });
+    const result = await res.json();
     if (result && result.comment) {
-      setComments((prev) => {
-        if (prev.some((c: Comment) => c._id === result.comment._id)) return prev;
-        return [{ ...result.comment, hasUpvoted: false }, ...prev];
-      });
+      setComments((prev) =>
+        prev.some((c: Comment) => c._id === result.comment._id)
+          ? prev
+          : [{ ...result.comment, hasUpvoted: false }, ...prev]
+      );
       setNewComment('');
       setIsTyping(false);
     } else if (result && result.error) {

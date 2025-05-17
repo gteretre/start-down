@@ -252,7 +252,7 @@ export async function getCommentsByStartupId(
   const skip = (Math.max(1, page) - 1) * safeLimit;
   const commentsRaw = await db
     .collection('comments')
-    .find({ startupId })
+    .find({ startupId: new ObjectId(startupId) })
     .sort({ createdAt: 1 })
     .skip(skip)
     .limit(safeLimit + 1)

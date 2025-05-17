@@ -54,8 +54,8 @@ describe('GET /api/comments', () => {
   it('should return paginated comments for valid startupId', async () => {
     (getCommentsByStartupId as jest.Mock).mockResolvedValue({
       comments: [
-        { _id: '1', text: 'A', userUpvotes: [1, 2] },
-        { _id: '2', text: 'B', userUpvotes: [] },
+        { _id: '1', text: 'A', userUpvotes: ['u1', 'u2'], startupId: 'abc' },
+        { _id: '2', text: 'B', userUpvotes: [], startupId: 'abc' },
       ],
       hasMore: true,
     });
@@ -68,6 +68,7 @@ describe('GET /api/comments', () => {
     expect(data.comments.length).toBeGreaterThan(0);
     expect(data.comments[0].text).toBe('A');
     expect(Array.isArray(data.comments[0].userUpvotes)).toBe(true);
+    expect(data.comments[0].startupId).toBe('abc');
   });
 });
 
@@ -131,6 +132,40 @@ describe('DELETE /api/comments/[id]', () => {
     expect(data.success).toBe(false);
     expect(data.error).toContain('Failed to delete comment');
   });
+});
+
+describe('POST /api/comments', () => {
+  it('should return 401 if not authenticated', async () => {
+    jest.spyOn(authModule, 'auth').mockResolvedValueOnce(null);
+    const req = new NextRequest('http://localhost/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ startupId: '507f1f77bcf86cd799439011', text: 'Test comment' }),
+    });
+    const { POST } = await import('@/app/api/comments/route');
+    const res = await POST(req);
+    expect(res.status).toBe(401);
+    const data = await res.json();
+    expect(data.error).toContain('signed in');
+  });
+  // Add more POST tests as needed for success, missing fields, etc.
+});
+
+describe('POST /api/comments/[id] (upvote)', () => {
+  it('should return 401 if not authenticated', async () => {
+    jest.spyOn(authModule, 'auth').mockResolvedValueOnce(null);
+    const req = new NextRequest('http://localhost/api/comments/507f1f77bcf86cd799439011/upvote', {
+      method: 'POST',
+    });
+    const params = { id: '507f1f77bcf86cd799439011' };
+    const { POST } = await import('@/app/api/comments/[id]/route');
+    const res = await POST(req, { params });
+    expect(res.status).toBe(401);
+    const data = await res.json();
+    expect(data.success).toBe(false);
+    expect(data.error).toContain('signed in');
+  });
+  // Add more upvote tests as needed for success, already upvoted, etc.
 });
 
 afterAll(async () => {
