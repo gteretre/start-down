@@ -9,6 +9,7 @@ import { getCommentsByStartupId } from '@/lib/queries';
 import clientPromise from '@/lib/mongodb';
 import { NextRequest } from 'next/server';
 import { rateLimit } from '@/api-middleware/rateLimits';
+import * as queries from '@/lib/queries';
 
 jest.mock('@/lib/queries');
 jest.mock('@/lib/mongodb', () => ({
@@ -154,7 +155,6 @@ describe('POST /api/comments', () => {
     const data = await res.json();
     expect(data.error).toContain('signed in');
   });
-  // Add more POST tests as needed for success, missing fields, etc.
 });
 
 describe('POST /api/comments/[id] (upvote)', () => {
@@ -164,14 +164,94 @@ describe('POST /api/comments/[id] (upvote)', () => {
       method: 'POST',
     });
     const params = { id: '507f1f77bcf86cd799439011' };
-    const { POST } = await import('@/app/api/comments/[id]/route');
+    const { POST } = await import('@/app/api/comments/[id]/upvote/route');
     const res = await POST(req, { params });
     expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.success).toBe(false);
     expect(data.error).toContain('signed in');
   });
-  // Add more upvote tests as needed for success, already upvoted, etc.
+
+  it('should return 404 if comment not found', async () => {
+    jest.spyOn(authModule, 'auth').mockResolvedValue({ user: { username: 'test' } });
+    (queries.getAuthorByUsername as jest.Mock).mockResolvedValue({
+      _id: 'authorid',
+      username: 'test',
+    });
+    const mockFindOne = jest.fn();
+    mockFindOne.mockResolvedValueOnce(null);
+    (dbModule.getDb as jest.Mock).mockResolvedValueOnce({
+      collection: () => ({
+        findOne: mockFindOne,
+      }),
+    });
+    const req = new NextRequest('http://localhost/api/comments/507f1f77bcf86cd799439011/upvote', {
+      method: 'POST',
+    });
+    const params = { id: '507f1f77bcf86cd799439011' };
+    const { POST } = await import('@/app/api/comments/[id]/upvote/route');
+    const res = await POST(req, { params });
+    expect(res.status).toBe(404);
+    const data = await res.json();
+    expect(data.success).toBe(false);
+    expect(data.error).toContain('Comment not found');
+  });
+
+  it('should upvote a comment successfully', async () => {
+    jest.spyOn(authModule, 'auth').mockResolvedValue({ user: { username: 'test' } });
+    (queries.getAuthorByUsername as jest.Mock).mockResolvedValue({
+      _id: 'authorid',
+      username: 'test',
+    });
+    const mockFindOne = jest.fn();
+    mockFindOne
+      .mockResolvedValueOnce({ _id: 'commentid', userUpvotes: [], upvotes: 0 })
+      .mockResolvedValueOnce({ _id: 'commentid', userUpvotes: [], upvotes: 0 });
+    (dbModule.getDb as jest.Mock).mockResolvedValueOnce({
+      collection: () => ({
+        findOne: mockFindOne,
+        updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+      }),
+    });
+    const req = new NextRequest('http://localhost/api/comments/507f1f77bcf86cd799439011/upvote', {
+      method: 'POST',
+    });
+    const params = { id: '507f1f77bcf86cd799439011' };
+    const { POST } = await import('@/app/api/comments/[id]/upvote/route');
+    const res = await POST(req, { params });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(typeof data.toggled).toBe('boolean');
+  });
+
+  it('should toggle upvote off if already upvoted', async () => {
+    jest.spyOn(authModule, 'auth').mockResolvedValue({ user: { username: 'test' } });
+    (queries.getAuthorByUsername as jest.Mock).mockResolvedValue({
+      _id: 'authorid',
+      username: 'test',
+    });
+    const mockFindOne = jest.fn();
+    mockFindOne
+      .mockResolvedValueOnce({ _id: 'commentid', userUpvotes: ['authorid'], upvotes: 1 })
+      .mockResolvedValueOnce({ _id: 'commentid', userUpvotes: ['authorid'], upvotes: 1 });
+    (dbModule.getDb as jest.Mock).mockResolvedValueOnce({
+      collection: () => ({
+        findOne: mockFindOne,
+        updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
+      }),
+    });
+    const req = new NextRequest('http://localhost/api/comments/507f1f77bcf86cd799439011/upvote', {
+      method: 'POST',
+    });
+    const params = { id: '507f1f77bcf86cd799439011' };
+    const { POST } = await import('@/app/api/comments/[id]/upvote/route');
+    const res = await POST(req, { params });
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(typeof data.toggled).toBe('boolean');
+  });
 });
 
 afterAll(async () => {
