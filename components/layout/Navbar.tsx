@@ -1,13 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LibraryIcon, Pencil, User } from 'lucide-react';
+import { LibraryIcon, Pencil } from 'lucide-react';
 
 import Tooltip from '@/components/common/Tooltip';
 import UIMode from '@/components/layout/UIMode';
 import GoogleTranslateToggle from '@/components/layout/GoogleTranslate';
-import { SignInButtons, SignOutButton } from '../user/AuthButtons';
+import { SignInButtons, SignOutButton } from '@/components/user/AuthButtons';
 import { auth } from '@/lib/auth';
+import { ProfilePicture } from '@/components/ImageUtilities';
 
 const Navbar = async () => {
   const session = await auth();
@@ -38,29 +39,31 @@ const Navbar = async () => {
             </Tooltip>
             <GoogleTranslateToggle />
           </div>
-          <div id="navbar-text" className="flex items-center gap-2">
+          <div id="navbar-text" className="flex items-center">
             {session && session.user ? (
               <>
-                <Tooltip text="Create" position="left">
-                  <Link href="/startup/create">
-                    <span>
-                      <Pencil />
-                    </span>
-                  </Link>
-                </Tooltip>
-                <Tooltip text="Library" position="left">
-                  <Link href="/library">
+                <Link href="/startup/create" className="inline-flex items-center">
+                  <Tooltip text="Create" position="left">
+                    <Pencil />
+                  </Tooltip>
+                </Link>
+                <Link href="/library" className="inline-flex items-center">
+                  <Tooltip text="Library" position="left">
                     <LibraryIcon />
-                  </Link>
-                </Tooltip>
+                  </Tooltip>
+                </Link>
                 <SignOutButton />
-                <Tooltip text={`${session.user.username}'s Profile`} position="left">
-                  <Link href={`/user/${session.user.username}`}>
-                    <span>
-                      <User />
-                    </span>
-                  </Link>
-                </Tooltip>
+                <Link href={`/user/${session.user.username}`} className="inline-flex items-center">
+                  <Tooltip text={`${session.user.username}'s Profile`} position="left">
+                    <ProfilePicture
+                      src={session?.user?.image}
+                      alt="Profile picture"
+                      width={40}
+                      height={40}
+                      className="avatar"
+                    />
+                  </Tooltip>
+                </Link>
               </>
             ) : (
               <SignInButtons />

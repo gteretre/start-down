@@ -135,14 +135,44 @@ export async function deleteStartup(id: string) {
 }
 
 export async function upsertViewTimestamp(startupId: string, username: string) {
-  const author = await getAuthorByUsername(username);
-  if (!author || !author._id) return null;
-  const db = await getDb();
-  await db
-    .collection('startup_views')
-    .updateOne(
-      { startupId: new ObjectId(startupId), visitorId: new ObjectId(author._id) },
-      { $set: { lastViewed: new Date() } },
-      { upsert: true }
+  try {
+    const author = await getAuthorByUsername(username);
+    if (!author || !author._id) return null;
+    const db = await getDb();
+    await db
+      .collection('startup_views')
+      .updateOne(
+        { startupId: new ObjectId(startupId), visitorId: new ObjectId(author._id) },
+        { $set: { lastViewed: new Date() } },
+        { upsert: true }
+      );
+  } catch (error) {
+    console.error('Error in upsertViewTimestamp:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
     );
+  }
+}
+
+export async function updateAuthorTermsAccepted(username: string, termsAcceptedAt: Date) {
+  try {
+    const db = await getDb();
+    const result = await db.collection('authors').updateOne(
+      {
+        username: username,
+      },
+      {
+        $set: { termsAcceptedAt },
+      }
+    );
+    if (result.modifiedCount === 0) {
+      throw new Error('Failed to update terms acceptance');
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating author terms acceptance:', error);
+    throw new Error(
+      error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+    );
+  }
 }

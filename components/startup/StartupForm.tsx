@@ -248,6 +248,13 @@ function StartupForm({
     !formValues.category.trim() ||
     !formValues.pitch.trim();
 
+  const isFormUnchanged =
+    formValues.title === originalValues.current.title &&
+    formValues.description === originalValues.current.description &&
+    formValues.category === originalValues.current.category &&
+    formValues.image === originalValues.current.image &&
+    formValues.pitch === originalValues.current.pitch;
+
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsPending(true);
@@ -538,14 +545,14 @@ function StartupForm({
               type="button"
               className="btn-normal bg-gray-600 text-white ring-1 ring-ring hover:bg-gray-500"
               disabled={isPending}
-              onClick={() => router.push(`/startup/${initialFormValues.slug}`)}
+              onClick={() => router.push(`/startup/${startupSlug}`)}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`btn-normal text-white ring-1 ring-ring hover:bg-green-600 ${isPending || isFormIncomplete ? 'cursor-not-allowed bg-gray-700' : 'bg-green-700'}`}
-              disabled={isPending || isFormIncomplete}
+              className={`btn-normal text-white ring-1 ring-ring hover:bg-green-600 ${isPending || isFormIncomplete || isFormUnchanged ? 'cursor-not-allowed bg-gray-700' : 'bg-green-700'}`}
+              disabled={isPending || isFormIncomplete || isFormUnchanged}
             >
               {isPending ? (
                 <>

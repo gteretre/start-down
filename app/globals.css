@@ -55,6 +55,7 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --sidebar: rgb(255, 255, 255);
   }
   .dark {
     --background: 222.2 84% 5%;
@@ -82,6 +83,7 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --sidebar: rgb(17, 24, 39);
   }
   * {
     @apply border-border;
@@ -135,7 +137,7 @@
     @apply bg-[var(--backHeader)] px-5 py-3 shadow-sm;
   }
   #navbar-text {
-    @apply flex items-center gap-6;
+    @apply flex items-center gap-4;
   }
   #logo {
     @apply h-12 w-12 rounded-3xl transition-all duration-300 ease-in-out hover:scale-110 hover:rounded-lg;
@@ -162,6 +164,9 @@
     text-shadow:
       0 2px 16px #a78bfa55,
       0 1px 4px #ec489955;
+  }
+  .sidebar {
+    @apply bottom-0 top-0 flex h-screen w-[220px] flex-col gap-2 border-r border-ring bg-card/80 px-8 py-6;
   }
   .textBox {
     @apply rounded-lg bg-blue-300 px-8 py-8 ring-1 ring-ring md:px-12 lg:px-20 lg:py-8;

@@ -7,9 +7,21 @@ function Footer() {
         <div className="pointer-events-none flex items-center gap-2">
           <span className="font-semibold">© Michał Kowalski {new Date().getFullYear()}</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 text-xs">
+          <Link
+            href="/docs/privacy"
+            className="transition-colors hover:text-secondary hover:underline"
+          >
+            Privacy Policy
+          </Link>
+          <Link
+            href="/docs/terms"
+            className="transition-colors hover:text-secondary hover:underline"
+          >
+            Terms of Service
+          </Link>
           <Link href="/about" className="transition-colors hover:text-secondary hover:underline">
-            Who are we?
+            About us
           </Link>
         </div>
       </div>

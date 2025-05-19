@@ -20,6 +20,7 @@ export interface Author {
   image?: string;
   bio?: string;
   role?: string;
+  termsAcceptedAt?: Date;
 }
 
 export interface Startup {
@@ -62,6 +63,7 @@ export type RawAuthor = {
   bio?: string;
   role?: string;
   provider: string;
+  termsAcceptedAt?: Date | string;
 };
 
 export type RawStartup = {

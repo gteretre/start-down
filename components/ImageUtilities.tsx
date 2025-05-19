@@ -21,7 +21,7 @@ export function isAllowedImageUrl(url: string): boolean {
 }
 
 export function getSafeImageUrl(src: string | undefined, fallback: string): string {
-  if (src && isAllowedImageUrl(src)) {
+  if (src && isAllowedImageUrl(src) && src.trim() !== '') {
     return src;
   }
   return fallback;
@@ -34,12 +34,14 @@ export function ProfilePicture({
   height = 240,
   className = 'avatar',
 }: {
-  src: string;
+  src: string | null | undefined;
   alt?: string;
   width?: number;
   height?: number;
   className?: string;
 }) {
+  let safeSrc = '/logo.png';
+  if (src && typeof src === 'string') safeSrc = getSafeImageUrl(src, '/logo.png');
   return (
     <div
       style={{
@@ -52,7 +54,7 @@ export function ProfilePicture({
       className={className}
     >
       <Image
-        src={src}
+        src={safeSrc}
         alt={alt}
         width={width}
         height={height}

@@ -26,9 +26,9 @@ function getEnvVar(name: string): string {
 
 type ProviderUser = {
   id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
+  name?: string;
+  email?: string;
+  image?: string;
   role?: string;
   username?: string;
   provider?: string;
@@ -90,7 +90,15 @@ export const options = {
     }),
   ],
   callbacks: {
-    async signIn({ user, profile }: { user: ProviderUser; profile: ProviderProfile }) {
+    async signIn({
+      user,
+      profile,
+      account,
+    }: {
+      user: ProviderUser;
+      profile: ProviderProfile;
+      account?: { callbackUrl?: string };
+    }) {
       const rawEmail = user.email as string | null | undefined;
       const email = sanitizeEmail(rawEmail);
       if (!email) {
@@ -125,73 +133,73 @@ export const options = {
         return true;
       }
 
-      const rawUsername = (profile.login as string) || (email ? email.split('@')[0] : '');
-      const rawName = user.name as string | null | undefined;
-      const rawImage = (profile.avatar_url as string) || (profile.picture as string) || user.image;
-      const rawBio = typeof profile.bio === 'string' ? profile.bio : undefined;
-      let username = sanitizeUsername(rawUsername);
-      if (!username) username = `user_${Date.now().toString().slice(-6)}`;
-      const name = sanitizeName(rawName) || username;
-      const image = sanitizeImage(rawImage);
-      const bio = sanitizeBio(rawBio) || 'I am a freshman here';
-      const role = user.role || '';
-      try {
-        await createAuthor({
-          id: profile.id ? String(profile.id) : '',
-          name,
-          username,
-          email,
-          image,
-          bio,
-          role,
-          provider,
-          createdAt: new Date(),
-        });
-        user.role = role;
-        user.username = username;
-      } catch (err: unknown) {
-        if (
-          err &&
-          typeof err === 'object' &&
-          'code' in err &&
-          (err as { code?: number }).code === 11000
-        ) {
-          return '/auth/error?error=EmailOrUsernameExists';
+      const isNewUserFlow = account?.callbackUrl && account.callbackUrl.includes('new=1');
+      if (isNewUserFlow) {
+        const rawUsername = (profile.login as string) || (email ? email.split('@')[0] : '');
+        const rawName = user.name as string | null | undefined;
+        const rawImage =
+          (profile.avatar_url as string) || (profile.picture as string) || user.image;
+        const rawBio = typeof profile.bio === 'string' ? profile.bio : undefined;
+        let username = sanitizeUsername(rawUsername);
+        if (!username) username = `user_${Date.now().toString().slice(-6)}`;
+        const name = sanitizeName(rawName) || username;
+        const image = sanitizeImage(rawImage);
+        const bio = sanitizeBio(rawBio) || 'I am a freshman here';
+        const role = user.role || '';
+        try {
+          await createAuthor({
+            id: profile.id ? String(profile.id) : '',
+            name,
+            username,
+            email,
+            image,
+            bio,
+            role,
+            provider,
+            createdAt: new Date(),
+          });
+          user.role = role;
+          user.username = username;
+        } catch (err: unknown) {
+          if (
+            err &&
+            typeof err === 'object' &&
+            'code' in err &&
+            (err as { code?: number }).code === 11000
+          ) {
+            return '/auth/error?error=EmailOrUsernameExists';
+          }
+          console.error('Failed to create user', err);
+          return false;
         }
-        console.error('Failed to create user', err);
-        return false;
+        return true;
       }
-      return true;
+      return '/auth/signin';
     },
     async jwt({ token, user }: { token: JWT; user?: ProviderUser }) {
-      if (user) {
-        token.role = user.role;
-        token.username = user.username;
-      } else if (token.username) {
-        const dbUser = await getAuthorByUsername(token.username as string);
-        if (!dbUser) {
-          console.error(
-            'JWT callback: Failed to fetch user from DB by username. Aborting the log in process.'
-          );
-          return null;
-        }
-        token.role = dbUser.role || 'guy';
-        token.username = dbUser.username;
+      const username = user?.username ?? token.username;
+      if (typeof username === 'string' && username) {
+        const dbUser = await getAuthorByUsername(username);
+        if (!dbUser) return undefined;
+        token.role = dbUser.role || 'normal';
+        token.username = dbUser.username ?? undefined;
+        token.image = dbUser.image ?? undefined;
+        token.termsAcceptedAt = dbUser.termsAcceptedAt ?? undefined;
       }
-      Object.keys(token).forEach((key) => {
-        if (key !== 'role' && key !== 'username') delete (token as Record<string, unknown>)[key];
-      });
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
-        role: (token as Record<string, unknown>).role as string,
-        username: (token as Record<string, unknown>).username as string,
+        role: token.role as string,
+        username: token.username as string,
+        image: token.image as string,
+        termsAcceptedAt: token.termsAcceptedAt as string | undefined,
       };
       return session;
     },
   },
   pages: {
     error: '/auth/error',
+    signIn: '/auth/signin',
   },
 };

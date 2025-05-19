@@ -100,20 +100,20 @@ export default function GoogleTranslateToggle() {
   }, [enabled]);
 
   return (
-    <div className="google-translate-widget relative flex items-center" style={{ marginLeft: 16 }}>
-      <div className="nav-element">
-        <Tooltip text={enabled ? 'Disable Translation' : 'Enable Translation'} position="right">
-          <button
-            className={`btn-pure`}
-            aria-pressed={enabled}
-            aria-label={enabled ? 'Disable Translation' : 'Enable Translation'}
-            onClick={() => setEnabled((e) => !e)}
-            disabled={loading}
-            type="button"
-          >
+    <div className="nav-element google-translate-widget relative flex items-center">
+      <div className="">
+        <button
+          className={`btn-pure inline-flex items-center`}
+          aria-pressed={enabled}
+          aria-label={enabled ? 'Disable Translation' : 'Enable Translation'}
+          onClick={() => setEnabled((e) => !e)}
+          disabled={loading}
+          type="button"
+        >
+          <Tooltip text={enabled ? 'Disable Translation' : 'Enable Translation'} position="right">
             <LanguagesIcon />
-          </button>
-        </Tooltip>
+          </Tooltip>
+        </button>
       </div>
       {enabled && (
         <div

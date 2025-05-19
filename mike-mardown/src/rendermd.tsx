@@ -95,7 +95,10 @@ function parseMarkdown(md: string): React.ReactNode[] {
         inUl = true;
       }
       listItems.push(<li key={i}>{parseInline(line.replace(/^- /, ''))}</li>);
-    } else if (/^1\. (.*)/.test(line)) {
+    } else if (/^\d+\. (.*)/.test(line)) {
+      const match = line.match(/^(\d+)\. (.*)/);
+      const number = match ? match[1] : undefined;
+      const content = match ? match[2] : line.replace(/^\d+\. /, '');
       if (!inOl) {
         if (inUl) {
           elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);
@@ -104,7 +107,12 @@ function parseMarkdown(md: string): React.ReactNode[] {
         }
         inOl = true;
       }
-      listItems.push(<li key={i}>{parseInline(line.replace(/^1\. /, ''))}</li>);
+      listItems.push(
+        <li key={i}>
+          <span style={{ fontWeight: 400, marginRight: 6 }}>{number}.</span>
+          {parseInline(content)}
+        </li>
+      );
     } else if (line.trim() === '') {
       if (inUl) {
         elements.push(<ul key={`ul-${i}`}>{listItems}</ul>);

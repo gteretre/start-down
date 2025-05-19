@@ -15,6 +15,11 @@ function mapAuthor(raw: RawAuthor): import('@/lib/models').Author {
     bio: raw.bio || '',
     role: raw.role || '',
     provider: raw.provider,
+    termsAcceptedAt: raw.termsAcceptedAt
+      ? raw.termsAcceptedAt instanceof Date
+        ? raw.termsAcceptedAt
+        : new Date(raw.termsAcceptedAt)
+      : undefined,
   };
 }
 

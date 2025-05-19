@@ -91,3 +91,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     );
   }
 }
+
+export async function PUT() {
+  return NextResponse.json({ success: false, error: 'Method Not Allowed' }, { status: 405 });
+}
+
+export async function DELETE() {
+  return NextResponse.json({ success: false, error: 'Method Not Allowed' }, { status: 405 });
+}
