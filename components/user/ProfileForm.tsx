@@ -99,7 +99,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 lg:flex-row lg:items-start lg:gap-12">
+    <div className="userpage">
       <aside className="hidden w-full flex-col items-center rounded-3xl bg-card p-8 shadow-lg lg:sticky lg:top-8 lg:flex lg:w-1/3">
         <div className="flex flex-col items-center gap-4">
           <h1 className="animated-heading mb-2 text-3xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg">
@@ -127,7 +127,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </p>
       </aside>
       <section>
-        <form onSubmit={handleSubmit} className="relative mx-auto max-w-3xl items-center">
+        <form onSubmit={handleSubmit} className="form-container">
           <div className="mx-10 grid items-center gap-8">
             <div className="relative flex items-center gap-2">
               <div className="flex-1">

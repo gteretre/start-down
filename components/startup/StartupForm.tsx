@@ -3,6 +3,7 @@ import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { PlaneTakeoff, Info } from 'lucide-react';
+import Link from 'next/link';
 
 import { validateForm } from '@/lib/validation';
 import { Textarea } from '@/components/ui/textarea';
@@ -359,7 +360,7 @@ function StartupForm({
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="relative mx-auto max-w-3xl items-center">
+    <form onSubmit={handleFormSubmit} className="form-container">
       <Confirmation
         open={showConfirm}
         onConfirmAction={handleDelete}
@@ -368,6 +369,18 @@ function StartupForm({
         message="This action cannot be undone. To confirm, type the word below:"
       />
       <div className="mx-10 grid items-center gap-8">
+        <p>
+          See our{' '}
+          <Link
+            href="/docs/guidelines-startup-form"
+            className="text-blue-500 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            guidelines
+          </Link>{' '}
+          for more information.
+        </p>
         <FormField
           label="Project Name"
           name="title"
@@ -494,6 +507,18 @@ function StartupForm({
           clearField={clearField}
           handleUndo={handleUndo}
         >
+          <p>
+            See our{' '}
+            <Link
+              href="/docs/tutorial-pitch-editor"
+              className="text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Pitch Editor tutorial
+            </Link>{' '}
+            for more information.
+          </p>
           <MDEditor
             className="form-input"
             value={formValues.pitch}

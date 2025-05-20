@@ -31,7 +31,6 @@
     "app/api/auth/[...nextauth]/options.ts",
     "app/api/auth/[...nextauth]/route.ts",
     "lib/auth.ts",
-    "auth.ts.fuck",
     "lib/queries.ts"
   ],
   "exclude": ["node_modules"]

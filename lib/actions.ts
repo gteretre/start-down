@@ -185,7 +185,7 @@ export const deleteComment = async (commentId: string) => {
     }
     const result = await db
       .collection('comments')
-      .deleteOne({ _id: new ObjectId(commentId), author: author._id });
+      .deleteOne({ _id: new ObjectId(commentId), author: new ObjectId(author._id) });
     if (result.deletedCount === 0) {
       return { success: false, error: 'Failed to delete comment.' };
     }
@@ -372,7 +372,7 @@ export async function deleteStartup(id: string) {
     if (!author || String(startup.author) !== String(author._id)) {
       return { success: false, message: 'You are not authorized to delete this startup.' };
     }
-    await db.collection('comments').deleteMany({ startupId: id });
+    await db.collection('comments').deleteMany({ startupId: new ObjectId(id) });
     const result = await db.collection('startups').deleteOne({ _id: new ObjectId(id) });
     if (result.deletedCount === 0) {
       console.warn('No startup found to delete with id:', id);
@@ -443,4 +443,64 @@ export async function hasViewedInWindow(startupId: string, username: string, win
   if (!record) return false;
   const now = Date.now();
   return record.lastViewed && now - new Date(record.lastViewed).getTime() < windowMs;
+}
+
+export async function deleteProfile() {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { success: false, error: 'Not authenticated' };
+    }
+    const db = await getDb();
+    const user = await getAuthorByUsername(session.user.username);
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+    // Delete all startups and comments of the user
+    const userId = new ObjectId(user._id);
+    const startupDeleteResult = await db.collection('startups').deleteMany({ author: userId });
+    if (startupDeleteResult.deletedCount === 0) {
+      console.warn(`No startups deleted for user ${user._id}`);
+    }
+    const commentDeleteResult = await db.collection('comments').deleteMany({ author: userId });
+    if (commentDeleteResult.deletedCount === 0) {
+      console.warn(`No comments deleted for user ${user._id}`);
+    }
+    // Delete the user
+    const userDeleteResult = await db.collection('authors').deleteOne({ _id: userId });
+    if (userDeleteResult.deletedCount === 0) {
+      console.warn(`User not deleted: ${user._id}`);
+      return { success: false, error: 'Failed to delete user' };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    return { success: false, error: 'Failed to delete profile' };
+  }
+}
+
+export async function updateAccount(fields: { language?: string }) {
+  try {
+    const session = await auth();
+    if (!session || !session.user || !('username' in session.user) || !session.user.username) {
+      return { error: 'Not authenticated' };
+    }
+    const db = await getDb();
+    const user = await getAuthorByUsername(session.user.username);
+    if (!user) {
+      return { error: 'User not found' };
+    }
+    const update: Record<string, unknown> = {};
+    if (fields.language !== undefined) {
+      update['location.language'] = fields.language;
+    }
+    if (Object.keys(update).length === 0) {
+      return { error: 'No valid fields to update' };
+    }
+    await db.collection('authors').updateOne({ _id: new ObjectId(user._id) }, { $set: update });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating account:', error);
+    return { error: 'Failed to update account' };
+  }
 }

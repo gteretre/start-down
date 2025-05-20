@@ -1,0 +1,146 @@
+/* =========================
+   Utilities Layer: Animations, Effects, Helpers
+   ========================= */
+@tailwind utilities;
+@layer utilities {
+  .view-update-animate {
+    animation: view-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rainbowEffect {
+    @apply animate-rainbow bg-gradient-to-r from-red-500 via-yellow-500 to-green-500;
+  }
+
+  .animate-rainbow {
+    background-size: 200% 200%;
+    animation: rainbow 5s linear infinite;
+  }
+
+  .shadow-orbit {
+    animation: shadow-orbit 2s linear infinite;
+  }
+
+  .animated-heading {
+    animation: fadeInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes view-pop {
+    0% {
+      transform: scale(1);
+      background-color: transparent;
+    }
+    20% {
+      transform: scale(1.2);
+      background-color: #ffe066;
+    }
+    60% {
+      transform: scale(0.95);
+      background-color: #fffbe6;
+    }
+    100% {
+      transform: scale(1);
+      background-color: transparent;
+    }
+  }
+
+  @keyframes rainbow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .typewriter {
+    @apply mx-auto overflow-hidden whitespace-nowrap border-r-2 border-current font-mono;
+    width: 0;
+    animation:
+      typing 3s steps(30, end) forwards,
+      blink 0.7s step-end infinite;
+  }
+
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      border-color: transparent;
+    }
+    50% {
+      border-color: currentColor;
+    }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .go-up-jump.jumping {
+    animation: goUpJump 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes goUpJump {
+    0% {
+      transform: translateY(0);
+    }
+    20% {
+      transform: translateY(-12px) scale(1.08);
+    }
+    40% {
+      transform: translateY(-18px) scale(1.12);
+    }
+    60% {
+      transform: translateY(-12px) scale(1.08);
+    }
+    80% {
+      transform: translateY(-4px) scale(1.04);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+  /* Animation for the featured startups */
+  @keyframes slide-left {
+    0% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-100%);
+      opacity: 0.7;
+    }
+  }
+  @keyframes slide-right {
+    0% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100%);
+      opacity: 0.7;
+    }
+  }
+  .animate-slide-left {
+    animation: slide-left 0.5s forwards;
+  }
+  .animate-slide-right {
+    animation: slide-right 0.5s forwards;
+  }
+}

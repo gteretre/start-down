@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
 export default function SettingsRootPage() {
-  redirect('/docs/terms');
+  redirect('/docs/guidelines-startup-form');
   return null;
 }

@@ -1,60 +1,84 @@
 # Privacy Policy
 
-Effective Date: 19 May 2025
+**Effective Date:** 19 May 2025
 
 StartDown (“we”, “us”) is committed to protecting your privacy. This policy explains how we collect, use, and protect your personal data, in accordance with the General Data Protection Regulation (EU) 2016/679 (GDPR).
 
-1. Data Controller
-   StartDown is the data controller. For questions, email: gteretre@gmail.com.
+---
 
-2. What Data We Collect
-   We collect and process:
+### 1. Data Controller
 
-Your name and username (during registration)
+- **Controller:** StartDown
+- **Contact:** [gteretre@gmail.com](mailto:gteretre@gmail.com)
 
-Any data you include in your posts
+---
 
-We do not collect sensitive personal data.
+### 2. What Data We Collect
 
-3. Legal Basis for Processing
-   We process your data based on:
+We collect and process:
 
-Contractual necessity (Art. 6(1)(b)) – to manage your account and allow you to post.
+- Your **name** and **username** (during registration)
+- Any data you include in your **posts**
 
-Legitimate interests (Art. 6(1)(f)) – to operate and improve the StartDown.
+> We do **not** collect sensitive personal data.
 
-Legal obligations (Art. 6(1)(c)) – if required to comply with law.
+---
 
-We will request your consent (Art. 6(1)(a)) before collecting any optional or additional personal data (e.g., for newsletters or analytics).
+### 3. Legal Basis for Processing
 
-4. Data Retention
-   We retain your personal data as long as your account is active. On account deletion, we erase it within 30 days, except anonymized statistical data, which cannot identify you.
+We process your data based on:
 
-5. Your Rights
-   Under GDPR, you have the right to:
+- **Contractual necessity** (Art. 6(1)(b)): To manage your account and allow you to post.
+- **Legitimate interests** (Art. 6(1)(f)): To operate and improve StartDown.
+- **Legal obligations** (Art. 6(1)(c)): If required to comply with law.
+- **Consent** (Art. 6(1)(a)): For optional or additional data (e.g., newsletters, analytics).
 
-Access your data
+---
 
-Correct inaccurate data
+### 4. Data Retention
 
-Request erasure
+- We keep your personal data as long as your account is active.
+- On account deletion, your data is erased within **30 days** (except anonymized statistics).
 
-Restrict processing
+---
 
-Data portability
+### 5. Your Rights (GDPR)
 
-Object to processing
+You have the right to:
 
-To exercise your rights, email: gteretre@gmail.com.
+- **Access** your data
+- **Correct** inaccurate data
+- **Request erasure**
+- **Restrict processing**
+- **Data portability**
+- **Object to processing**
 
-6. Data Sharing and Transfers
-   We do not share your personal data with third parties unless legally required. We do not transfer your data outside the European Economic Area (EEA).
+> To exercise your rights, email: [gteretre@gmail.com](mailto:gteretre@gmail.com)
 
-7. Security
-   We implement appropriate technical and organizational measures to protect your data. However, no system is 100% secure.
+---
 
-8. Cookies
-   We use cookies solely for authentication and session management. These cookies are essential for account access and do not track users across other sites or collect analytics data. As these cookies are strictly necessary, we do not request separate consent.
+### 6. Data Sharing and Transfers
 
-9. Updates
-   We may revise this policy.
+- We **do not share** your personal data with third parties unless legally required.
+- We **do not transfer** your data outside the European Economic Area (EEA).
+
+---
+
+### 7. Security
+
+We use appropriate technical and organizational measures to protect your data.  
+However, no system is 100% secure.
+
+---
+
+### 8. Cookies
+
+- We use cookies **only** for authentication and session management.
+- These cookies are **essential** and do **not** track you or collect analytics.
+- No separate consent is required for these cookies.
+
+---
+
+### 9. Updates
+
+We may revise this policy in the future.

@@ -13,6 +13,9 @@ import {
   Code,
   Quote,
   Trash2,
+  Image as ImageIcon,
+  Minus,
+  Code2,
 } from 'lucide-react';
 
 type MDEditorProps = {
@@ -20,9 +23,16 @@ type MDEditorProps = {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  blockContent?: { image?: boolean; code?: boolean; link?: boolean };
 };
 
-const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, className = '' }) => {
+const MDEditor: React.FC<MDEditorProps> = ({
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  blockContent = {},
+}) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showPreview, setShowPreview] = React.useState(false);
 
@@ -47,6 +57,23 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
       textarea.focus();
       textarea.setSelectionRange(start + before.length, end + before.length + selected.length);
     }, 0);
+  };
+
+  // Helper to validate image URLs
+  const isValidImageUrl = (url: string) => {
+    try {
+      const parsed = new URL(url);
+      const allowedProtocols = ['http:', 'https:'];
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+      const ext = parsed.pathname.toLowerCase().split('.').pop();
+      return (
+        allowedProtocols.includes(parsed.protocol) &&
+        ext &&
+        allowedExtensions.some((e) => parsed.pathname.toLowerCase().endsWith(e))
+      );
+    } catch {
+      return false;
+    }
   };
 
   // Insert link markdown
@@ -84,6 +111,31 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
     insertMarkdown('### ', '');
   };
 
+  // Insert horizontal rule
+  const insertHr = () => {
+    insertMarkdown('\n---\n', '');
+  };
+
+  // Insert image
+  const insertImage = () => {
+    const url = window.prompt(
+      'Enter image URL (http(s)://... and must be .jpg/.png/.gif/.webp/.svg):'
+    );
+    if (!url) return;
+    if (!isValidImageUrl(url)) {
+      window.alert(
+        'Invalid or unsafe image URL. Please use a valid http(s) image link ending with .jpg, .png, .gif, .webp, or .svg.'
+      );
+      return;
+    }
+    insertMarkdown(`![alt](${url})`, '');
+  };
+
+  // Insert inline code
+  const insertInlineCode = () => {
+    insertMarkdown('`', '`');
+  };
+
   // Clear editor
   const handleClear = () => {
     onChange('');
@@ -102,11 +154,43 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
       const lines = before.split(/\r?\n/);
       const currentLine = lines[lines.length - 1];
       // Ordered list: "1. ...", "2. ...", etc.
-      const olMatch = currentLine.match(/^(\s*)(\d+)\.\s/);
+      const olMatch = currentLine.match(/^(\s*)(\d+)\.\s*$/);
       if (olMatch) {
+        // If the line is just '1. ' (or similar), remove it and break the list
         e.preventDefault();
-        const indent = olMatch[1] || '';
-        const num = parseInt(olMatch[2], 10) + 1;
+        // Remove the current line
+        const beforeLines = lines.slice(0, -1).join('\n');
+        const newValue = (beforeLines ? beforeLines + '\n' : '') + after;
+        onChange(newValue);
+        setTimeout(() => {
+          textarea.focus();
+          const pos = beforeLines.length ? beforeLines.length + 1 : 0;
+          textarea.setSelectionRange(pos, pos);
+        }, 0);
+        return;
+      }
+      // Unordered list: "- ..."
+      const ulMatch = currentLine.match(/^(\s*)-\s*$/);
+      if (ulMatch) {
+        // If the line is just '- ', remove it and break the list
+        e.preventDefault();
+        // Remove the current line
+        const beforeLines = lines.slice(0, -1).join('\n');
+        const newValue = (beforeLines ? beforeLines + '\n' : '') + after;
+        onChange(newValue);
+        setTimeout(() => {
+          textarea.focus();
+          const pos = beforeLines.length ? beforeLines.length + 1 : 0;
+          textarea.setSelectionRange(pos, pos);
+        }, 0);
+        return;
+      }
+      // Ordered list: "1. ...", "2. ...", etc. (continue numbering)
+      const olContinueMatch = currentLine.match(/^(\s*)(\d+)\.\s/);
+      if (olContinueMatch) {
+        e.preventDefault();
+        const indent = olContinueMatch[1] || '';
+        const num = parseInt(olContinueMatch[2], 10) + 1;
         const insert = `\n${indent}${num}. `;
         const newValue = before + insert + after;
         onChange(newValue);
@@ -116,11 +200,11 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
         }, 0);
         return;
       }
-      // Unordered list: "- ..."
-      const ulMatch = currentLine.match(/^(\s*)-\s/);
-      if (ulMatch) {
+      // Unordered list: "- ..." (continue list)
+      const ulContinueMatch = currentLine.match(/^(\s*)-\s/);
+      if (ulContinueMatch) {
         e.preventDefault();
-        const indent = ulMatch[1] || '';
+        const indent = ulContinueMatch[1] || '';
         const insert = `\n${indent}- `;
         const newValue = before + insert + after;
         onChange(newValue);
@@ -135,78 +219,171 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
 
   const minHeight = textareaRef.current ? textareaRef.current.scrollHeight : undefined;
 
+  // Define all insert functions in a single object for cleaner button handlers
+  const insertFns = {
+    insertMarkdown,
+    insertH2,
+    insertH3,
+    insertLink,
+    insertList,
+    insertOrderedList,
+    insertCode,
+    insertQuote,
+    insertHr,
+    insertImage,
+    insertInlineCode,
+    handleClear,
+    setShowPreview,
+  };
+
+  // Toolbar button definitions
+  const TOOLBAR_BUTTONS = [
+    {
+      key: 'h1',
+      title: 'Heading 1',
+      icon: Heading1,
+      onClick: ({ insertMarkdown }: typeof insertFns) => insertMarkdown('# ', ''),
+    },
+    {
+      key: 'h2',
+      title: 'Heading 2',
+      icon: Heading2,
+      onClick: ({ insertH2 }: typeof insertFns) => insertH2(),
+    },
+    {
+      key: 'h3',
+      title: 'Heading 3',
+      icon: Heading3,
+      onClick: ({ insertH3 }: typeof insertFns) => insertH3(),
+    },
+    {
+      key: 'bold',
+      title: 'Bold',
+      icon: Bold,
+      onClick: ({ insertMarkdown }: typeof insertFns) => insertMarkdown('**', '**'),
+    },
+    {
+      key: 'italic',
+      title: 'Italic',
+      icon: Italic,
+      onClick: ({ insertMarkdown }: typeof insertFns) => insertMarkdown('*', '*'),
+    },
+    {
+      key: 'underline',
+      title: 'Underline',
+      icon: Underline,
+      onClick: ({ insertMarkdown }: typeof insertFns) => insertMarkdown('__', '__'),
+    },
+    {
+      key: 'link',
+      title: 'Link',
+      icon: LinkIcon,
+      blockKey: 'link',
+      onClick: ({ insertLink }: typeof insertFns) => insertLink(),
+      blockLabel: 'Link Blocked',
+    },
+    {
+      key: 'ul',
+      title: 'List',
+      icon: List,
+      onClick: ({ insertList }: typeof insertFns) => insertList(),
+    },
+    {
+      key: 'ol',
+      title: 'Ordered List',
+      label: '1.',
+      onClick: ({ insertOrderedList }: typeof insertFns) => insertOrderedList(),
+    },
+    {
+      key: 'code',
+      title: 'Code Block',
+      icon: Code,
+      blockKey: 'code',
+      onClick: ({ insertCode }: typeof insertFns) => insertCode(),
+      blockLabel: 'Code Blocked',
+    },
+    {
+      key: 'inlineCode',
+      title: 'Inline Code',
+      icon: Code2,
+      blockKey: 'code',
+      onClick: ({ insertInlineCode }: typeof insertFns) => insertInlineCode(),
+      blockLabel: 'Inline Code Blocked',
+    },
+    {
+      key: 'image',
+      title: 'Image',
+      icon: ImageIcon,
+      blockKey: 'image',
+      onClick: ({ insertImage }: typeof insertFns) => insertImage(),
+      blockLabel: 'Image Blocked',
+    },
+    {
+      key: 'hr',
+      title: 'Horizontal Rule',
+      icon: Minus,
+      onClick: ({ insertHr }: typeof insertFns) => insertHr(),
+    },
+    {
+      key: 'quote',
+      title: 'Quote',
+      icon: Quote,
+      onClick: ({ insertQuote }: typeof insertFns) => insertQuote(),
+    },
+    {
+      key: 'clear',
+      title: 'Clear',
+      icon: Trash2,
+      onClick: ({ handleClear }: typeof insertFns) => handleClear(),
+    },
+    {
+      key: 'preview',
+      title: 'Toggle Preview',
+      icon: Eye,
+      onClick: ({ setShowPreview }: typeof insertFns) => setShowPreview((v: boolean) => !v),
+      extraClass: 'ml-auto',
+    },
+  ];
+
   return (
     <div className="w-full">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          title="Heading 1"
-          className="btn-normal"
-          onClick={() => insertMarkdown('# ', '')}
-        >
-          <Heading1 size={18} />
-        </button>
-        <button type="button" title="Heading 2" className="btn-normal" onClick={insertH2}>
-          <Heading2 size={18} />
-        </button>
-        <button type="button" title="Heading 3" className="btn-normal" onClick={insertH3}>
-          <Heading3 size={18} />
-        </button>
-        <button
-          type="button"
-          title="Bold"
-          className="btn-normal"
-          onClick={() => insertMarkdown('**', '**')}
-        >
-          <Bold size={18} />
-        </button>
-        <button
-          type="button"
-          title="Italic"
-          className="btn-normal"
-          onClick={() => insertMarkdown('*', '*')}
-        >
-          <Italic size={18} />
-        </button>
-        <button
-          type="button"
-          title="Underline"
-          className="btn-normal"
-          onClick={() => insertMarkdown('__', '__')}
-        >
-          <Underline size={18} />
-        </button>
-        <button type="button" title="Link" className="btn-normal" onClick={insertLink}>
-          <LinkIcon size={18} />
-        </button>
-        <button type="button" title="List" className="btn-normal" onClick={insertList}>
-          <List size={18} />
-        </button>
-        <button
-          type="button"
-          title="Ordered List"
-          className="btn-normal"
-          onClick={insertOrderedList}
-        >
-          1.
-        </button>
-        <button type="button" title="Code Block" className="btn-normal" onClick={insertCode}>
-          <Code size={18} />
-        </button>
-        <button type="button" title="Quote" className="btn-normal" onClick={insertQuote}>
-          <Quote size={18} />
-        </button>
-        <button type="button" title="Clear" className="btn-normal ml-2" onClick={handleClear}>
-          <Trash2 size={18} />
-        </button>
-        <button
-          type="button"
-          title="Toggle Preview"
-          className="btn-normal ml-auto"
-          onClick={() => setShowPreview((v) => !v)}
-        >
-          <Eye size={18} />
-        </button>
+        {TOOLBAR_BUTTONS.map((btn) => {
+          const Icon = btn.icon;
+          const isBlocked =
+            btn.blockKey && blockContent && blockContent[btn.blockKey as keyof typeof blockContent];
+          if (isBlocked) {
+            return (
+              <span key={btn.key} style={{ color: 'red', fontWeight: 600, padding: '0 8px' }}>
+                {btn.blockLabel || `${btn.title} Blocked`}
+              </span>
+            );
+          }
+          if (btn.label) {
+            return (
+              <button
+                key={btn.key}
+                type="button"
+                title={btn.title}
+                className="btn-normal"
+                onClick={() => btn.onClick(insertFns)}
+              >
+                {btn.label}
+              </button>
+            );
+          }
+          return (
+            <button
+              key={btn.key}
+              type="button"
+              title={btn.title}
+              className={`btn-normal${btn.extraClass ? ' ' + btn.extraClass : ''} p-2`}
+              onClick={() => btn.onClick(insertFns)}
+            >
+              {Icon && <Icon size={18} />}
+            </button>
+          );
+        })}
       </div>
       <textarea
         ref={textareaRef}
@@ -228,7 +405,7 @@ const MDEditor: React.FC<MDEditorProps> = ({ value, onChange, placeholder, class
       />
       {showPreview && (
         <div className="articleBox mt-4 border px-8">
-          <MDRender markdown={value} />
+          <MDRender markdown={value} blockContent={blockContent} />
         </div>
       )}
     </div>

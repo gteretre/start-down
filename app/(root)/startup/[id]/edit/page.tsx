@@ -17,13 +17,9 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   if (session?.user?.username !== post.author.username) return notFound();
   return (
     <>
-      <section className="relative flex flex-col items-center justify-center gap-6 overflow-hidden bg-card p-8 text-center">
-        <div className="z-10 flex w-full max-w-2xl flex-col items-center justify-center gap-5">
-          <h1 className="animated-heading text-3xl font-extrabold leading-tight tracking-tight text-primary">
-            Edit {post.title}
-          </h1>
-        </div>
-      </section>
+      <div className="header-container">
+        <h1>Edit {post.title}</h1>
+      </div>
       <section>
         <StartupForm
           startupId={post._id}

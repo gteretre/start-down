@@ -21,6 +21,10 @@ export interface Author {
   bio?: string;
   role?: string;
   termsAcceptedAt?: Date;
+  location?: {
+    language?: string;
+    region?: string;
+  };
 }
 
 export interface Startup {

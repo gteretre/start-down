@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { getAuthorByUsername } from '@/lib/queries';
 import { auth } from '@/lib/auth';
-import ProfileForm from '@/components/user/ProfileForm';
+import AccountForm from '@/components/user/AccountForm';
 
 const Page = async () => {
   const session = await auth();
@@ -14,14 +14,10 @@ const Page = async () => {
 
   return (
     <>
-      <section className="relative flex flex-col items-center justify-center gap-6 overflow-hidden bg-card p-8 text-center">
-        <div className="z-10 flex w-full max-w-2xl flex-col items-center justify-center gap-5">
-          <h1 className="animated-heading text-3xl font-extrabold leading-tight tracking-tight text-primary">
-            Edit Your Profile
-          </h1>
-        </div>
-      </section>
-      <ProfileForm user={user} />
+      <div className="header-container">
+        <h1>Account Settings</h1>
+      </div>
+      <AccountForm user={user} />
     </>
   );
 };
