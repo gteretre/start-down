@@ -291,63 +291,57 @@
 }
 
 /* Article Layer */
+
 @layer components {
   .articleBox {
-    @apply rounded-lg py-8 sm:px-24 md:px-32 lg:px-48;
+    @apply py-8 sm:px-24 md:px-32 lg:px-48;
   }
   .articleBox h1 {
-    @apply mb-5 text-3xl font-bold;
+    @apply my-4 text-3xl font-bold leading-tight;
   }
   .articleBox h2 {
-    @apply mb-3 text-2xl font-bold;
+    @apply my-4 text-2xl font-bold leading-tight;
   }
   .articleBox h3 {
-    @apply mb-2 text-xl font-bold;
+    @apply my-3 text-xl font-bold leading-tight;
   }
   .articleBox h4,
   .articleBox h5,
   .articleBox h6 {
-    @apply mb-1 text-lg font-semibold;
+    @apply my-2 text-lg font-semibold leading-tight;
   }
   .articleBox p {
-    @apply mb-5 text-justify leading-relaxed;
+    @apply mb-4 text-justify leading-relaxed;
   }
   .articleBox blockquote {
-    @apply my-5 border-l-4 border-primary pl-4 italic text-gray-600;
+    @apply my-6 border-l-4 border-primary pl-4 italic text-gray-600;
   }
   .dark .articleBox blockquote {
     @apply border-blue-400 bg-slate-800 text-gray-300;
   }
 
-  /* bullets */
   .articleBox ul {
-    @apply mb-5 ml-5 *:list-disc;
+    @apply mb-4 ml-4 list-disc;
   }
 
   .articleBox ol {
-    @apply mb-5 ml-5;
+    @apply mb-4 ml-4;
   }
 
   .articleBox li {
-    @apply mb-2;
+    @apply mt-2 text-justify;
   }
 
-  /* image link line */
   .articleBox a {
     @apply text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200;
-  }
-
-  .articleBox img {
-    @apply mx-auto mb-5 block max-w-full rounded-md;
   }
 
   .articleBox hr {
     @apply my-8 border-t border-gray-300 dark:border-gray-700;
   }
 
-  /* code */
   .articleBox pre {
-    @apply mb-5 overflow-auto rounded-md bg-gray-100 p-4 font-mono text-sm dark:bg-gray-800;
+    @apply overflow-x-auto rounded-md bg-gray-100 p-4 font-mono text-sm dark:bg-gray-800;
   }
   .articleBox code {
     @apply rounded-sm bg-gray-200 px-1 py-0.5 font-mono text-sm dark:bg-gray-700;

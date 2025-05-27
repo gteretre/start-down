@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Share2, Copy } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface ShareButtonProps {
   title: string;
@@ -10,8 +11,10 @@ interface ShareButtonProps {
 
 const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
   const [showMenu, setShowMenu] = React.useState(false);
+  const [openedBy, setOpenedBy] = React.useState<'hover' | 'click' | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -22,6 +25,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
         !menuRef.current.contains(event.target as Node)
       ) {
         setShowMenu(false);
+        setOpenedBy(null);
       }
     }
     if (showMenu) {
@@ -32,12 +36,67 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
+  React.useEffect(() => {
+    if (showMenu) {
+      timeoutRef.current = setTimeout(() => {
+        setShowMenu(false);
+        setOpenedBy(null);
+      }, 2000);
+    } else {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [showMenu]);
+
+  const handleMenuMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  const handleMenuMouseLeave = () => {
+    setShowMenu(false);
+    setOpenedBy(null);
+  };
+
+  const handleButtonClick = () => {
+    if (!showMenu) {
+      setShowMenu(true);
+      setOpenedBy('click');
+    } else if (openedBy === 'click') {
+      setShowMenu(false);
+      setOpenedBy(null);
+    } else if (openedBy === 'hover') {
+      setOpenedBy('click');
+    }
+  };
+
+  const handleButtonMouseEnter = () => {
+    if (!showMenu) {
+      setShowMenu(true);
+      setOpenedBy('hover');
+    }
+  };
+
   const absoluteUrl =
     typeof window !== 'undefined' && url.startsWith('/') ? window.location.origin + url : url;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(absoluteUrl);
     setShowMenu(false);
+    toast({
+      title: 'Link copied!',
+      description: 'You can now share it anywhere.',
+    });
   };
 
   const openShare = (shareUrl: string) => {
@@ -45,7 +104,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
     setShowMenu(false);
   };
 
-  // SVGs from Simple Icons (inline for each platform)
   const FacebookIcon = (
     <svg
       width="16"
@@ -149,7 +207,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        // Use shareArticle endpoint for more options
         openShare(
           `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(absoluteUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(text)}`
         );
@@ -174,7 +231,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        // Facebook only supports the 'u' param for public URLs
         openShare(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(absoluteUrl)}`
         );
@@ -187,8 +243,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
       <button
         ref={buttonRef}
         className="btn-normal"
-        onClick={() => setShowMenu((v) => !v)}
-        onMouseEnter={() => setShowMenu(true)}
+        onClick={handleButtonClick}
+        onMouseEnter={handleButtonMouseEnter}
         type="button"
       >
         <Share2 size={16} />
@@ -196,7 +252,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ title, text, url }) => {
       </button>
       {showMenu && (
         <div
-          onMouseLeave={() => setShowMenu(false)}
+          onMouseEnter={handleMenuMouseEnter}
+          onMouseLeave={handleMenuMouseLeave}
           ref={menuRef}
           className="absolute left-0 z-20 mt-2 w-52 border bg-muted py-2 shadow-lg"
         >

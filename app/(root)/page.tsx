@@ -35,19 +35,19 @@ async function Home({
   const subtexts = [
     'Where bad ideas go to become legendary failures. Submit your concept, and watch as the internet either elevates it to meme status or buries it six feet under. The audience decides.',
     'Share your wildest ideas, vote for the most outrageous, and let the community mock you mercilessly!',
+    'A place for your democratizing, digitally-sustainable, super-scalable, industry-agnostic, blazingly-fast, cutting-edge, innovative, hyper-converged, synergistically-disruptive, whatever AI product idea',
   ];
-  const weights = [0.75, 0.25];
   const rand = Math.random();
-  const subtext = rand < weights[0] ? subtexts[0] : subtexts[1];
+  const subtext = subtexts[Math.floor(rand * subtexts.length)];
 
   return (
     <>
       <section className="relative flex min-h-[60vh] flex-col-reverse items-center justify-between gap-10 overflow-hidden px-8 pb-16 pt-20 md:flex-row">
         <div className="z-10 flex max-w-xl flex-1 flex-col items-start justify-center gap-7">
-          <h1 className="animated-heading mb-2 text-left text-5xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg md:text-6xl">
+          <h1 className="animated-heading mb-2 text-left text-3xl font-extrabold leading-tight tracking-tight text-primary drop-shadow-lg md:text-6xl">
             Bring Light to Your Misery
           </h1>
-          <h3 className="mb-2 text-left text-xl font-medium text-muted-foreground md:text-2xl">
+          <h3 className="mb-2 break-keep text-left text-xl font-medium text-muted-foreground md:text-2xl">
             {subtext}
           </h3>
           <div className="mt-2 w-full max-w-md">
@@ -98,7 +98,7 @@ async function Home({
           </div>
           <div className="flex flex-col">
             <label htmlFor="view" className="mb-1 text-xs text-muted-foreground">
-              View (Experimental)
+              View
             </label>
             <select
               id="view"

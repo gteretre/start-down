@@ -19,22 +19,16 @@ const Tooltip = ({
   };
 
   return (
-    <div className="group relative">
-      <div className="nav-element">{children}</div>
+    <div className="group relative inline-block">
+      <span className="cursor-pointer">{children}</span>
       <div
-        className={`absolute z-50 w-auto min-w-max scale-0 rounded-md bg-secondary p-2 text-xs font-semibold text-primary ring-1 ring-ring transition-all duration-100 ease-linear group-hover:scale-100 ${positionClasses[position] || positionClasses.default} pointer-events-none cursor-default select-none`}
-        style={{ userSelect: 'none', whiteSpace: multiline ? 'pre-line' : undefined }}
+        className={`pointer-events-none absolute z-50 min-w-max scale-95 rounded bg-black/90 px-2 py-1 text-xs text-white opacity-0 shadow transition-all duration-100 ease-linear group-hover:scale-100 group-hover:opacity-100 ${positionClasses[position] || positionClasses.default} hidden sm:block`}
+        style={{
+          userSelect: 'none',
+          whiteSpace: multiline ? 'pre-line' : undefined,
+        }}
       >
-        {multiline ? (
-          <pre
-            className="m-0 whitespace-pre-line border-none bg-transparent p-0 text-inherit"
-            style={{ fontFamily: 'inherit' }}
-          >
-            {text}
-          </pre>
-        ) : (
-          text
-        )}
+        {multiline ? <span className="whitespace-pre-line">{text}</span> : text}
       </div>
     </div>
   );

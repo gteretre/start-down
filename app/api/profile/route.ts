@@ -3,7 +3,7 @@ import { updateProfile } from '@/lib/actions';
 import { rateLimit } from '@/api-middleware/rateLimits';
 
 export async function PATCH(req: NextRequest) {
-  const { limited } = rateLimit(req, { windowMs: 60_000 * 15, max: 4 });
+  const { limited } = rateLimit(req, { windowMs: 10_000, max: 4 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }

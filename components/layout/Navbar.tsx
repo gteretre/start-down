@@ -8,7 +8,7 @@ import UIMode from '@/components/layout/UIMode';
 import GoogleTranslateToggle from '@/components/layout/GoogleTranslate';
 import { SignInButtons, SignOutButton } from '@/components/user/AuthButtons';
 import { auth } from '@/lib/auth';
-import { ProfilePicture } from '@/components/ImageUtilities';
+import ProfileQuickSettings from '@/components/user/ProfileQuickSettings';
 
 const Navbar = async () => {
   const session = await auth();
@@ -42,28 +42,24 @@ const Navbar = async () => {
           <div id="navbar-text" className="flex items-center">
             {session && session.user ? (
               <>
-                <Link href="/startup/create" className="inline-flex items-center">
-                  <Tooltip text="Create" position="left">
-                    <Pencil />
-                  </Tooltip>
-                </Link>
-                <Link href="/library" className="inline-flex items-center">
-                  <Tooltip text="Library" position="left">
-                    <LibraryIcon />
-                  </Tooltip>
-                </Link>
-                <SignOutButton />
-                <Link href={`/user/${session.user.username}`} className="inline-flex items-center">
-                  <Tooltip text={`${session.user.username}'s Profile`} position="left">
-                    <ProfilePicture
-                      src={session?.user?.image}
-                      alt="Profile picture"
-                      width={40}
-                      height={40}
-                      className="avatar"
-                    />
-                  </Tooltip>
-                </Link>
+                <div className="hidden md:contents">
+                  <Link href="/startup/create" className="inline-flex items-center">
+                    <Tooltip text="Create" position="left">
+                      <Pencil />
+                    </Tooltip>
+                  </Link>
+                  <Link href="/library" className="inline-flex items-center">
+                    <Tooltip text="Library" position="left">
+                      <LibraryIcon />
+                    </Tooltip>
+                  </Link>
+                  <SignOutButton />
+                </div>
+                <ProfileQuickSettings
+                  username={session.user.username}
+                  image={session.user.image}
+                  position="left"
+                />
               </>
             ) : (
               <SignInButtons />

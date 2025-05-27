@@ -15,6 +15,7 @@ import MDRender from '@/mike-mardown/src/rendermd';
 import CommentSection from '@/components/metrics/CommentSection';
 import { ProfilePicture } from '@/components/ImageUtilities';
 import LikeButton from '@/components/metrics/LikeButton';
+import UserCard from '@/components/user/UserCard';
 
 const slugs = [
   'quantum-procrastination',
@@ -80,7 +81,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         </h1>
         <p className="mb-5 text-base text-muted-foreground md:text-lg">{post.description}</p>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Tooltip text={(post.author.bio || 'Author bio').substring(0, 80)}>
+          <UserCard user={post.author}>
             <Link
               className="flex items-center gap-3 transition-opacity hover:opacity-80"
               href={`/user/${post.author.username}`}
@@ -96,7 +97,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
                 <p className="text-muted-foreground">@{post.author.username}</p>
               </div>
             </Link>
-          </Tooltip>
+          </UserCard>
           <div className="flex items-center gap-4">
             <Link href={`/?query=${post.category}#cards-section`}>
               <span className="tag">{post.category}</span>

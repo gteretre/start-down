@@ -9,7 +9,7 @@ import { rateLimit } from '@/api-middleware/rateLimits';
 const MAX_COMMENTS_PER_REQUEST = 20;
 
 export async function GET(req: Request) {
-  const { limited } = rateLimit(req, { windowMs: 60_000 * 2, max: 10 });
+  const { limited } = rateLimit(req, { windowMs: 60_000 * 2, max: 20 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }

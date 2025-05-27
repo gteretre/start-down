@@ -12,24 +12,45 @@ function StartupCardList({ posts }: { posts: Startup[] }) {
       {posts.map((post) => {
         const createdAtStr =
           typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
+
         return (
-          <li key={post._id} className="startup-card-list-item">
-            <Link href={`/startup/${post.slug}`} className="relative h-14 w-20 flex-shrink-0">
+          <li key={post._id} className="startup-card-list-item group">
+            <Link
+              href={`/startup/${post.slug}`}
+              className="relative h-14 w-20 flex-shrink-0 overflow-hidden rounded-md"
+            >
               <Image
                 src={getStartupImage(post)}
                 alt="startup image"
                 fill
-                className="startup-image rounded-md"
-                sizes="80px"
+                className="startup-image object-cover"
+                sizes="100px"
               />
             </Link>
-            <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
-              <Link href={`/startup/${post.slug}`}>
-                <h3 className="card-title truncate text-base" title={post.title}>
+            <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+              <Link
+                href={`/startup/${post.slug}`}
+                className="-m-1 block rounded-md p-1 transition-colors duration-200"
+              >
+                <h3
+                  className="card-title truncate text-base font-semibold transition-colors duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                  title={post.title}
+                >
                   {post.title}
                 </h3>
+                {post.description && (
+                  <p
+                    className="mt-0.5 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"
+                    title={post.title}
+                  >
+                    {post.description}
+                  </p>
+                )}
               </Link>
+
               <div className="card-metadata">
+                <View views={post.views} />
+                <span className="text-xs">{formatDate(createdAtStr)}</span>
                 <Link
                   href={`/user/${post.author.username}`}
                   className="flex items-center gap-1 hover:underline"
@@ -42,8 +63,7 @@ function StartupCardList({ posts }: { posts: Startup[] }) {
                   />
                   <span className="text-xs">{post.author.name}</span>
                 </Link>
-                <span className="text-xs">{formatDate(createdAtStr)}</span>
-                <View views={post.views} />
+
                 <Link href={`/?query=${post.category}`} className="card-category ml-auto pl-2">
                   {post.category}
                 </Link>

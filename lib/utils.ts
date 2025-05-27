@@ -9,10 +9,14 @@ export function mergeCssClasses(...inputs: ClassValue[]) {
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-US', {
+  const options: Intl.DateTimeFormatOptions = {
     month: 'long',
-    day: 'numeric',
+    day: '2-digit',
     year: 'numeric',
+  };
+  const formatted = d.toLocaleDateString('en-US', options);
+  return formatted.replace(/(\w+)\s(\d{2}),\s(\d{4})/, (match, month, day, year) => {
+    return `${month} ${day}, ${year}`;
   });
 }
 

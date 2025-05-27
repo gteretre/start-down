@@ -25,6 +25,11 @@ export interface Author {
     language?: string;
     region?: string;
   };
+  social?: {
+    github?: string;
+    linkedin?: string;
+    website?: string;
+  };
 }
 
 export interface Startup {
