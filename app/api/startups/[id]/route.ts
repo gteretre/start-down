@@ -115,3 +115,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     );
   }
 }
+
+export async function GET() {
+  return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
+}
+export async function POST() {
+  return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
+}
+export async function PUT() {
+  return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
+}

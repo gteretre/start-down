@@ -11,7 +11,7 @@ const StartupCard: React.FC<{ post: Startup }> = ({ post }) => {
   const createdAtStr =
     typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toISOString();
   return (
-    <div className="group rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-border hover:shadow-lg">
+    <div className="group rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:border-white hover:shadow-lg">
       <Link href={`/startup/${post.slug}`} className="block">
         <div className="relative mb-4 aspect-[16/10] w-full overflow-hidden rounded-lg">
           <Image

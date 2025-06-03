@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { auth } from '@/lib/auth';
 import { updateProfile } from '@/lib/actions';
 import { rateLimit } from '@/api-middleware/rateLimits';
 
@@ -6,6 +8,10 @@ export async function PATCH(req: NextRequest) {
   const { limited } = rateLimit(req, { windowMs: 10_000, max: 4 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+  const session = await auth();
+  if (!session || !session.user || !session.user.username) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
   try {

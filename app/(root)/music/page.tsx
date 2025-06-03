@@ -65,7 +65,13 @@ export default function NotesEditor() {
     y: number;
     measure: number;
     pitch: string;
+    canPlace: boolean;
+    suggestedPosition?: number;
+    warning?: string;
   } | null>(null);
+  const [snapToGrid, setSnapToGrid] = useState<boolean>(true);
+  const [showHelpers, setShowHelpers] = useState<boolean>(true);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const getStaffLineForMeasure = useCallback((measureNumber: number): number => {
@@ -119,6 +125,107 @@ export default function NotesEditor() {
     [totalMeasures]
   );
 
+  const calculateBestPosition = useCallback(
+    (
+      measure: number,
+      targetPosition: number,
+      duration: NoteDuration
+    ): { position: number; canPlace: boolean; warning?: string } => {
+      const notesInMeasure = notes.filter((note) => note.measure === measure);
+      const newNoteDurationValue = DURATION_VALUES[duration];
+
+      // Check total duration
+      let usedDuration = 0;
+      for (const note of notesInMeasure) {
+        usedDuration += DURATION_VALUES[note.duration];
+      }
+
+      if (usedDuration + newNoteDurationValue > 4) {
+        return { position: 0, canPlace: false, warning: 'Measure is full' };
+      }
+
+      // Sort existing notes by position
+      const sortedNotes = notesInMeasure.sort((a, b) => a.positionInMeasure - b.positionInMeasure);
+
+      // Try to place at target position first
+      let bestPosition = snapToGrid ? Math.round(targetPosition * 8) / 8 : targetPosition;
+      bestPosition = Math.max(0, Math.min(4 - newNoteDurationValue, bestPosition));
+
+      // Check for conflicts
+      const hasConflict = (pos: number): boolean => {
+        const newNoteEnd = pos + newNoteDurationValue;
+        return sortedNotes.some((note) => {
+          const noteStart = note.positionInMeasure;
+          const noteEnd = noteStart + DURATION_VALUES[note.duration];
+          return (
+            (pos >= noteStart && pos < noteEnd) ||
+            (newNoteEnd > noteStart && newNoteEnd <= noteEnd) ||
+            (pos <= noteStart && newNoteEnd >= noteEnd)
+          );
+        });
+      };
+
+      if (!hasConflict(bestPosition)) {
+        return { position: bestPosition, canPlace: true };
+      }
+
+      // Find the best available slot
+      const slots: { start: number; end: number }[] = [];
+
+      // Add slot before first note
+      if (sortedNotes.length > 0 && sortedNotes[0].positionInMeasure > 0) {
+        slots.push({ start: 0, end: sortedNotes[0].positionInMeasure });
+      }
+
+      // Add slots between notes
+      for (let i = 0; i < sortedNotes.length - 1; i++) {
+        const currentEnd =
+          sortedNotes[i].positionInMeasure + DURATION_VALUES[sortedNotes[i].duration];
+        const nextStart = sortedNotes[i + 1].positionInMeasure;
+        if (currentEnd < nextStart) {
+          slots.push({ start: currentEnd, end: nextStart });
+        }
+      }
+
+      // Add slot after last note
+      if (sortedNotes.length > 0) {
+        const lastEnd =
+          sortedNotes[sortedNotes.length - 1].positionInMeasure +
+          DURATION_VALUES[sortedNotes[sortedNotes.length - 1].duration];
+        if (lastEnd < 4) {
+          slots.push({ start: lastEnd, end: 4 });
+        }
+      }
+
+      // If no notes, entire measure is available
+      if (sortedNotes.length === 0) {
+        slots.push({ start: 0, end: 4 });
+      }
+
+      // Find best slot that can fit the note
+      for (const slot of slots) {
+        if (slot.end - slot.start >= newNoteDurationValue) {
+          // Try to place as close to target as possible within this slot
+          let position = Math.max(
+            slot.start,
+            Math.min(slot.end - newNoteDurationValue, bestPosition)
+          );
+          if (snapToGrid) {
+            position = Math.round(position * 8) / 8;
+            // Ensure snapped position still fits in slot
+            if (position < slot.start) position = Math.ceil(slot.start * 8) / 8;
+            if (position + newNoteDurationValue > slot.end)
+              position = Math.floor((slot.end - newNoteDurationValue) * 8) / 8;
+          }
+          return { position, canPlace: true };
+        }
+      }
+
+      return { position: 0, canPlace: false, warning: 'No space available' };
+    },
+    [notes, snapToGrid]
+  );
+
   const addNote = useCallback(
     (x: number, y: number) => {
       const staffLine = Math.max(
@@ -133,24 +240,9 @@ export default function NotesEditor() {
       const pitch = getPitchFromY(snappedY, staffLine);
       const measure = getMeasureFromClick(x, y);
 
+      // Auto-expand measures if needed
       if (measure >= totalMeasures - 1) {
         setTotalMeasures((prev) => prev + MEASURES_PER_LINE);
-      }
-
-      const notesInMeasure = notes.filter((note) => note.measure === measure);
-      let usedDuration = 0;
-      for (const note of notesInMeasure) {
-        usedDuration += DURATION_VALUES[note.duration];
-      }
-
-      const newNoteDurationValue = DURATION_VALUES[selectedDuration];
-      if (usedDuration + newNoteDurationValue > 4) {
-        alert(
-          `Cannot add ${selectedDuration} note to measure ${
-            measure + 1
-          }. Not enough space remaining.`
-        );
-        return;
       }
 
       const measureCoords = getMeasureCoordinates(measure);
@@ -158,49 +250,42 @@ export default function NotesEditor() {
       const measureWidth = MEASURE_WIDTH - 20;
       const targetTimePosition = Math.max(0, Math.min(4, (relativeXInMeasure / measureWidth) * 4));
 
-      const sortedNotes = notesInMeasure.sort((a, b) => a.positionInMeasure - b.positionInMeasure);
-      let insertPosition = 0;
+      const result = calculateBestPosition(measure, targetTimePosition, selectedDuration);
 
-      for (let i = 0; i < sortedNotes.length; i++) {
-        const currentNote = sortedNotes[i];
-        const nextNote = sortedNotes[i + 1];
-
-        const currentEnd = currentNote.positionInMeasure + DURATION_VALUES[currentNote.duration];
-        const nextStart = nextNote ? nextNote.positionInMeasure : 4;
-
-        if (
-          insertPosition + newNoteDurationValue <= currentNote.positionInMeasure &&
-          targetTimePosition <= currentNote.positionInMeasure
-        ) {
-          break;
-        }
-
-        if (currentEnd + newNoteDurationValue <= nextStart && targetTimePosition >= currentEnd) {
-          insertPosition = currentEnd;
-          if (nextNote && targetTimePosition + newNoteDurationValue <= nextNote.positionInMeasure) {
-            insertPosition = Math.min(targetTimePosition, nextStart - newNoteDurationValue);
-          }
-          break;
-        }
-
-        insertPosition = currentEnd;
+      if (!result.canPlace) {
+        // Show visual feedback for failed placement
+        setHoverPosition({
+          x: measureCoords.x + 10 + (targetTimePosition / 4) * measureWidth,
+          y: snappedY,
+          measure,
+          pitch,
+          canPlace: false,
+          warning: result.warning,
+        });
+        return false;
       }
-
-      insertPosition = Math.min(insertPosition, 4 - newNoteDurationValue);
 
       const newNote: Note = {
         id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        x: measureCoords.x + 10 + (insertPosition / 4) * measureWidth,
+        x: measureCoords.x + 10 + (result.position / 4) * measureWidth,
         y: snappedY,
         pitch,
         duration: selectedDuration,
         measure,
-        positionInMeasure: insertPosition,
+        positionInMeasure: result.position,
       };
 
       setNotes((prev) => [...prev, newNote]);
+      setSelectedNote(newNote.id);
+      return true;
     },
-    [selectedDuration, notes, totalMeasures, getMeasureFromClick, getMeasureCoordinates]
+    [
+      selectedDuration,
+      totalMeasures,
+      getMeasureFromClick,
+      getMeasureCoordinates,
+      calculateBestPosition,
+    ]
   );
 
   const handleStaffClick = useCallback(
@@ -238,51 +323,67 @@ export default function NotesEditor() {
       const measureWidth = MEASURE_WIDTH - 20;
       const timePosition = Math.max(0, Math.min(4, (relativeXInMeasure / measureWidth) * 4));
 
-      const snappedTimePosition = Math.round(timePosition * 8) / 8;
-      const snappedX = measureCoords.x + 10 + (snappedTimePosition / 4) * measureWidth;
+      const result = calculateBestPosition(measure, timePosition, selectedDuration);
+      const snappedX = measureCoords.x + 10 + (result.position / 4) * measureWidth;
 
-      setHoverPosition({ x: snappedX, y: snappedY, measure, pitch });
+      setHoverPosition({
+        x: snappedX,
+        y: snappedY,
+        measure,
+        pitch,
+        canPlace: result.canPlace,
+        suggestedPosition: result.position,
+        warning: result.warning,
+      });
     },
-    [getMeasureFromClick, getMeasureCoordinates]
+    [getMeasureFromClick, getMeasureCoordinates, selectedDuration, calculateBestPosition]
   );
 
   const handleMouseLeave = useCallback(() => {
     setHoverPosition(null);
   }, []);
 
-  const removeNote = useCallback((noteId: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== noteId));
-  }, []);
+  const removeNote = useCallback(
+    (noteId: string) => {
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
+      if (selectedNote === noteId) {
+        setSelectedNote(null);
+      }
+    },
+    [selectedNote]
+  );
 
   const clearAll = useCallback(() => {
     setNotes([]);
     setTotalMeasures(4);
+    setSelectedNote(null);
   }, []);
 
   const totalStaffLines = useMemo(
     () => Math.ceil(totalMeasures / MEASURES_PER_LINE),
     [totalMeasures]
   );
+
   const svgHeight = useMemo(
     () => Math.max(400, STAFF_START_Y + (totalStaffLines - 1) * LINE_HEIGHT + 150),
     [totalStaffLines]
   );
 
   return (
-    <div className="min-h-screen bg-gray-500 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* Enhanced Header */}
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white/80 p-6 shadow-lg backdrop-blur-sm">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-                  <span className="text-xl font-bold text-white">♪</span>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Music Notes Editor</h1>
-                  <p className="text-sm text-gray-500">Professional music composition tool</p>
-                </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg">
+                <span className="text-2xl font-bold text-white">♪</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Smart Music Composer</h1>
+                <p className="text-sm text-gray-600">
+                  Intelligent note placement with collision detection
+                </p>
               </div>
             </div>
 
@@ -308,18 +409,37 @@ export default function NotesEditor() {
                 </select>
               </div>
 
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={snapToGrid}
+                    onChange={(e) => setSnapToGrid(e.target.checked)}
+                    className="rounded"
+                  />
+                  Snap to Grid
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={showHelpers}
+                    onChange={(e) => setShowHelpers(e.target.checked)}
+                    className="rounded"
+                  />
+                  Show Helpers
+                </label>
+              </div>
+
               <button
                 onClick={clearAll}
-                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors duration-200 hover:bg-red-700"
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-all duration-200 hover:bg-red-700 hover:shadow-lg"
               >
                 <span className="text-sm">🗑️</span>
                 Clear All
               </button>
 
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                <div className="text-sm font-medium text-blue-900">
-                  Total Measures: {totalMeasures}
-                </div>
+                <div className="text-sm font-medium text-blue-900">Measures: {totalMeasures}</div>
                 <div className="text-xs text-blue-700">Notes: {notes.length}</div>
               </div>
             </div>
@@ -327,22 +447,32 @@ export default function NotesEditor() {
         </div>
 
         {/* Main Staff Container */}
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white/90 shadow-xl backdrop-blur-sm">
           {/* Toolbar */}
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <div className="text-sm font-medium text-gray-700">Staff View</div>
                 <div className="text-xs text-gray-500">Time Signature: 4/4</div>
+                {hoverPosition && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full ${hoverPosition.canPlace ? 'bg-green-500' : 'bg-red-500'}`}
+                    ></span>
+                    <span className={hoverPosition.canPlace ? 'text-green-700' : 'text-red-700'}>
+                      {hoverPosition.canPlace ? 'Ready to place' : hoverPosition.warning}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="text-xs text-gray-500">
-                Hover over the staff to preview note placement
+                {snapToGrid ? 'Smart grid snapping enabled' : 'Free positioning'}
               </div>
             </div>
           </div>
 
           {/* Staff SVG */}
-          <div className="bg-gradient-to-b from-gray-50 to-white p-6">
+          <div className="bg-gradient-to-b from-gray-50/50 to-white p-6">
             <svg
               ref={svgRef}
               width="100%"
@@ -350,9 +480,37 @@ export default function NotesEditor() {
               onClick={handleStaffClick}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              className="cursor-crosshair rounded-lg border border-gray-200 bg-white shadow-inner"
+              className="cursor-crosshair rounded-lg border border-gray-200 bg-white shadow-inner transition-all duration-300 hover:shadow-md"
               style={{ minHeight: '400px' }}
             >
+              {/* Grid lines for visual reference */}
+              {showHelpers &&
+                Array.from({ length: totalStaffLines }, (_, staffLineIndex) => {
+                  const staffY = STAFF_START_Y + staffLineIndex * LINE_HEIGHT;
+                  return (
+                    <g key={`grid-${staffLineIndex}`}>
+                      {Array.from({ length: MEASURES_PER_LINE }, (_, measureIndex) => {
+                        const measureNumber = staffLineIndex * MEASURES_PER_LINE + measureIndex;
+                        if (measureNumber >= totalMeasures) return null;
+                        const measureX = STAFF_START_X + measureIndex * MEASURE_WIDTH;
+
+                        return Array.from({ length: 8 }, (_, i) => (
+                          <line
+                            key={`grid-${measureNumber}-${i}`}
+                            x1={measureX + 10 + (i * (MEASURE_WIDTH - 20)) / 8}
+                            y1={staffY - 20}
+                            x2={measureX + 10 + (i * (MEASURE_WIDTH - 20)) / 8}
+                            y2={staffY + (STAFF_LINES - 1) * STAFF_LINE_HEIGHT + 20}
+                            stroke="rgba(59, 130, 246, 0.1)"
+                            strokeWidth="1"
+                            strokeDasharray={i % 2 === 0 ? '2,2' : '1,3'}
+                          />
+                        ));
+                      })}
+                    </g>
+                  );
+                })}
+
               {/* Render staff lines */}
               {Array.from({ length: totalStaffLines }, (_, staffLineIndex) => {
                 const staffY = STAFF_START_Y + staffLineIndex * LINE_HEIGHT;
@@ -364,7 +522,7 @@ export default function NotesEditor() {
                       x="20"
                       y={staffY + 60}
                       fontSize="60"
-                      className="select-none fill-black"
+                      className="select-none fill-gray-800"
                       style={{ fontFamily: 'serif' }}
                     >
                       𝄞
@@ -375,7 +533,7 @@ export default function NotesEditor() {
                       x="70"
                       y={staffY + 15}
                       fontSize="20"
-                      className="select-none fill-black"
+                      className="select-none fill-gray-800"
                       style={{ fontFamily: 'serif' }}
                     >
                       4
@@ -384,7 +542,7 @@ export default function NotesEditor() {
                       x="70"
                       y={staffY + 55}
                       fontSize="20"
-                      className="select-none fill-black"
+                      className="select-none fill-gray-800"
                       style={{ fontFamily: 'serif' }}
                     >
                       4
@@ -398,8 +556,8 @@ export default function NotesEditor() {
                         y1={staffY + i * STAFF_LINE_HEIGHT}
                         x2={STAFF_START_X + MEASURES_PER_LINE * MEASURE_WIDTH}
                         y2={staffY + i * STAFF_LINE_HEIGHT}
-                        stroke="black"
-                        strokeWidth="1"
+                        stroke="#374151"
+                        strokeWidth="1.5"
                       />
                     ))}
 
@@ -418,12 +576,12 @@ export default function NotesEditor() {
                           y1={staffY}
                           x2={STAFF_START_X + measureIndex * MEASURE_WIDTH}
                           y2={staffY + (STAFF_LINES - 1) * STAFF_LINE_HEIGHT}
-                          stroke="black"
+                          stroke="#374151"
                           strokeWidth={
                             isFirstMeasure ||
                             (isLastMeasureOnLine && measureNumber <= totalMeasures)
                               ? '3'
-                              : '1'
+                              : '1.5'
                           }
                         />
                       );
@@ -438,10 +596,10 @@ export default function NotesEditor() {
                         <text
                           key={`measure-number-${measureNumber}`}
                           x={STAFF_START_X + measureIndex * MEASURE_WIDTH + MEASURE_WIDTH / 2}
-                          y={staffY - 10}
+                          y={staffY - 15}
                           textAnchor="middle"
                           fontSize="14"
-                          className="select-none fill-gray-500"
+                          className="select-none fill-gray-600 font-medium"
                         >
                           {measureNumber + 1}
                         </text>
@@ -451,16 +609,20 @@ export default function NotesEditor() {
                 );
               })}
 
-              {/* Hover preview */}
+              {/* Enhanced hover preview */}
               {hoverPosition && (
                 <g>
                   <ellipse
                     cx={hoverPosition.x}
                     cy={hoverPosition.y}
-                    rx={NOTE_RADIUS}
-                    ry={NOTE_RADIUS * 0.8}
-                    fill="rgba(59, 130, 246, 0.5)"
-                    stroke="rgba(59, 130, 246, 0.8)"
+                    rx={NOTE_RADIUS + 2}
+                    ry={(NOTE_RADIUS + 2) * 0.8}
+                    fill={
+                      hoverPosition.canPlace ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+                    }
+                    stroke={
+                      hoverPosition.canPlace ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                    }
                     strokeWidth="2"
                     className="pointer-events-none"
                   />
@@ -471,7 +633,9 @@ export default function NotesEditor() {
                       y1={hoverPosition.y}
                       x2={hoverPosition.x + NOTE_RADIUS}
                       y2={hoverPosition.y - 60}
-                      stroke="rgba(59, 130, 246, 0.8)"
+                      stroke={
+                        hoverPosition.canPlace ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                      }
                       strokeWidth="2"
                       className="pointer-events-none"
                     />
@@ -479,27 +643,30 @@ export default function NotesEditor() {
 
                   <text
                     x={hoverPosition.x}
-                    y={hoverPosition.y - 80}
+                    y={hoverPosition.y - 90}
                     textAnchor="middle"
                     fontSize="12"
-                    className="pointer-events-none select-none fill-blue-600 font-semibold"
+                    className={`pointer-events-none select-none font-semibold ${
+                      hoverPosition.canPlace ? 'fill-green-600' : 'fill-red-600'
+                    }`}
                   >
                     {hoverPosition.pitch} ({selectedDuration})
                   </text>
 
                   <text
                     x={hoverPosition.x}
-                    y={hoverPosition.y + 90}
+                    y={hoverPosition.y + 100}
                     textAnchor="middle"
                     fontSize="10"
                     className="pointer-events-none select-none fill-gray-500"
                   >
                     Measure {hoverPosition.measure + 1}
+                    {hoverPosition.warning && ` - ${hoverPosition.warning}`}
                   </text>
                 </g>
               )}
 
-              {/* Notes */}
+              {/* Enhanced Notes */}
               {notes.map((note) => (
                 <g key={note.id}>
                   {note.duration === 'whole' ? (
@@ -507,14 +674,18 @@ export default function NotesEditor() {
                       cx={note.x}
                       cy={note.y}
                       rx={NOTE_RADIUS + 2}
-                      ry={NOTE_RADIUS * 0.8}
+                      ry={(NOTE_RADIUS + 2) * 0.8}
                       fill="none"
-                      stroke="black"
-                      strokeWidth="2"
-                      className="cursor-pointer transition-colors duration-200 hover:stroke-red-500"
+                      stroke={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
+                      strokeWidth={selectedNote === note.id ? '3' : '2'}
+                      className="cursor-pointer transition-all duration-200 hover:stroke-red-500"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeNote(note.id);
+                        if (selectedNote === note.id) {
+                          removeNote(note.id);
+                        } else {
+                          setSelectedNote(note.id);
+                        }
                       }}
                     />
                   ) : note.duration === 'half' ? (
@@ -524,12 +695,16 @@ export default function NotesEditor() {
                       rx={NOTE_RADIUS}
                       ry={NOTE_RADIUS * 0.8}
                       fill="none"
-                      stroke="black"
-                      strokeWidth="2"
-                      className="cursor-pointer transition-colors duration-200 hover:stroke-red-500"
+                      stroke={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
+                      strokeWidth={selectedNote === note.id ? '3' : '2'}
+                      className="cursor-pointer transition-all duration-200 hover:stroke-red-500"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeNote(note.id);
+                        if (selectedNote === note.id) {
+                          removeNote(note.id);
+                        } else {
+                          setSelectedNote(note.id);
+                        }
                       }}
                     />
                   ) : (
@@ -538,11 +713,15 @@ export default function NotesEditor() {
                       cy={note.y}
                       rx={NOTE_RADIUS}
                       ry={NOTE_RADIUS * 0.8}
-                      fill="black"
-                      className="cursor-pointer transition-colors duration-200 hover:fill-red-500"
+                      fill={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
+                      className="cursor-pointer transition-all duration-200 hover:fill-red-500"
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeNote(note.id);
+                        if (selectedNote === note.id) {
+                          removeNote(note.id);
+                        } else {
+                          setSelectedNote(note.id);
+                        }
                       }}
                     />
                   )}
@@ -553,8 +732,8 @@ export default function NotesEditor() {
                       y1={note.y}
                       x2={note.x + NOTE_RADIUS}
                       y2={note.y - 60}
-                      stroke="black"
-                      strokeWidth="2"
+                      stroke={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
+                      strokeWidth={selectedNote === note.id ? '3' : '2'}
                       className="pointer-events-none"
                     />
                   )}
@@ -565,7 +744,7 @@ export default function NotesEditor() {
                           C${note.x + NOTE_RADIUS + 15} ${note.y - 50} 
                           ${note.x + NOTE_RADIUS + 15} ${note.y - 40} 
                           ${note.x + NOTE_RADIUS} ${note.y - 30}`}
-                      fill="black"
+                      fill={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
                       className="pointer-events-none"
                     />
                   )}
@@ -577,7 +756,7 @@ export default function NotesEditor() {
                             C${note.x + NOTE_RADIUS + 15} ${note.y - 50} 
                             ${note.x + NOTE_RADIUS + 15} ${note.y - 40} 
                             ${note.x + NOTE_RADIUS} ${note.y - 30}`}
-                        fill="black"
+                        fill={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
                         className="pointer-events-none"
                       />
                       <path
@@ -585,62 +764,87 @@ export default function NotesEditor() {
                             C${note.x + NOTE_RADIUS + 15} ${note.y - 40} 
                             ${note.x + NOTE_RADIUS + 15} ${note.y - 30} 
                             ${note.x + NOTE_RADIUS} ${note.y - 20}`}
-                        fill="black"
+                        fill={selectedNote === note.id ? '#3B82F6' : '#1F2937'}
                         className="pointer-events-none"
                       />
                     </>
                   )}
 
-                  <text
-                    x={note.x}
-                    y={note.y - 70}
-                    textAnchor="middle"
-                    fontSize="12"
-                    className="pointer-events-none select-none fill-gray-600"
-                  >
-                    {note.pitch} ({note.duration})
-                  </text>
+                  {showHelpers && (
+                    <text
+                      x={note.x}
+                      y={note.y - 75}
+                      textAnchor="middle"
+                      fontSize="10"
+                      className="pointer-events-none select-none fill-gray-600 font-medium"
+                    >
+                      {note.pitch}
+                    </text>
+                  )}
                 </g>
               ))}
             </svg>
           </div>
         </div>
 
-        {/* Help Panel */}
-        <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800">
+        {/* Enhanced Help Panel */}
+        <div className="mt-6 rounded-xl border border-gray-200 bg-white/80 p-6 shadow-lg backdrop-blur-sm">
+          <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-gray-800">
             <span className="text-blue-600">💡</span>
-            Quick Guide
+            Smart Composer Guide
           </h3>
-          <div className="grid grid-cols-1 gap-4 text-sm text-gray-600 md:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-green-600">•</span>
-                <span>
-                  <strong>Click</strong> on the staff to add notes
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-green-600">•</span>
-                <span>Notes automatically snap to staff lines</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-green-600">•</span>
-                <span>Use the dropdown to select note duration</span>
+          <div className="grid grid-cols-1 gap-6 text-sm text-gray-600 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">Note Placement</h4>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">•</span>
+                  <span>
+                    <strong>Click</strong> anywhere on the staff to add notes
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">•</span>
+                  <span>Smart positioning automatically finds the best spot</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-green-600">•</span>
+                  <span>Green preview = valid placement</span>
+                </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-blue-600">•</span>
-                <span>Each measure holds up to 4 quarter notes (4/4 time)</span>
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">Smart Features</h4>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">•</span>
+                  <span>Automatic collision detection</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">•</span>
+                  <span>Grid snapping for perfect timing</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-blue-600">•</span>
+                  <span>Real-time measure capacity checking</span>
+                </div>
               </div>
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-blue-600">•</span>
-                <span>Click on any note to remove it</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="font-bold text-blue-600">•</span>
-                <span>Staff expands automatically as needed</span>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">Interaction</h4>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-purple-600">•</span>
+                  <span>Click a note to select it</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-purple-600">•</span>
+                  <span>Click selected note again to delete</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="font-bold text-purple-600">•</span>
+                  <span>Staff auto-expands as you compose</span>
+                </div>
               </div>
             </div>
           </div>

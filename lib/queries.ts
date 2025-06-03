@@ -1,3 +1,5 @@
+import { startOfWeek, endOfWeek } from 'date-fns';
+
 import { ObjectId } from 'mongodb';
 import { getDb } from './mongodb';
 import type { RawAuthor, RawStartup, RawComment } from '@/lib/models';
@@ -40,19 +42,31 @@ function mapStartup(raw: RawStartup, authorObj: RawAuthor): import('@/lib/models
   };
 }
 
-export async function getStartups(search?: string, sort?: string) {
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export async function getStartups(
+  search?: string,
+  sort?: string,
+  page: number = 1,
+  limit: number = 20
+) {
   const db = await getDb();
+  const MAX_LIMIT = 24;
+  const safeLimit = Math.min(MAX_LIMIT, Math.max(1, limit));
   let query = {};
   let authorIds: ObjectId[] = [];
   let sortObj: Record<string, 1 | -1> = { createdAt: -1 };
 
   if (search) {
+    const safeSearch = escapeRegex(search);
     const authorMatches = await db
       .collection('authors')
       .find({
         $or: [
-          { name: { $regex: search, $options: 'i' } },
-          { username: { $regex: search, $options: 'i' } },
+          { name: { $regex: safeSearch, $options: 'i' } },
+          { username: { $regex: safeSearch, $options: 'i' } },
         ],
       })
       .project({ _id: 1 })
@@ -61,8 +75,8 @@ export async function getStartups(search?: string, sort?: string) {
 
     query = {
       $or: [
-        { title: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { category: { $regex: safeSearch, $options: 'i' } },
         ...(authorIds.length > 0 ? [{ author: { $in: authorIds } }] : []),
       ],
     };
@@ -91,7 +105,15 @@ export async function getStartups(search?: string, sort?: string) {
       break;
   }
 
-  const startups = await db.collection('startups').find(query).sort(sortObj).toArray();
+  const skip = (Math.max(1, page) - 1) * safeLimit;
+  const startups = await db
+    .collection('startups')
+    .find(query)
+    .sort(sortObj)
+    .skip(skip)
+    .limit(safeLimit)
+    .toArray();
+
   const allAuthorIds = [...new Set(startups.map((startup) => startup.author?.toString()))]
     .filter(Boolean)
     .map((id) => new ObjectId(id));
@@ -116,6 +138,37 @@ export async function getStartups(search?: string, sort?: string) {
       );
       return mapStartup(startup as RawStartup, authorObj as RawAuthor);
     });
+}
+
+export async function getStartupsCount(search?: string) {
+  const db = await getDb();
+  let query = {};
+  let authorIds: ObjectId[] = [];
+
+  if (search) {
+    const safeSearch = escapeRegex(search);
+    const authorMatches = await db
+      .collection('authors')
+      .find({
+        $or: [
+          { name: { $regex: safeSearch, $options: 'i' } },
+          { username: { $regex: safeSearch, $options: 'i' } },
+        ],
+      })
+      .project({ _id: 1 })
+      .toArray();
+    authorIds = authorMatches.map((a) => a._id);
+
+    query = {
+      $or: [
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { category: { $regex: safeSearch, $options: 'i' } },
+        ...(authorIds.length > 0 ? [{ author: { $in: authorIds } }] : []),
+      ],
+    };
+  }
+
+  return db.collection('startups').countDocuments(query);
 }
 
 export async function getStartupsByAuthor(username: string) {
@@ -379,4 +432,61 @@ export async function getStartupsLikedByUser(username: string) {
       );
       return mapStartup(startup as RawStartup, authorObj as RawAuthor);
     });
+}
+
+export async function getMostViewedStartupThisWeek() {
+  const db = await getDb();
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+  const agg = await db
+    .collection('startup_views')
+    .aggregate([
+      {
+        $match: {
+          lastViewed: { $gte: weekStart, $lte: weekEnd },
+        },
+      },
+      {
+        $group: {
+          _id: '$startupId',
+          viewsThisWeek: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: 'startups',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'startup',
+        },
+      },
+      { $unwind: '$startup' },
+      {
+        $addFields: {
+          totalViews: '$startup.views',
+        },
+      },
+      {
+        $sort: {
+          viewsThisWeek: -1,
+          totalViews: -1,
+        },
+      },
+      { $limit: 1 },
+    ])
+    .toArray();
+
+  if (!agg.length) return null;
+
+  const startup = agg[0].startup;
+  const author = await db.collection('authors').findOne({ _id: startup.author });
+  if (!author) return null;
+
+  return {
+    ...startup,
+    viewsThisWeek: agg[0].viewsThisWeek,
+    author,
+  };
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/api-middleware/rateLimits';
 import { upvoteComment } from '@/lib/actions';
 
+import { auth } from '@/lib/auth';
+
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const { limited } = rateLimit(req, { windowMs: 60_000 * 2, max: 20 });
   if (limited) {
@@ -10,6 +12,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const commentId = (await params).id;
   if (!commentId) {
     return NextResponse.json({ success: false, error: 'Missing comment id.' }, { status: 400 });
+  }
+  const session = await auth();
+  if (!session || !session.user || !session.user.username) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
   try {
     const result = await upvoteComment(commentId);

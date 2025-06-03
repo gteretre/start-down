@@ -60,7 +60,7 @@
       0 2px 16px 0 rgba(80, 180, 255, 0.18);
   }
   .startup-card-list-item {
-    @apply flex items-start gap-3 border-b border-border p-3 transition-colors duration-150 hover:bg-muted/50;
+    @apply flex items-start gap-3 border-b border-ring p-3 transition-colors duration-150 hover:bg-muted/50;
   }
   .startup-card-small {
     @apply card-base flex select-none flex-col gap-2 p-2 shadow;
@@ -143,6 +143,9 @@
   }
   .dark .search-form:focus-within {
     @apply ring-gray-400;
+  }
+  .selector {
+    @apply min-w-[120px] rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
 }
 
