@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env.local
+    depends_on:
+      - localstack
+      - mongo
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
+      - EAGER_SERVICE_LOADING=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - '${LOCALSTACK_VOLUME_DIR:-./.localstack}:/var/lib/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - './localstack-init:/etc/localstack/init/ready.d'
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
