@@ -9,7 +9,9 @@
     "lint": "next lint",
     "prepare": "husky",
     "test": "jest",
-    "tstest": "npx tsc --noEmit"
+    "tstest": "npx tsc --noEmit",
+    "docker": "docker compose up --build",
+    "docker:down": "docker compose down"
   },
   "packageManager": "npm@10.5.2",
   "overrides": {

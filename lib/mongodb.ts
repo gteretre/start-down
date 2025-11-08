@@ -1,5 +1,17 @@
 import { MongoClient, Db, MongoClientOptions } from 'mongodb';
 
+export class MongoConnectionError extends Error {
+  cause?: unknown;
+
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'MongoConnectionError';
+    if (cause !== undefined) {
+      this.cause = cause;
+    }
+  }
+}
+
 if (!process.env.MONGODB_URI) {
   throw new Error(
     'Missing MongoDB URI. Please set MONGODB_URI in your .env.local file (e.g., MONGODB_URI=mongodb://localhost:27017).'
@@ -19,6 +31,22 @@ const options: MongoClientOptions = {
   wtimeoutMS: 2500,
 };
 
+let lastConnectionError: MongoConnectionError | null = null;
+
+const wrapMongoError = (context: string, error: unknown): MongoConnectionError => {
+  if (error instanceof MongoConnectionError) {
+    lastConnectionError = error;
+    return error;
+  }
+  const message =
+    context === 'initial'
+      ? 'Failed to connect to MongoDB. Please ensure the database service is running and reachable.'
+      : 'MongoDB is currently unavailable. Please try again shortly.';
+  const wrapped = new MongoConnectionError(message, error);
+  lastConnectionError = wrapped;
+  return wrapped;
+};
+
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient>;
@@ -30,15 +58,11 @@ let clientPromise: Promise<MongoClient>;
 if (process.env.NODE_ENV === 'development') {
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    global._mongoClientPromise = client
-      .connect()
-      .then((connectedClient) => {
-        return connectedClient;
-      })
-      .catch((err) => {
-        console.error('MongoDB connection error (development):', err);
-        throw err;
-      });
+    global._mongoClientPromise = client.connect().catch((err) => {
+      const wrapped = wrapMongoError('initial', err);
+      console.error('MongoDB connection error (development):', err);
+      throw wrapped;
+    });
   }
   clientPromise = global._mongoClientPromise;
 } else {
@@ -50,8 +74,9 @@ if (process.env.NODE_ENV === 'development') {
       return connectedClient;
     })
     .catch((err) => {
+      const wrapped = wrapMongoError('initial', err);
       console.error('MongoDB connection error (production):', err);
-      throw err;
+      throw wrapped;
     });
 }
 
@@ -60,8 +85,14 @@ export async function getDb(): Promise<Db> {
     console.error('MongoDB database name is not configured.');
     throw new Error('MongoDB database name is not configured.');
   }
-  const connectedClient = await clientPromise;
-  return connectedClient.db(dbName);
+  try {
+    const connectedClient = await clientPromise;
+    return connectedClient.db(dbName);
+  } catch (err) {
+    const wrapped = wrapMongoError('runtime', err);
+    console.error('MongoDB runtime error:', err);
+    throw wrapped;
+  }
 }
 
 let isShuttingDown = false;
@@ -84,3 +115,7 @@ process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
 export default clientPromise;
+
+export function getLastMongoConnectionError() {
+  return lastConnectionError;
+}

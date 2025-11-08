@@ -9,9 +9,15 @@ services:
       - '3000:3000'
     env_file:
       - .env.local
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB: startdown
+      HOST: 0.0.0.0
     depends_on:
-      - localstack
-      - mongo
+      localstack:
+        condition: service_started
+      mongo:
+        condition: service_healthy
   localstack:
     image: localstack/localstack:latest
     ports:
@@ -32,6 +38,12 @@ services:
       - '27017:27017'
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   mongo-data:

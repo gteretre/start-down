@@ -1,7 +1,7 @@
-import { allowedImageDomains } from './lib/allowedDomains';
+import { allowedImageDomains } from './lib/allowedDomains.js';
 
 const remotePatterns = allowedImageDomains
-  .filter((domain): domain is string => typeof domain === 'string')
+  .filter((domain) => typeof domain === 'string')
   .flatMap((hostname) => {
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return [
