@@ -10,12 +10,18 @@ import { upsertViewTimestamp } from '@/lib/mutations';
 const cache = new Map<string, { views: number; likes: number; ts: number }>();
 const CACHE_TTL = 10_000;
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+type RouteContext = { params: Promise<{ id: string | string[] | undefined }> };
+
+const resolveIdParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
+export async function GET(req: NextRequest, context: RouteContext) {
   const { limited } = rateLimit(req, { windowMs: 60_000, max: 30 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
-  const id = (await params).id;
+  const params = await context.params;
+  const id = resolveIdParam(params?.id);
   if (!id) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
@@ -44,12 +50,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, context: RouteContext) {
   const { limited } = rateLimit(req, { windowMs: 60_000 * 30, max: 4 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
-  const id = (await params).id;
+  const params = await context.params;
+  const id = resolveIdParam(params?.id);
   if (!id) {
     return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }

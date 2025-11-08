@@ -7,7 +7,12 @@ import { ObjectId } from 'mongodb';
 import { validateForm } from '@/lib/validation';
 import { rateLimit } from '@/api-middleware/rateLimits';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+type RouteContext = { params: Promise<{ id: string | string[] | undefined }> };
+
+const resolveIdParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
+export async function PATCH(req: NextRequest, context: RouteContext) {
   const { limited } = rateLimit(req, { windowMs: 60_000 * 20, max: 10 });
   if (limited) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -18,9 +23,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
     const db = await getDb();
-    const startup = await db
-      .collection('startups')
-      .findOne({ _id: new ObjectId((await params).id) });
+    const params = await context.params;
+    const startupId = resolveIdParam(params?.id);
+    if (!startupId) {
+      return NextResponse.json({ error: 'Missing startup id.' }, { status: 400 });
+    }
+    const startup = await db.collection('startups').findOne({ _id: new ObjectId(startupId) });
     if (!startup) {
       return NextResponse.json({ error: 'Startup not found' }, { status: 404 });
     }
@@ -44,7 +52,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
     const updateResult = await db.collection('startups').updateOne(
-      { _id: new ObjectId((await params).id) },
+      { _id: new ObjectId(startupId) },
       {
         $set: {
           description,
@@ -68,7 +76,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
   const { limited } = rateLimit(req, { windowMs: 60_000, max: 2 });
   if (limited) {
     return NextResponse.json({ success: false, message: 'Too many requests' }, { status: 429 });
@@ -79,9 +87,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ success: false, message: 'Not authenticated.' }, { status: 401 });
     }
     const db = await getDb();
-    const startup = await db
-      .collection('startups')
-      .findOne({ _id: new ObjectId((await params).id) });
+    const params = await context.params;
+    const startupId = resolveIdParam(params?.id);
+    if (!startupId) {
+      return NextResponse.json({ success: false, message: 'Missing startup id.' }, { status: 400 });
+    }
+    const startup = await db.collection('startups').findOne({ _id: new ObjectId(startupId) });
     if (!startup) {
       return NextResponse.json({ success: false, message: 'Startup not found.' }, { status: 404 });
     }
@@ -92,10 +103,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         { status: 403 }
       );
     }
-    await db.collection('comments').deleteMany({ startupId: (await params).id });
-    const result = await db
-      .collection('startups')
-      .deleteOne({ _id: new ObjectId((await params).id) });
+    await db.collection('comments').deleteMany({ startupId });
+    const result = await db.collection('startups').deleteOne({ _id: new ObjectId(startupId) });
     if (result.deletedCount === 0) {
       return NextResponse.json({ success: false, message: 'Startup not found.' }, { status: 404 });
     }

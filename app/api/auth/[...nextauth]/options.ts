@@ -178,22 +178,37 @@ export const options = {
     },
     async jwt({ token, user }: { token: JWT; user?: ProviderUser }) {
       const username = user?.username ?? token.username;
+
       if (typeof username === 'string' && username) {
-        const dbUser = await getAuthorByUsername(username);
-        if (!dbUser) return undefined;
-        token.role = dbUser.role || 'normal';
-        token.username = dbUser.username ?? undefined;
-        token.image = dbUser.image ?? undefined;
-        token.termsAcceptedAt = dbUser.termsAcceptedAt ?? undefined;
+        try {
+          const dbUser = await getAuthorByUsername(username);
+          if (dbUser) {
+            token.role = dbUser.role || 'normal';
+            token.username = dbUser.username ?? username;
+            token.image = dbUser.image ?? token.image;
+            token.termsAcceptedAt = dbUser.termsAcceptedAt ?? token.termsAcceptedAt;
+          } else {
+            token.role = token.role ?? user?.role ?? 'guest';
+            token.username = username;
+          }
+        } catch (error) {
+          console.error('JWT callback failed to load user, retaining existing token', error);
+          token.role = token.role ?? user?.role ?? 'guest';
+          token.username = username;
+        }
+      } else if (user?.role) {
+        token.role = user.role;
       }
+
+      token.role = token.role ?? 'guest';
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       session.user = {
-        role: token.role as string,
-        username: token.username as string,
-        image: token.image as string,
-        termsAcceptedAt: token.termsAcceptedAt as string | undefined,
+        role: (token.role as string) ?? 'guest',
+        username: (token.username as string) ?? undefined,
+        image: (token.image as string) ?? undefined,
+        termsAcceptedAt: (token.termsAcceptedAt as string | undefined) ?? undefined,
       };
       return session;
     },
